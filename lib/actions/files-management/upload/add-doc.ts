@@ -11,6 +11,10 @@ export async function addDoc(files: FileUploadRes[], apiKey: string) {
       throw new CustomError('客户端验证失败', 'CLIENT_VALIDATION_FAILED');
     }
 
+    if (!files?.length) {
+      throw new CustomError('没有可添加的文件记录', 'NO_FILES_TO_ADD');
+    }
+
     const documentsToInsert = files.map((file) => ({
       client_id: client.id,
       name: file.docName,

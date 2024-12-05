@@ -36,7 +36,7 @@ export async function POST(request: Request) {
 
     const coreMessages = convertToCoreMessages(messages);
 
-    const answer = await streamText({
+    const answer = streamText({
       system: `You are a helpful assistant. Check your knowledge base before answering any questions.
       Only respond to questions using information from tool calls.
       If no relevant information is found in the tool calls, respond, "Sorry, I don't know."`,
@@ -61,14 +61,14 @@ export async function POST(request: Request) {
           },
         }),
       },
-      maxToolRoundtrips: 1,
       onStepFinish: async ({ text, toolResults, usage }) => {
         const toolResult = toolResults.map((result) => result.result);
         console.log('onStepFinish', { text, toolResult, usage });
       },
+      maxSteps: 2,
     });
 
-    return answer.toDataStreamResponse();
+    return (await answer).toDataStreamResponse();
   } catch (error) {
     const { message, code, details } = handleError(error);
     const status =

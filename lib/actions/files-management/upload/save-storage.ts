@@ -27,7 +27,7 @@ async function uploadFileToStorage({
 }): Promise<FileUploadRes> {
   await validateAPIKey(apiKey);
 
-  const bucket = 'file-uploader-test';
+  const bucket = process.env.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET || 'file-uploader-test';
   const sanitizedFileName = sanitizeFileName(file.name);
   const path = `${nanoid()}-${sanitizedFileName}`;
 
