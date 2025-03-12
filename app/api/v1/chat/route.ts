@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { streamText, convertToCoreMessages, tool } from 'ai';
+import { streamText, tool, createDataStreamResponse } from 'ai';
 import { z } from 'zod';
 import { registry } from '@/lib/utils/models-registry';
 import { queryEmbeddings } from '@/lib/actions';
@@ -34,41 +34,53 @@ export async function POST(request: Request) {
     const { messages, docs, docVersions, similarityThreshold, model } =
       chatRequestSchema.parse(body);
 
-    const coreMessages = convertToCoreMessages(messages);
+    return createDataStreamResponse({
+      execute: async (dataStream) => {
+        dataStream.writeData({
+          type: 'text',
+          text: 'Welcome to the AI chat!',
+        });
 
-    const answer = streamText({
-      system: `You are a helpful assistant. Check your knowledge base before answering any questions.
-      Only respond to questions using information from tool calls.
-      If no relevant information is found in the tool calls, respond, "Sorry, I don't know."`,
-      model: registry.languageModel(model),
-      messages: coreMessages,
-      tools: {
-        getInformation: tool({
-          description: `Retrieve relevant information from the knowledge base based on the user's input.`,
-          parameters: z.object({
-            content: z.string().describe("The user's question or input"),
-          }),
-          execute: async ({ content }) => {
-            console.log('content', content);
-            const queryRes = await queryEmbeddings({
-              question: content,
-              clientId: client.id,
-              docs,
-              docVersions,
-              similarityThreshold,
-            });
-            return queryRes;
+        const answer = streamText({
+          system: `You are a helpful assistant. Check your knowledge base before answering any questions.
+                   Only respond to questions using information from tool calls.
+                   If no relevant information is found in the tool calls, respond, "Sorry, I don't know."`,
+          model: registry.languageModel(model),
+          messages: messages,
+          tools: {
+            getInformation: tool({
+              description: `Retrieve relevant information from the knowledge base based on the user's input.`,
+              parameters: z.object({
+                content: z.string().describe("The user's question or input"),
+              }),
+              execute: async ({ content }) => {
+                console.log('content', content);
+                const queryRes = await queryEmbeddings({
+                  question: content,
+                  clientId: client.id,
+                  docs,
+                  docVersions,
+                  similarityThreshold,
+                });
+                return queryRes;
+              },
+            }),
           },
-        }),
-      },
-      onStepFinish: async ({ text, toolResults, usage }) => {
-        const toolResult = toolResults.map((result) => result.result);
-        console.log('onStepFinish', { text, toolResult, usage });
-      },
-      maxSteps: 2,
-    });
+          onStepFinish: async ({ text, toolResults, usage }) => {
+            const toolResult = toolResults.map((result) => result.result);
+            console.log('onStepFinish', { text, toolResult, usage });
+          },
+          maxSteps: 2,
+          onFinish: async () => {
+            dataStream.writeMessageAnnotation({
+              type: 'end',
+            });
+          },
+        });
 
-    return (await answer).toDataStreamResponse();
+        answer.mergeIntoDataStream(dataStream);
+      },
+    });
   } catch (error) {
     const { message, code, details } = handleError(error);
     const status =

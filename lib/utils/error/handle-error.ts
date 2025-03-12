@@ -1,5 +1,5 @@
 import { logger } from '../logger';
-import { ErrorResponse, CustomError } from '@/types';
+import { type ErrorResponse, CustomError } from '@/types';
 import { ZodError } from 'zod';
 
 export function handleError(error: unknown): ErrorResponse {
