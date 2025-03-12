@@ -18,6 +18,9 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@agentic/ai-sdk": "^7.3.3",
+    "@agentic/weather": "^7.3.3",
+    "@agentic/wikipedia": "^7.3.3",
     "@ai-sdk/anthropic": "^1.1.15",
     "@ai-sdk/openai": "^1.2.1",
     "@noble/hashes": "^1.5.0",
@@ -68,7 +71,7 @@
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",
     "tus-js-client": "^4.2.1",
-    "zod": "^3.23.8",
+    "zod": "^3.24.2",
     "zustand": "5.0.0-rc.2"
   },
   "devDependencies": {
@@ -106,6 +109,11 @@
     ],
     "**/*.{json,css,scss,md}": [
       "prettier --write --config .prettierrc"
+    ]
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "openai-zod-to-json-schema"
     ]
   }
 }

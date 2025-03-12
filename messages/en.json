@@ -157,6 +157,7 @@
         "delete": "Delete",
         "batchEmbedding": "Batch Parse Documents",
         "uploadNewVersion": "Upload New Version",
+        "uploadNewDoc": "Upload New Doc",
         "embeddingCurrentDoc": "Parse Current Version",
         "viewVersions": "View Version History",
         "confirm": "Confirm",
@@ -164,7 +165,9 @@
         "selectFiles": "Select Files"
       },
       "Messages": {
-        "selectFiles": "Please select files"
+        "selectFiles": "Please select files",
+        "deleteDialogTitle": "Are you sure you want to delete these files?",
+        "deleteDialogDescription": "This action cannot be undone."
       }
     },
     "VersionsManagement": {
