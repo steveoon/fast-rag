@@ -11,7 +11,13 @@ importers:
       '@agentic/ai-sdk':
         specifier: ^7.3.3
         version: 7.3.3(ai@4.1.54(react@18.3.1)(zod@3.24.2))(zod@3.24.2)
+      '@agentic/exa':
+        specifier: ^7.3.3
+        version: 7.3.3(zod@3.24.2)
       '@agentic/weather':
+        specifier: ^7.3.3
+        version: 7.3.3(zod@3.24.2)
+      '@agentic/wikidata':
         specifier: ^7.3.3
         version: 7.3.3(zod@3.24.2)
       '@agentic/wikipedia':
@@ -265,8 +271,18 @@ packages:
     peerDependencies:
       zod: ^3.24.2
 
+  '@agentic/exa@7.3.3':
+    resolution: {integrity: sha512-Kh5C5VHVZFUIsk/jqei/Tj4Kp7bhrsbS0UyhZnSJoLWMPd1Kg905mrhx2d4GMKKPz91u7HHSlamO71RwQLfOCQ==}
+    peerDependencies:
+      zod: ^3.24.2
+
   '@agentic/weather@7.3.3':
     resolution: {integrity: sha512-ARw9bwyQMiiehTYy5FCRviVHVW3hOvV8ZhB/euTWhgPIJvsfcw8tNqybsj5g4Sooc6+OXYHD5FEU0hqRcT/TRA==}
+    peerDependencies:
+      zod: ^3.24.2
+
+  '@agentic/wikidata@7.3.3':
+    resolution: {integrity: sha512-jGpC023IgpPzO3wbuBt8Sc3UEFcIWiL+ThFY4k+JiOUEnvyzXveFnMBAlA7riKkB1PZ7Sf+gSfEL48B/q7GnKQ==}
     peerDependencies:
       zod: ^3.24.2
 
@@ -4805,6 +4821,10 @@ packages:
     engines: {node: '>=8'}
     hasBin: true
 
+  wikibase-sdk@10.2.2:
+    resolution: {integrity: sha512-DDN+oV9vDN4fwegt1JLJV2EjLK5RPtnpp8cfEl5RJwONrooT45n5S52mzUbiypUiCqdPbHdQexdre7rsYgwoXw==}
+    engines: {node: '>= 12.0.0'}
+
   word-wrap@1.2.5:
     resolution: {integrity: sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA==}
     engines: {node: '>=0.10.0'}
@@ -4937,10 +4957,28 @@ snapshots:
     transitivePeerDependencies:
       - babel-plugin-macros
 
+  '@agentic/exa@7.3.3(zod@3.24.2)':
+    dependencies:
+      '@agentic/core': 7.3.3(zod@3.24.2)
+      ky: 1.7.5
+      zod: 3.24.2
+    transitivePeerDependencies:
+      - babel-plugin-macros
+
   '@agentic/weather@7.3.3(zod@3.24.2)':
     dependencies:
       '@agentic/core': 7.3.3(zod@3.24.2)
       ky: 1.7.5
+      zod: 3.24.2
+    transitivePeerDependencies:
+      - babel-plugin-macros
+
+  '@agentic/wikidata@7.3.3(zod@3.24.2)':
+    dependencies:
+      '@agentic/core': 7.3.3(zod@3.24.2)
+      ky: 1.7.5
+      p-throttle: 6.2.0
+      wikibase-sdk: 10.2.2
       zod: 3.24.2
     transitivePeerDependencies:
       - babel-plugin-macros
@@ -9583,6 +9621,8 @@ snapshots:
     dependencies:
       siginfo: 2.0.0
       stackback: 0.0.2
+
+  wikibase-sdk@10.2.2: {}
 
   word-wrap@1.2.5: {}
 

@@ -6,7 +6,7 @@
   "printWidth": 100,
   "trailingComma": "es5",
   "bracketSpacing": true,
-  "arrowParens": "always",
+  "arrowParens": "avoid",
   "endOfLine": "lf",
   "jsxSingleQuote": false,
   "quoteProps": "as-needed",

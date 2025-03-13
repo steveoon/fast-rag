@@ -19,7 +19,9 @@
   },
   "dependencies": {
     "@agentic/ai-sdk": "^7.3.3",
+    "@agentic/exa": "^7.3.3",
     "@agentic/weather": "^7.3.3",
+    "@agentic/wikidata": "^7.3.3",
     "@agentic/wikipedia": "^7.3.3",
     "@ai-sdk/anthropic": "^1.1.15",
     "@ai-sdk/openai": "^1.2.1",

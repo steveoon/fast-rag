@@ -16,11 +16,18 @@
       },
       "suspicious": {
         "recommended": true,
-        "noConsoleLog": "warn"
+        "noConsoleLog": "warn",
+        "noExplicitAny": "warn",
+        "noArrayIndexKey": "warn"
       },
       "complexity": {
         "recommended": false,
-        "noExcessiveCognitiveComplexity": "warn"
+        "noExcessiveCognitiveComplexity": {
+          "level": "warn",
+          "options": {
+            "maxAllowedComplexity": 20
+          }
+        }
       }
     }
   },
@@ -28,7 +35,7 @@
     "enabled": true,
     "indentStyle": "space",
     "indentWidth": 2,
-    "lineWidth": 80
+    "lineWidth": 100
   },
   "javascript": {
     "formatter": {
