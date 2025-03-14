@@ -12,12 +12,14 @@
       },
       "correctness": {
         "recommended": true,
-        "useExhaustiveDependencies": "off"
+        "useExhaustiveDependencies": "off",
+        "noUnusedVariables": "error",
+        "noUnusedImports": "error"
       },
       "suspicious": {
         "recommended": true,
-        "noConsoleLog": "warn",
-        "noExplicitAny": "warn",
+        "noConsoleLog": "off",
+        "noExplicitAny": "error",
         "noArrayIndexKey": "warn"
       },
       "complexity": {
