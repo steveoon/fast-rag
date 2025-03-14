@@ -94,10 +94,12 @@ export async function POST(request: Request) {
           onStepFinish: async ({ text, toolResults, usage, stepType }) => {
             const toolResult = toolResults.map((result: ToolResult<string, unknown, unknown>) => ({
               tool: result.toolName,
-              result: JSON.stringify(result.result),
+              result: result.result,
             }));
 
-            console.log(`步骤 ${stepType} 完成`, { text, toolResult, usage });
+            const textLength = text.length;
+
+            console.log(`步骤 ${stepType} 完成`, { textLength, toolResult, usage });
 
             dataStream.writeData({
               type: 'stepComplete',
