@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js';
-import { nanoid } from 'nanoid';
 import { UploadFile, FileUploadRes } from '@/types';
 import * as tus from 'tus-js-client';
 import { z } from 'zod';
@@ -8,6 +7,7 @@ import { logger, handleError, sanitizeFileName, mimeTypeToDocumentType } from '@
 import { validateAPIKey } from '@/lib/api-key';
 import { Readable } from 'stream';
 import { Buffer } from 'buffer';
+import { customAlphabet } from 'nanoid';
 
 const uploadFileSchema = z.object({
   file: z.instanceof(Blob, { message: '文件必须是 Blob 类型' }),
@@ -15,6 +15,11 @@ const uploadFileSchema = z.object({
 });
 
 const supabase = createClient(SUPABASE_URL!, SUPABASE_PUBLIC_ANON_KEY!);
+
+const safeNanoid = customAlphabet(
+  'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+  21
+);
 
 async function uploadFileToStorage({
   file,
@@ -29,9 +34,9 @@ async function uploadFileToStorage({
 
   const bucket = process.env.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET || 'file-uploader-test';
   const sanitizedFileName = sanitizeFileName(file.name);
-  const path = `${nanoid()}-${sanitizedFileName}`;
+  const path = 'subdir/' + safeNanoid() + '_' + sanitizedFileName;
 
-  const fileStream = Readable.from(Buffer.from(file.buffer));
+  const fileStream = Readable.from(file.buffer);
 
   return new Promise((resolve, reject) => {
     const upload = new tus.Upload(fileStream, {
@@ -53,7 +58,7 @@ async function uploadFileToStorage({
       },
       chunkSize: 6 * 1024 * 1024,
       uploadSize: file.size,
-      onError: (error) => {
+      onError: error => {
         handleError(error);
         reject(error);
         cleanup();
@@ -123,7 +128,7 @@ export async function upload(args: {
 
   const res = await Promise.allSettled(allPromise);
 
-  return res.map((item) => {
+  return res.map(item => {
     return {
       success: item.status === 'fulfilled',
       file: item.status === 'fulfilled' ? item.value : undefined,
