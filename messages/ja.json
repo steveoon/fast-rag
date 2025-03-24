@@ -1,6 +1,142 @@
 {
   "home": {
-    "title": "ホーム"
+    "title": "ホーム",
+    "hero": {
+      "title1": "プリセットを超え、",
+      "title2": "真に",
+      "title3": "自律的な",
+      "title4": "エージェントへ",
+      "description": "複雑なプロセス編成は不要。エージェントは自らの力で意図を理解し、ツールを選択、タスクを実行します。単なる会話を超え、考え行動するAIアシスタントを実現します",
+      "startButton": "無料で始める",
+      "docsButton": "ドキュメント",
+      "demoTitle": "AI自律意思決定デモ",
+      "demoUserQuestion": "ユーザーの質問",
+      "demoQuestion": "この財務報告書の主要リスクポイントを分析してください",
+      "demoThinking": "エージェントの思考",
+      "demoStep1": "まず報告書の内容を理解する必要がある",
+      "demoStep2": "専門的な金融知識が必要",
+      "demoStep3": "異常なデータパターンを識別する必要がある",
+      "demoTool1": "知識ベースツールを選択",
+      "demoTool2": "データ分析ツールを選択",
+      "demoTool3": "リスク評価ツールを選択"
+    },
+    "features": {
+      "sectionTag": "主な特徴",
+      "title": "Wolian AIを選ぶ理由",
+      "cards": {
+        "autonomy": {
+          "title": "真の自律知能",
+          "description": "他のプラットフォームのように手動でワークフローを設計する必要はありません。Wolianのエージェントはユーザーの意図を理解し、自律的に意思決定を行い、最適なツールの組み合わせを選択します。固定スクリプトの実行者ではなく、思考するアシスタントです"
+        },
+        "knowledge": {
+          "title": "深い知識理解と応用",
+          "description": "強力なRAG技術と知識ベース管理により、エージェントは質問に答えるだけでなく、複雑な文書を理解し、重要な情報を抽出して実際のビジネスシナリオに適用することができます"
+        },
+        "developer": {
+          "title": "開発者のための柔軟なアーキテクチャ",
+          "description": "豊富なAPIインターフェース、SDKツールキット、詳細なドキュメントが開発者のカスタマイズニーズを満たします。モジュラー設計により、いつでも機能を拡張し、ビジネス要件に完全に一致するエージェントを構築できます"
+        }
+      },
+      "api": {
+        "title": "シンプルで使いやすいAPI",
+        "endpoint": "POST https://wolian.cc/api/v1/chat",
+        "requestLabel": "リクエスト",
+        "requestTitle": "APIリクエスト例",
+        "requestHint": "シンプルなJSONリクエスト、複雑な設定は不要",
+        "responseLabel": "レスポンス",
+        "responseTitle": "インテリジェント処理結果",
+        "responseHint": "システムが自動的に意図を理解し、最適なツールを呼び出します",
+        "bottomText1": "1つのAPI、無限の可能性",
+        "bottomText2": "学習コストが低く、迅速な統合が可能で、5分でインテリジェントアプリケーションを展開できます"
+      }
+    },
+    "useCases": {
+      "sectionTag": "業界活用例",
+      "title": "適用シナリオ",
+      "description": "Wolian AIの自律型インテリジェントエージェントは、様々な複雑なビジネスシナリオに適応できます。以下は代表的な適用分野です",
+      "cases": {
+        "finance": {
+          "title": "金融テクノロジー",
+          "description": "膨大な金融データから洞察を抽出します。エージェントは自律的に市場動向を分析し、投資リスクを評価し、従来のロボアドバイザーよりも柔軟かつ自律的にパーソナライズされた投資アドバイスを提供します"
+        },
+        "legal": {
+          "title": "法務サービス",
+          "description": "エージェントを強力な法律アシスタントに変え、関連法規と先例を自動的に検索し、ケースの類似性を分析し、法的根拠を提供し、弁護士を退屈な情報検索作業から解放します"
+        },
+        "healthcare": {
+          "title": "医療ヘルスケア",
+          "description": "医学知識ベースと患者データに基づいて、エージェントは医師の臨床意思決定をサポートし、治療推奨を自動生成し、患者にパーソナライズされた健康管理計画を提供できます"
+        }
+      }
+    },
+    "comparison": {
+      "sectionTag": "製品の優位性",
+      "title": "競合比較",
+      "description": "Wolian AIを選択し、自律型インテリジェントシステムと従来のプロセスベースプラットフォームの主な違いを体験してください",
+      "table": {
+        "feature": "比較項目",
+        "wolianLabel": "先進",
+        "wolianTitle": "Wolian AI",
+        "traditional": "従来のプロセス型プラットフォーム",
+        "workMode": {
+          "title": "動作方式",
+          "subtitle": "ユーザー対話モード",
+          "wolian": "自律的に意図を理解し決定",
+          "wolianDetail": "プリセットプロセスパスは不要",
+          "competitor": "手動設定されたプリセットプロセス",
+          "competitorDetail": "各ステップの詳細な定義が必要"
+        },
+        "flexibility": {
+          "title": "開発の柔軟性",
+          "subtitle": "システム拡張性",
+          "wolian": "豊富なAPIと深いカスタマイズ",
+          "wolianDetail": "完全なSDKサポート",
+          "competitor": "限られたローコード設定",
+          "competitorDetail": "プラットフォーム組込機能に制限"
+        },
+        "knowledge": {
+          "title": "知識処理",
+          "subtitle": "データ理解能力",
+          "wolian": "強力なRAGと知識ベース統合",
+          "wolianDetail": "インテリジェントな解析とコンテキスト理解",
+          "competitor": "基本的な知識ベース機能",
+          "competitorDetail": "単純なマッチングと検索"
+        },
+        "scenarios": {
+          "title": "適用シナリオ",
+          "subtitle": "アプリケーションシナリオの幅",
+          "wolian": "複雑なインテリジェントアプリケーション開発",
+          "wolianDetail": "複数のドメイン垂直アプリケーションをサポート",
+          "competitor": "単純な会話とワークフロー",
+          "competitorDetail": "限られたビジネスシナリオカバレッジ"
+        },
+        "deployment": {
+          "title": "デプロイメントと統合",
+          "subtitle": "システム互換性",
+          "wolian": "マルチプラットフォームサポートとオープンインターフェース",
+          "wolianDetail": "プライベートデプロイメントオプション",
+          "competitor": "クラウドサービスとクローズドエコシステムのみ",
+          "competitorDetail": "限られた統合オプション"
+        }
+      }
+    },
+    "cta": {
+      "title1": "構築を開始",
+      "title2": "真にインテリジェント",
+      "title3": "なエージェントアプリケーション",
+      "description1": "わずか5分で自律型エージェント意思決定の力を体験",
+      "description2": "面倒なプロセス設定に別れを告げ、AIアプリケーション開発の新時代を迎えましょう",
+      "button": "今すぐ始める",
+      "hint": "無料登録、クレジットカード不要"
+    }
+  },
+  "navbar": {
+    "features": "特徴",
+    "cases": "活用例",
+    "compare": "比較"
+  },
+  "footer": {
+    "copyright": "全著作権所有"
   },
   "Auth": {
     "signIn": "サインイン",

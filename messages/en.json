@@ -1,6 +1,142 @@
 {
   "home": {
-    "title": "Home"
+    "title": "Home",
+    "hero": {
+      "title1": "Beyond Preset Workflows,",
+      "title2": "Build ",
+      "title3": "Truly Autonomous",
+      "title4": " Agents",
+      "description": "No complex process orchestration needed. Agents independently understand intent, select tools, and execute tasks, transforming your AI applications from simple conversations into truly thinking and acting assistants",
+      "startButton": "Start Free",
+      "docsButton": "View Docs",
+      "demoTitle": "AI Autonomous Decision Making Demo",
+      "demoUserQuestion": "User Question",
+      "demoQuestion": "Help me analyze the key risk points in this financial report",
+      "demoThinking": "Agent Thinking",
+      "demoStep1": "Need to understand report content first",
+      "demoStep2": "Need professional finance knowledge",
+      "demoStep3": "Need to identify abnormal data patterns",
+      "demoTool1": "Select Knowledge Base Tool",
+      "demoTool2": "Select Data Analysis Tool",
+      "demoTool3": "Select Risk Assessment Tool"
+    },
+    "features": {
+      "sectionTag": "Core Features",
+      "title": "Why Choose Wolian AI",
+      "cards": {
+        "autonomy": {
+          "title": "True Autonomous Intelligence",
+          "description": "Unlike other platforms requiring manual workflow orchestration, Wolian's Agents understand user intent, make decisions, and select the best tool combinations. They're thinking assistants, not script executors"
+        },
+        "knowledge": {
+          "title": "Deep Knowledge Understanding & Application",
+          "description": "Powerful RAG technology and knowledge base management allow your Agent to not just answer questions, but understand complex documents, extract key information, and apply it to real business scenarios"
+        },
+        "developer": {
+          "title": "Flexible Architecture Built for Developers",
+          "description": "Rich API interfaces, SDK toolkits, and detailed documentation meet developers' customization needs. Modular design allows you to extend functionality anytime and build Agents that perfectly match your business requirements"
+        }
+      },
+      "api": {
+        "title": "Simple, Easy-to-Use API",
+        "endpoint": "POST https://wolian.cc/api/v1/chat",
+        "requestLabel": "Request",
+        "requestTitle": "API Request Example",
+        "requestHint": "Simple JSON request, no complex configuration needed",
+        "responseLabel": "Response",
+        "responseTitle": "Intelligent Processing Result",
+        "responseHint": "System automatically understands intent and calls the most appropriate tools",
+        "bottomText1": "One API, Endless Possibilities",
+        "bottomText2": "Low learning curve, rapid integration, deploy intelligent applications in 5 minutes"
+      }
+    },
+    "useCases": {
+      "sectionTag": "Industry Applications",
+      "title": "Use Cases",
+      "description": "Wolian AI's autonomous intelligent Agents can adapt to various complex business scenarios. Here are some typical application areas",
+      "cases": {
+        "finance": {
+          "title": "Financial Technology",
+          "description": "Extract insights from vast financial data. Agents independently analyze market trends, assess investment risks, and provide personalized investment advice more flexibly and autonomously than traditional robo-advisors"
+        },
+        "legal": {
+          "title": "Legal Services",
+          "description": "Transform Agents into powerful legal assistants that automatically retrieve relevant regulations and precedents, analyze case similarities, provide legal basis, and free lawyers from tedious information retrieval work"
+        },
+        "healthcare": {
+          "title": "Healthcare",
+          "description": "Based on medical knowledge bases and patient data, Agents can assist doctors with clinical decision support, automatically generate treatment recommendations, and provide personalized health management plans for patients"
+        }
+      }
+    },
+    "comparison": {
+      "sectionTag": "Product Advantages",
+      "title": "Comparison with Competitors",
+      "description": "Choose Wolian AI and experience the key differences between autonomous intelligent systems and traditional process-based platforms",
+      "table": {
+        "feature": "Comparison",
+        "wolianLabel": "Leading",
+        "wolianTitle": "Wolian AI",
+        "traditional": "Traditional Process Platforms",
+        "workMode": {
+          "title": "Working Method",
+          "subtitle": "User Interaction Mode",
+          "wolian": "Autonomously understands intent and decides",
+          "wolianDetail": "No preset process paths needed",
+          "competitor": "Manually configured preset processes",
+          "competitorDetail": "Requires detailed definition of each step"
+        },
+        "flexibility": {
+          "title": "Development Flexibility",
+          "subtitle": "System Extensibility",
+          "wolian": "Rich APIs and deep customization",
+          "wolianDetail": "Complete SDK support",
+          "competitor": "Limited low-code configuration",
+          "competitorDetail": "Limited by platform built-in functions"
+        },
+        "knowledge": {
+          "title": "Knowledge Processing",
+          "subtitle": "Data Understanding Capability",
+          "wolian": "Powerful RAG and knowledge base integration",
+          "wolianDetail": "Intelligent parsing and context understanding",
+          "competitor": "Basic knowledge base functions",
+          "competitorDetail": "Simple matching and retrieval"
+        },
+        "scenarios": {
+          "title": "Applicable Scenarios",
+          "subtitle": "Application Scenario Breadth",
+          "wolian": "Complex intelligent application development",
+          "wolianDetail": "Supports multi-domain vertical applications",
+          "competitor": "Simple conversations and workflows",
+          "competitorDetail": "Limited business scenario coverage"
+        },
+        "deployment": {
+          "title": "Deployment & Integration",
+          "subtitle": "System Compatibility",
+          "wolian": "Multi-platform support and open interfaces",
+          "wolianDetail": "Private deployment options",
+          "competitor": "Cloud services and closed ecosystems only",
+          "competitorDetail": "Limited integration options"
+        }
+      }
+    },
+    "cta": {
+      "title1": "Start Building",
+      "title2": "Truly Intelligent",
+      "title3": "Agent Applications",
+      "description1": "Experience the power of autonomous agent decision-making in just 5 minutes",
+      "description2": "Say goodbye to tedious process configuration and welcome the new era of AI application development",
+      "button": "Get Started Now",
+      "hint": "Free registration, no credit card required"
+    }
+  },
+  "navbar": {
+    "features": "Features",
+    "cases": "Use Cases",
+    "compare": "Compare"
+  },
+  "footer": {
+    "copyright": "All rights reserved"
   },
   "Auth": {
     "signIn": "Sign In",

@@ -1,6 +1,142 @@
 {
   "home": {
-    "title": "首页"
+    "title": "首页",
+    "hero": {
+      "title1": "告别预设流程",
+      "title2": "构建",
+      "title3": "真正自主",
+      "title4": "的智能Agent",
+      "description": "无需繁琐的流程编排，Agent可自主理解意图、选择工具、执行任务，让您的AI应用超越简单对话，成为真正能思考和行动的智能助手",
+      "startButton": "免费开始",
+      "docsButton": "查看文档",
+      "demoTitle": "AI 自主决策能力演示",
+      "demoUserQuestion": "用户问题",
+      "demoQuestion": "帮我分析这份金融报表的关键风险点",
+      "demoThinking": "Agent思考",
+      "demoStep1": "需要先理解报表内容",
+      "demoStep2": "需要专业金融知识",
+      "demoStep3": "需要识别异常数据模式",
+      "demoTool1": "选择知识库工具",
+      "demoTool2": "选择数据分析工具",
+      "demoTool3": "选择风险评估工具"
+    },
+    "features": {
+      "sectionTag": "核心特性",
+      "title": "为什么选择 Wolian AI",
+      "cards": {
+        "autonomy": {
+          "title": "真正的自主智能",
+          "description": "无需像其他平台那样手动编排每一步流程，Wolian的Agent能理解用户意图，自主决策并选择最佳工具组合，就像有思考能力的助手而非固定脚本的执行者"
+        },
+        "knowledge": {
+          "title": "深度知识理解与应用",
+          "description": "强大的RAG技术与知识库管理，让您的Agent不仅能回答问题，更能理解复杂文档、提取关键信息并应用到实际业务场景中"
+        },
+        "developer": {
+          "title": "为开发者而生的灵活架构",
+          "description": "丰富的API接口、SDK工具包和详尽文档，满足开发者深度定制需求，模块化设计让您能随时扩展功能，打造完全符合业务需求的专属Agent"
+        }
+      },
+      "api": {
+        "title": "简单易用的API接口",
+        "endpoint": "POST https://wolian.cc/api/v1/chat",
+        "requestLabel": "请求",
+        "requestTitle": "接口请求示例",
+        "requestHint": "只需简单的JSON请求，无需复杂配置",
+        "responseLabel": "响应",
+        "responseTitle": "智能处理结果",
+        "responseHint": "系统自动理解意图并调用最合适的工具",
+        "bottomText1": "一套API，无限可能",
+        "bottomText2": "低学习成本，快速集成，5分钟即可上线智能应用"
+      }
+    },
+    "useCases": {
+      "sectionTag": "行业应用",
+      "title": "适用场景",
+      "description": "Wolian AI的自主智能Agent可以适应多种复杂业务场景，以下是几个典型应用领域",
+      "cases": {
+        "finance": {
+          "title": "金融科技",
+          "description": "从海量金融数据中提取洞见，Agent自主分析市场趋势、评估投资风险并为客户提供个性化投资建议，比传统智能投顾更灵活、更自主"
+        },
+        "legal": {
+          "title": "法律服务",
+          "description": "让Agent成为律师的得力助手，自动检索相关法规和判例，分析案例相似度，提供法律依据，将律师从繁琐的资料检索工作中解放出来"
+        },
+        "healthcare": {
+          "title": "医疗健康",
+          "description": "基于医学知识库和患者数据，Agent可协助医生进行临床决策支持，自动生成诊疗建议，并为患者提供个性化健康管理方案"
+        }
+      }
+    },
+    "comparison": {
+      "sectionTag": "产品优势",
+      "title": "与竞品对比",
+      "description": "选择Wolian AI，体验自主智能系统与传统流程型平台的关键区别",
+      "table": {
+        "feature": "对比项",
+        "wolianLabel": "领先",
+        "wolianTitle": "Wolian AI",
+        "traditional": "传统流程型平台",
+        "workMode": {
+          "title": "工作方式",
+          "subtitle": "用户交互模式",
+          "wolian": "自主理解意图并决策",
+          "wolianDetail": "无需预设流程路径",
+          "competitor": "预设流程手动配置",
+          "competitorDetail": "需要详细定义每个步骤"
+        },
+        "flexibility": {
+          "title": "开发灵活性",
+          "subtitle": "系统扩展性",
+          "wolian": "丰富API与深度定制",
+          "wolianDetail": "完整SDK支持",
+          "competitor": "有限的低代码配置",
+          "competitorDetail": "受限于平台内置功能"
+        },
+        "knowledge": {
+          "title": "知识处理",
+          "subtitle": "数据理解能力",
+          "wolian": "强大RAG与知识库集成",
+          "wolianDetail": "智能解析与上下文理解",
+          "competitor": "基础知识库功能",
+          "competitorDetail": "简单匹配与检索"
+        },
+        "scenarios": {
+          "title": "适用场景",
+          "subtitle": "应用场景广度",
+          "wolian": "复杂智能应用开发",
+          "wolianDetail": "支持多领域垂直应用",
+          "competitor": "简单对话与工作流",
+          "competitorDetail": "有限的业务场景覆盖"
+        },
+        "deployment": {
+          "title": "部署与集成",
+          "subtitle": "系统兼容性",
+          "wolian": "多平台支持与开放接口",
+          "wolianDetail": "私有化部署选项",
+          "competitor": "仅云服务与封闭生态",
+          "competitorDetail": "有限的集成选项"
+        }
+      }
+    },
+    "cta": {
+      "title1": "开始构建",
+      "title2": "真正智能",
+      "title3": "的Agent应用",
+      "description1": "只需5分钟，体验Agent自主决策的力量",
+      "description2": "从此告别繁琐的流程配置，迎接AI应用开发的新时代",
+      "button": "立即开始",
+      "hint": "免费注册，无需信用卡"
+    }
+  },
+  "navbar": {
+    "features": "特点",
+    "cases": "场景",
+    "compare": "对比"
+  },
+  "footer": {
+    "copyright": "保留所有权利"
   },
   "Auth": {
     "signIn": "登录",

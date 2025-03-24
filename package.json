@@ -67,6 +67,7 @@
     "postgres": "^3.4.4",
     "react": "^18",
     "react-dom": "^18",
+    "react-syntax-highlighter": "^15.6.1",
     "sharp": "^0.33.5",
     "sonner": "^1.5.0",
     "stream": "^0.0.3",
