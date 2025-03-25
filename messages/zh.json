@@ -143,6 +143,11 @@
     "signUp": "注册",
     "signOut": "登出",
     "welcome": "你好，{name}",
+    "SalesContact": {
+      "title": "联系我们了解产品",
+      "description": "为了提供更优质的服务，我们目前采用邀请制，请扫描下方二维码联系我们的销售人员，获取更多产品信息。",
+      "wechatScan": "微信扫码联系"
+    },
     "SignUpPage": {
       "alreadyHaveAnAccount": "已有账号？",
       "email": "邮箱",

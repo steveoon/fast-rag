@@ -1,6 +1,6 @@
-import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { StartButton } from '@/components/ui/start-button';
 
 export function CtaSection() {
   const t = useTranslations('home.cta');
@@ -35,13 +35,10 @@ export function CtaSection() {
           </p>
 
           <div>
-            <Button
-              size="lg"
+            <StartButton
+              text={t('button')}
               className="px-12 py-6 bg-indigo-600 hover:bg-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400 shadow-lg hover:shadow-indigo-500/20 dark:hover:shadow-indigo-500/30 transition-all duration-300"
-            >
-              {t('button')}
-              <ArrowRight className="ml-2" />
-            </Button>
+            />
             <p className="text-sm text-indigo-500 dark:text-indigo-400 mt-4 opacity-80">
               {t('hint')}
             </p>

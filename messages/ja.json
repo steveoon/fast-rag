@@ -143,6 +143,11 @@
     "signUp": "サインアップ",
     "signOut": "サインアウト",
     "welcome": "こんにちは、{name}さん",
+    "SalesContact": {
+      "title": "製品情報のお問い合わせ",
+      "description": "より良いサービスを提供するため、現在は招待制で運営しています。製品の詳細については、以下のQRコードをスキャンして営業担当者にお問い合わせください。",
+      "wechatScan": "WeChatでスキャンして連絡する"
+    },
     "SignUpPage": {
       "alreadyHaveAnAccount": "すでにアカウントをお持ちですか？",
       "email": "メールアドレス",

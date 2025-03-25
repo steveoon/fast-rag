@@ -143,6 +143,11 @@
     "signUp": "Sign Up",
     "signOut": "Sign Out",
     "welcome": "Hello, {name}",
+    "SalesContact": {
+      "title": "Contact Us for Product Information",
+      "description": "To provide better service, we currently operate by invitation only. Please scan the QR code below to contact our sales team for more information about our product.",
+      "wechatScan": "Scan with WeChat to contact us"
+    },
     "SignUpPage": {
       "alreadyHaveAnAccount": "Already have an account?",
       "email": "Email",

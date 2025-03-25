@@ -1,6 +1,8 @@
 import { Button } from '@/components/ui/button';
-import { ArrowRight, FileText } from 'lucide-react';
+import { StartButton } from '@/components/ui/start-button';
+import { FileText } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 
 export function HeroSection() {
   const t = useTranslations('home');
@@ -20,20 +22,21 @@ export function HeroSection() {
             {t('hero.description')}
           </p>
           <div className="mt-10 flex gap-4">
-            <Button
-              size="lg"
-              className="bg-indigo-600 hover:bg-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400 shadow-md"
-            >
-              {t('hero.startButton')}
-              <ArrowRight className="ml-2" />
-            </Button>
+            <StartButton text={t('hero.startButton')} />
             <Button
               variant="outline"
               size="lg"
               className="border-indigo-300 text-indigo-700 hover:bg-indigo-50 dark:border-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-950"
+              asChild
             >
-              {t('hero.docsButton')}
-              <FileText className="ml-2 h-4 w-4" />
+              <Link
+                href="https://verbena-animantarx-4e7.notion.site/Help-Center-Knowledge-Base-1c1364213db48065be8bea173787f4c7?pvs=4"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t('hero.docsButton')}
+                <FileText className="ml-2 h-4 w-4" />
+              </Link>
             </Button>
           </div>
         </div>
