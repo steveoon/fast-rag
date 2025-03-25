@@ -7,8 +7,6 @@ import './globals.css';
 import { NavBar } from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import { Toaster } from '@/components/ui/toaster';
-import { createClient } from '@/lib/utils/supabase/server';
-import { AuthProvider } from '@/components/AuthProvider';
 
 const inter = Inter({ subsets: ['latin'] });
 const defaultUrl = process.env.VERCEL_URL
@@ -31,23 +29,17 @@ export default async function RootLayout({
 }>) {
   const locale = await getLocale();
   const messages = await getMessages();
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
   return (
     <html suppressHydrationWarning lang={locale}>
       <body className={`${inter.className} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <NextIntlClientProvider locale={locale} messages={messages}>
-            <AuthProvider initialUser={user}>
-              <div className="min-h-screen flex flex-col">
-                <NavBar />
-                <main className="flex-grow pt-16">{children}</main>
-                <Footer />
-              </div>
-            </AuthProvider>
+            <div className="min-h-screen flex flex-col">
+              <NavBar />
+              <main className="flex-grow pt-16">{children}</main>
+              <Footer />
+            </div>
           </NextIntlClientProvider>
         </ThemeProvider>
         <Toaster />
