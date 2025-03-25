@@ -202,6 +202,7 @@
       "home": "Home",
       "clientsManagement": "Clients Management",
       "dataManagement": "Data Management",
+      "generalSettings": "General Settings",
       "resetPassword": "Reset Password"
     },
     "Home": {
@@ -316,6 +317,23 @@
         "preview": "Preview"
       },
       "backToFiles": "Back to Data Management"
+    },
+    "GeneralSettings": {
+      "title": "General Settings",
+      "subtitle": "Manage your account information and preferences",
+      "preferences": "Preferences",
+      "preferencesDescription": "Manage your application preferences",
+      "comingSoon": "More settings options coming soon...",
+      "userProfile": {
+        "userId": "User ID",
+        "authMethod": "Authentication Method",
+        "createdAt": "Created At",
+        "lastUpdated": "Last Updated",
+        "fullUserInfo": "Full User Information",
+        "unknown": "Unknown",
+        "defaultUser": "User",
+        "emailPassword": "Email Password"
+      }
     }
   },
   "Utils": {

@@ -202,6 +202,7 @@
       "home": "ホーム",
       "clientsManagement": "クライアント管理",
       "dataManagement": "データ管理",
+      "generalSettings": "一般設定",
       "resetPassword": "パスワードリセット"
     },
     "Home": {
@@ -313,6 +314,23 @@
         "preview": "プレビュー"
       },
       "backToFiles": "データ管理に戻る"
+    },
+    "GeneralSettings": {
+      "title": "一般設定",
+      "subtitle": "アカウント情報と設定を管理します",
+      "preferences": "環境設定",
+      "preferencesDescription": "アプリケーション設定を管理します",
+      "comingSoon": "その他の設定オプションは近日公開予定...",
+      "userProfile": {
+        "userId": "ユーザーID",
+        "authMethod": "認証方法",
+        "createdAt": "作成日時",
+        "lastUpdated": "最終更新",
+        "fullUserInfo": "ユーザー情報詳細",
+        "unknown": "不明",
+        "defaultUser": "ユーザー",
+        "emailPassword": "メールパスワード"
+      }
     }
   },
   "Utils": {

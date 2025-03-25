@@ -1,10 +1,8 @@
 import { resetPasswordAction } from '@/lib/actions/sign-up';
-import { FormMessage, Message } from '@/components/form-message';
-import { SubmitButton } from '@/components/submit-button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Message } from '@/components/form-message';
 import AuthTranslations from '@/components/auth-translations';
 import { HashRedirect } from './hash-redirect';
+import { AuthForm } from '@/components/auth/auth-form';
 
 export default async function ResetPassword({
   searchParams,
@@ -27,43 +25,36 @@ export default async function ResetPassword({
     message = { message: searchParams.message };
   }
 
-  const [messageElement, isFormDisabled] = message ? FormMessage({ message }) : [null, false];
-
   return (
     <AuthTranslations namespace="Auth.ResetPasswordPage">
-      {(t) => (
-        <div className="flex-1 flex min-h-screen justify-center items-center">
+      {t => (
+        <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-white via-slate-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-950">
           <HashRedirect />
-          <form className="flex flex-col min-w-64 max-w-64 mx-auto">
-            <h1 className="text-2xl font-medium">{t('title')}</h1>
-            <p className="text-sm text-foreground/60">{t('enterYourNewPassword')}</p>
-            <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
-              <Label htmlFor="password">{t('newPassword')}</Label>
-              <Input
-                type="password"
-                name="password"
-                placeholder={t('newPasswordPlaceholder')}
-                required
-                disabled={isFormDisabled}
-              />
-              <Label htmlFor="confirmPassword">{t('confirmPassword')}</Label>
-              <Input
-                type="password"
-                name="confirmPassword"
-                placeholder={t('confirmPasswordPlaceholder')}
-                required
-                disabled={isFormDisabled}
-              />
-              <SubmitButton
-                pendingText={t('resetPasswordLoading')}
-                formAction={resetPasswordAction}
-                disabled={isFormDisabled}
-              >
-                {t('resetPassword')}
-              </SubmitButton>
-              {messageElement}
-            </div>
-          </form>
+
+          <AuthForm
+            title={t('title')}
+            description={t('enterYourNewPassword')}
+            fields={[
+              {
+                name: 'password',
+                type: 'password',
+                label: t('newPassword'),
+                placeholder: t('newPasswordPlaceholder'),
+                required: true,
+              },
+              {
+                name: 'confirmPassword',
+                type: 'password',
+                label: t('confirmPassword'),
+                placeholder: t('confirmPasswordPlaceholder'),
+                required: true,
+              },
+            ]}
+            submitText={t('resetPassword')}
+            submitPendingText={t('resetPasswordLoading')}
+            formAction={resetPasswordAction}
+            message={message || undefined}
+          />
         </div>
       )}
     </AuthTranslations>

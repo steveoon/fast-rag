@@ -19,18 +19,22 @@ export default function FilesManagement() {
   }, [getTableData]);
 
   return (
-    <div>
-      <div className="flex gap-4">
-        <AddNewDoc />
-        <Delete />
-        <Embedding />
+    <div className="bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm p-6">
+      <div className="flex gap-4 justify-between mb-6">
+        <div className="flex gap-4">
+          <AddNewDoc />
+          <Embedding />
+        </div>
+        <div className="flex gap-4">
+          <Delete />
+        </div>
       </div>
       <UploadProgress />
-      <div className="pt-6">
+      <div className="pt-4">
         <FilesTable />
       </div>
       {isLoading ? (
-        <div className="absolute w-full h-full dark:bg-gray-950 opacity-70 left-0 top-0">
+        <div className="absolute w-full h-full bg-white/50 dark:bg-gray-950/50 backdrop-blur-sm left-0 top-0 flex items-center justify-center z-50 rounded-lg">
           <Loading />
         </div>
       ) : null}

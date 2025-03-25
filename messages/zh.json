@@ -202,6 +202,7 @@
       "home": "首页",
       "clientsManagement": "客户端管理",
       "dataManagement": "数据管理",
+      "generalSettings": "通用设置",
       "resetPassword": "重置密码"
     },
     "Home": {
@@ -316,6 +317,23 @@
         "preview": "预览"
       },
       "backToFiles": "返回数据管理"
+    },
+    "GeneralSettings": {
+      "title": "通用设置",
+      "subtitle": "管理您的账户信息和偏好设置",
+      "preferences": "偏好设置",
+      "preferencesDescription": "管理您的应用程序偏好设置",
+      "comingSoon": "更多设置选项即将推出...",
+      "userProfile": {
+        "userId": "用户 ID",
+        "authMethod": "认证方式",
+        "createdAt": "创建时间",
+        "lastUpdated": "上次更新",
+        "fullUserInfo": "完整用户信息",
+        "unknown": "未知",
+        "defaultUser": "用户",
+        "emailPassword": "邮箱密码"
+      }
     }
   },
   "Utils": {
