@@ -235,6 +235,17 @@
           "view": "View a list of uploaded documents",
           "parse": "Parse a document"
         }
+      },
+      "ClientToolsManagement": {
+        "title": "Tools Management",
+        "description": "View all AI tools in the system and select the appropriate tools for your clients.",
+        "linkText": "Manage Tools",
+        "Steps": {
+          "view": "View system tools list",
+          "add": "Add a tool to a client",
+          "edit": "Edit a client tool",
+          "delete": "Remove a client tool"
+        }
       }
     },
     "ClientsManagement": {
@@ -342,6 +353,7 @@
       "visibility": "Visibility",
       "public": "Public",
       "private": "Private",
+      "apply": "Apply",
       "Table": {
         "name": "Name",
         "displayName": "Display Name",
@@ -352,7 +364,13 @@
         "optional": "Optional"
       },
       "metadata": "Metadata",
-      "noMetadata": "No Metadata"
+      "noMetadata": "No Metadata",
+      "Actions": {
+        "selectTools": "Select Tools",
+        "exitSelectionMode": "Exit",
+        "applySelected": "Apply Selected",
+        "clear": "Clear"
+      }
     },
     "GeneralSettings": {
       "title": "General Settings",

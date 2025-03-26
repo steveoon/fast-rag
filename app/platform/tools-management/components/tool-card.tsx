@@ -11,21 +11,55 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { InfoIcon, Settings, Eye, Wrench } from 'lucide-react';
+import { InfoIcon, Settings, Eye, Wrench, Check, Loader2 } from 'lucide-react';
 import { ToolDetail } from './tool-detail';
 import { ToolWithParameters } from '@/lib/actions/tools-quire/get-tools';
 import { useTranslations } from 'next-intl';
+import { useSelectedToolsStore } from '@/components/tools/selected-tools-store';
+import { cn } from '@/lib/utils';
+
 interface ToolCardProps {
   tool: ToolWithParameters;
+  onApply?: (toolId: string) => Promise<void>;
+  isApplying?: boolean;
 }
 
-export function ToolCard({ tool }: ToolCardProps) {
+export function ToolCard({ tool, onApply, isApplying = false }: ToolCardProps) {
   const [showDetails, setShowDetails] = useState(false);
   const t = useTranslations('Platform.ToolsManagement');
 
+  const { isSelectionMode, toggleToolSelection, isToolSelected } = useSelectedToolsStore();
+
+  const selected = isToolSelected(tool.id);
+
+  const handleClick = () => {
+    if (isSelectionMode) {
+      toggleToolSelection(tool);
+    }
+  };
+
+  const handleApply = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onApply && !isApplying) {
+      await onApply(tool.id);
+    }
+  };
+
   return (
     <>
-      <Card className="border-0 border-t-2 border-t-pink-400 dark:border-t-pink-600 shadow-lg hover:shadow-xl transition-all duration-300 dark:bg-gray-900 flex flex-col h-full">
+      <Card
+        className={cn(
+          'border-0 border-t-2 border-t-pink-400 dark:border-t-pink-600 shadow-lg hover:shadow-xl transition-all duration-300 dark:bg-gray-900 flex flex-col h-full relative',
+          isSelectionMode && 'cursor-pointer',
+          selected && 'ring-2 ring-green-500 ring-offset-2'
+        )}
+        onClick={handleClick}
+      >
+        {isSelectionMode && selected && (
+          <div className="absolute top-2 right-2 bg-green-500 text-white p-1 rounded-full">
+            <Check className="h-4 w-4" />
+          </div>
+        )}
         <CardHeader className="pb-3">
           <div className="flex justify-between items-start">
             <div className="flex items-start gap-3">
@@ -51,10 +85,10 @@ export function ToolCard({ tool }: ToolCardProps) {
               }
               className={`text-xs ${
                 tool.status === 'active'
-                  ? 'bg-green-500 text-white'
+                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800'
                   : tool.status === 'deprecated'
-                    ? 'bg-yellow-500 text-white'
-                    : 'bg-red-500 text-white'
+                    ? 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-800'
+                    : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-800'
               }`}
             >
               {tool.status}
@@ -96,15 +130,32 @@ export function ToolCard({ tool }: ToolCardProps) {
             <InfoIcon className="h-3 w-3 mr-1" />
             {t('version')} {tool.version}
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 px-2 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-100 dark:text-blue-300 dark:hover:text-blue-100 dark:hover:bg-blue-900"
-            onClick={() => setShowDetails(true)}
-          >
-            <Eye className="h-3 w-3 mr-1" />
-            {t('details')}
-          </Button>
+          <div className="flex space-x-2">
+            {!isSelectionMode && onApply && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2 text-xs text-green-600 hover:text-green-800 hover:bg-green-100 dark:text-green-300 dark:hover:text-green-100 dark:hover:bg-green-900"
+                onClick={handleApply}
+                disabled={isApplying}
+              >
+                {isApplying ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : null}
+                {t('apply')}
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-100 dark:text-blue-300 dark:hover:text-blue-100 dark:hover:bg-blue-900"
+              onClick={e => {
+                e.stopPropagation();
+                setShowDetails(true);
+              }}
+            >
+              <Eye className="h-3 w-3 mr-1" />
+              {t('details')}
+            </Button>
+          </div>
         </CardFooter>
       </Card>
 

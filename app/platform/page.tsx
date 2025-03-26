@@ -8,7 +8,7 @@ import {
   CardContent,
   CardFooter,
 } from '@/components/ui/card';
-import { ArrowRight, Key, FileText } from 'lucide-react';
+import { ArrowRight, Key, FileText, Wrench } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 export default function PlatformPage() {
@@ -39,6 +39,19 @@ export default function PlatformPage() {
         t('DataManagement.Steps.delete'),
         t('DataManagement.Steps.view'),
         t('DataManagement.Steps.parse'),
+      ],
+    },
+    {
+      title: t('ClientToolsManagement.title'),
+      description: t('ClientToolsManagement.description'),
+      icon: Wrench,
+      link: '/platform/tools-management',
+      linkText: t('ClientToolsManagement.linkText'),
+      steps: [
+        t('ClientToolsManagement.Steps.view'),
+        t('ClientToolsManagement.Steps.add'),
+        t('ClientToolsManagement.Steps.edit'),
+        t('ClientToolsManagement.Steps.delete'),
       ],
     },
   ];

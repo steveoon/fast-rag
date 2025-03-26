@@ -235,6 +235,17 @@
           "view": "アップロードされたドキュメントのリストを表示",
           "parse": "ドキュメントを解析"
         }
+      },
+      "ClientToolsManagement": {
+        "title": "ツール管理",
+        "description": "システム内のすべての AI ツールを表示および管理します",
+        "linkText": "ツールの管理",
+        "Steps": {
+          "view": "システムツールリストを表示",
+          "add": "クライアントにツールを追加",
+          "edit": "クライアントツールを編集",
+          "delete": "クライアントツールを削除"
+        }
       }
     },
     "ClientsManagement": {
@@ -339,6 +350,7 @@
       "visibility": "可視性",
       "public": "公開",
       "private": "非公開",
+      "apply": "適用",
       "Table": {
         "name": "名前",
         "displayName": "表示名",
@@ -349,7 +361,13 @@
         "optional": "オプション"
       },
       "metadata": "メタデータ",
-      "noMetadata": "メタデータなし"
+      "noMetadata": "メタデータなし",
+      "Actions": {
+        "selectTools": "ツールを選択",
+        "exitSelectionMode": "退出",
+        "applySelected": "選択したツールを適用",
+        "clear": "クリア"
+      }
     },
     "GeneralSettings": {
       "title": "一般設定",

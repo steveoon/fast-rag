@@ -1,9 +1,11 @@
 import { getPublicTools } from '@/lib/actions/tools-quire/get-tools';
 import { Badge } from '@/components/ui/badge';
 import { AlertTriangle } from 'lucide-react';
-import { ToolCard } from './components/tool-card';
 import { Suspense } from 'react';
 import TranslationWrapper from '@/components/auth-translations';
+import { ToolActions } from './components/tool-actions';
+import { ToolsGrid } from './components/tools-grid';
+
 export default async function ToolsManagementPage() {
   // 从数据库获取工具列表
   const { tools, error } = await getPublicTools();
@@ -16,10 +18,13 @@ export default async function ToolsManagementPage() {
             <h4 className="text-xl font-semibold text-blue-900 dark:text-blue-300">
               {t('subtitle2')}
             </h4>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-4">
               <Badge variant="outline" className="px-2 text-blue-900 dark:text-blue-300">
                 {t('totalTools', { count: tools?.length || 0 })}
               </Badge>
+
+              {/* 工具操作组件 */}
+              <ToolActions />
             </div>
           </div>
 
@@ -29,13 +34,9 @@ export default async function ToolsManagementPage() {
               <span>{t('error', { error })}</span>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {tools?.map(tool => (
-                <Suspense key={tool.id} fallback={<div>{t('loading')}</div>}>
-                  <ToolCard tool={tool} />
-                </Suspense>
-              ))}
-            </div>
+            <Suspense fallback={<div>{t('loading')}</div>}>
+              <ToolsGrid tools={tools || []} loadingMessage={t('loading')} />
+            </Suspense>
           )}
         </div>
       )}

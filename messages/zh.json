@@ -235,6 +235,17 @@
           "view": "查看已上传的文档列表",
           "parse": "解析文档"
         }
+      },
+      "ClientToolsManagement": {
+        "title": "工具管理",
+        "description": "查看系统预置的所有AI工具，从中为客户端选择合适的工具。",
+        "linkText": "管理工具",
+        "Steps": {
+          "view": "查看系统工具列表",
+          "add": "为客户端添加工具",
+          "edit": "编辑客户端工具",
+          "delete": "移除客户端工具"
+        }
       }
     },
     "ClientsManagement": {
@@ -342,6 +353,7 @@
       "visibility": "可见性",
       "public": "公开",
       "private": "私有",
+      "apply": "应用",
       "Table": {
         "name": "名称",
         "displayName": "显示名称",
@@ -352,7 +364,13 @@
         "optional": "可选"
       },
       "metadata": "元数据",
-      "noMetadata": "无元数据"
+      "noMetadata": "无元数据",
+      "Actions": {
+        "selectTools": "选择工具",
+        "exitSelectionMode": "退出",
+        "applySelected": "应用选中的工具",
+        "clear": "清除"
+      }
     },
     "GeneralSettings": {
       "title": "通用设置",
