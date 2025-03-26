@@ -338,7 +338,8 @@
     "ToolsManagement": {
       "title": "工具管理中心",
       "subtitle1": "查看和管理系统中的所有AI工具",
-      "subtitle2": "系统工具合集",
+      "systemTools": "系统工具合集",
+      "clientTools": "客户端工具合集",
       "totalTools": "工具总数: {count}",
       "error": "获取工具列表失败: {error}",
       "loading": "加载中...",
@@ -384,6 +385,7 @@
         "createdAt": "创建时间",
         "lastUpdated": "上次更新",
         "fullUserInfo": "完整用户信息",
+        "noUserInfo": "无用户信息",
         "unknown": "未知",
         "defaultUser": "用户",
         "emailPassword": "邮箱密码"

@@ -335,7 +335,8 @@
     "ToolsManagement": {
       "title": "ツール管理",
       "subtitle1": "システム内のすべての AI ツールを表示および管理します",
-      "subtitle2": "システムツールコレクション",
+      "systemTools": "システムツールコレクション",
+      "clientTools": "クライアントツールコレクション",
       "totalTools": "ツール総数: {count}",
       "error": "ツールリストの取得に失敗しました: {error}",
       "loading": "読み込み中...",
@@ -381,6 +382,7 @@
         "createdAt": "作成日時",
         "lastUpdated": "最終更新",
         "fullUserInfo": "ユーザー情報詳細",
+        "noUserInfo": "ユーザー情報なし",
         "unknown": "不明",
         "defaultUser": "ユーザー",
         "emailPassword": "メールパスワード"

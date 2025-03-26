@@ -338,7 +338,8 @@
     "ToolsManagement": {
       "title": "Tools Management",
       "subtitle1": "View and manage all AI tools in the system",
-      "subtitle2": "System Tool Collection",
+      "systemTools": "System Tool Collection",
+      "clientTools": "Client Tool Collection",
       "totalTools": "Total Tools: {count}",
       "error": "Failed to get tool list: {error}",
       "loading": "Loading...",
@@ -384,6 +385,7 @@
         "createdAt": "Created At",
         "lastUpdated": "Last Updated",
         "fullUserInfo": "Full User Information",
+        "noUserInfo": "No User Information",
         "unknown": "Unknown",
         "defaultUser": "User",
         "emailPassword": "Email Password"

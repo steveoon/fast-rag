@@ -67,3 +67,58 @@ export async function applyClientTools(
     );
   }
 }
+
+/**
+ * 更新客户端工具的启用状态
+ */
+export async function updateClientToolStatus(
+  apiKey: string,
+  clientToolId: string,
+  isEnabled: boolean
+): Promise<{
+  success: boolean;
+  message: string;
+}> {
+  try {
+    const client = await validateClient(apiKey);
+    if (!client) {
+      throw new CustomError('非法请求', 'UN_AUTH_REQUEST');
+    }
+
+    // 验证工具是否属于该客户端
+    const clientTool = await db
+      .select()
+      .from(client_tools)
+      .where(and(eq(client_tools.id, clientToolId), eq(client_tools.client_id, client.id)))
+      .limit(1);
+
+    if (!clientTool.length) {
+      throw new CustomError('未找到客户端工具', 'CLIENT_TOOL_NOT_FOUND');
+    }
+
+    // 更新工具启用状态
+    await db
+      .update(client_tools)
+      .set({
+        is_enabled: isEnabled,
+        updated_at: new Date().toISOString(),
+      })
+      .where(eq(client_tools.id, clientToolId));
+
+    return {
+      success: true,
+      message: isEnabled ? '工具已启用' : '工具已禁用',
+    };
+  } catch (error) {
+    if (error instanceof CustomError) {
+      throw error;
+    }
+
+    console.error('更新工具状态失败:', error);
+    throw new CustomError(
+      '更新工具状态失败',
+      'UPDATE_TOOL_STATUS_FAILED',
+      error instanceof Error ? error.message : undefined
+    );
+  }
+}

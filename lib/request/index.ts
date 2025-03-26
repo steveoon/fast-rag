@@ -72,6 +72,13 @@ class Request {
   ): Promise<ApiResponse<T>> =>
     this.request<T>(url, { ...config, method: 'PUT', body: JSON.stringify(data) });
 
+  public patch = <T = unknown>(
+    url: string,
+    data?: unknown,
+    config?: RequestConfig
+  ): Promise<ApiResponse<T>> =>
+    this.request<T>(url, { ...config, method: 'PATCH', body: JSON.stringify(data) });
+
   public del = <T = unknown>(url: string, config?: RequestConfig): Promise<ApiResponse<T>> =>
     this.request<T>(url, { ...config, method: 'DELETE' });
 
