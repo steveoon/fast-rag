@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { User as UserIcon, Mail, Calendar, Key } from 'lucide-react';
 import { SettingsCard } from '@/components/settings-card';
 import { useTranslations } from 'next-intl';
+import { CodeDisplay } from '@/components/tools/tool-detail/code-display';
 
 interface UserProfileCardProps {
   user: User;
@@ -95,11 +96,7 @@ export function UserProfileCard({ user, className }: UserProfileCardProps) {
 
         <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
           <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">{t('fullUserInfo')}</div>
-          <div className="p-4 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg">
-            <pre className="text-xs font-mono max-h-64 overflow-auto text-gray-700 dark:text-gray-300">
-              {JSON.stringify(user, null, 2)}
-            </pre>
-          </div>
+          <CodeDisplay code={user} emptyMessage={t('noUserInfo')} className="max-h-64" />
         </div>
       </div>
     </SettingsCard>

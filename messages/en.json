@@ -207,6 +207,7 @@
       "home": "Home",
       "clientsManagement": "Clients Management",
       "dataManagement": "Data Management",
+      "toolsManagement": "Tools Management",
       "generalSettings": "General Settings",
       "resetPassword": "Reset Password"
     },
@@ -322,6 +323,36 @@
         "preview": "Preview"
       },
       "backToFiles": "Back to Data Management"
+    },
+    "ToolsManagement": {
+      "title": "Tools Management",
+      "subtitle1": "View and manage all AI tools in the system",
+      "subtitle2": "System Tool Collection",
+      "totalTools": "Total Tools: {count}",
+      "error": "Failed to get tool list: {error}",
+      "loading": "Loading...",
+      "parameters": "Parameters",
+      "moreParameters": "More Parameters",
+      "details": "Details",
+      "version": "Version",
+      "technicalIdentifier": "Technical Identifier",
+      "description": "Description",
+      "implementationDetails": "Implementation Details",
+      "implementationKey": "Implementation Key",
+      "visibility": "Visibility",
+      "public": "Public",
+      "private": "Private",
+      "Table": {
+        "name": "Name",
+        "displayName": "Display Name",
+        "description": "Description",
+        "type": "Type",
+        "required": "Required",
+        "defaultValue": "Default Value",
+        "optional": "Optional"
+      },
+      "metadata": "Metadata",
+      "noMetadata": "No Metadata"
     },
     "GeneralSettings": {
       "title": "General Settings",

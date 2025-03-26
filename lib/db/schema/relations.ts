@@ -1,5 +1,15 @@
 import { relations } from 'drizzle-orm/relations';
-import { clients, users, access_tokens, documents, document_versions, embeddings } from './schema';
+import {
+  clients,
+  users,
+  access_tokens,
+  documents,
+  document_versions,
+  embeddings,
+  tools,
+  tool_parameters,
+  client_tools,
+} from './schema';
 
 export const access_tokensRelations = relations(access_tokens, ({ one }) => ({
   client: one(clients, {
@@ -11,6 +21,7 @@ export const access_tokensRelations = relations(access_tokens, ({ one }) => ({
 export const clientsRelations = relations(clients, ({ many, one }) => ({
   access_tokens: many(access_tokens),
   documents: many(documents),
+  client_tools: many(client_tools),
   user: one(users, {
     fields: [clients.user_id],
     references: [users.id],
@@ -42,4 +53,27 @@ export const embeddingsRelations = relations(embeddings, ({ one }) => ({
 
 export const userRelations = relations(users, ({ many }) => ({
   clients: many(clients),
+}));
+
+export const toolsRelations = relations(tools, ({ many }) => ({
+  parameters: many(tool_parameters),
+  client_tools: many(client_tools),
+}));
+
+export const tool_parametersRelations = relations(tool_parameters, ({ one }) => ({
+  tool: one(tools, {
+    fields: [tool_parameters.tool_id],
+    references: [tools.id],
+  }),
+}));
+
+export const client_toolsRelations = relations(client_tools, ({ one }) => ({
+  client: one(clients, {
+    fields: [client_tools.client_id],
+    references: [clients.id],
+  }),
+  tool: one(tools, {
+    fields: [client_tools.tool_id],
+    references: [tools.id],
+  }),
 }));

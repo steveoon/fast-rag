@@ -5,15 +5,23 @@ import { useState } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark, oneLight } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import { useTheme } from 'next-themes';
+import { cn } from '@/lib/utils';
 
 export interface CodeBlockProps {
   code: string;
   language: string;
   fileName?: string;
   showLineNumbers?: boolean;
+  className?: string;
 }
 
-export function CodeBlock({ code, language, fileName, showLineNumbers = true }: CodeBlockProps) {
+export function CodeBlock({
+  code,
+  language,
+  fileName,
+  showLineNumbers = true,
+  className = '',
+}: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
@@ -52,8 +60,19 @@ export function CodeBlock({ code, language, fileName, showLineNumbers = true }: 
     return langMap[lang] || lang;
   };
 
+  // 提取可能的高度类，用于子容器
+  const heightClass =
+    className
+      .split(' ')
+      .find(cls => cls.includes('h-') || cls.includes('max-h-') || cls.includes('min-h-')) || '';
+
   return (
-    <div className="relative bg-gray-50 dark:bg-gray-900 rounded-md overflow-hidden border border-gray-200 dark:border-gray-800 shadow-sm">
+    <div
+      className={cn(
+        'relative bg-gray-50 dark:bg-gray-900 rounded-md overflow-hidden border border-gray-200 dark:border-gray-800 shadow-sm',
+        className
+      )}
+    >
       {/* 文件名和语言标签 */}
       <div className="flex justify-between items-center px-4 py-2 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 text-xs">
         {fileName && (
@@ -67,7 +86,7 @@ export function CodeBlock({ code, language, fileName, showLineNumbers = true }: 
       </div>
 
       {/* 代码内容 */}
-      <div className="relative group">
+      <div className={cn('relative group', heightClass, 'overflow-y-auto')}>
         <div className="overflow-x-auto">
           <SyntaxHighlighter
             language={getLanguage(language)}
@@ -75,9 +94,13 @@ export function CodeBlock({ code, language, fileName, showLineNumbers = true }: 
             showLineNumbers={showLineNumbers}
             wrapLongLines={false}
             customStyle={{
-              margin: 0,
               padding: '1rem',
               fontSize: '0.875rem',
+              maxHeight: '100%',
+              height: '100%',
+              marginBottom: '3rem',
+              marginLeft: 0,
+              marginRight: 0,
             }}
             lineNumberStyle={{
               minWidth: '2.5em',
@@ -94,7 +117,7 @@ export function CodeBlock({ code, language, fileName, showLineNumbers = true }: 
         <button
           onClick={handleCopy}
           type="button"
-          className="absolute top-2 right-2 p-2 rounded-md bg-gray-200/80 dark:bg-gray-700/80 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+          className="absolute top-2 right-2 p-2 rounded-md bg-gray-200/80 dark:bg-gray-700/80 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 z-10"
           aria-label="Copy code"
         >
           {copied ? <Check size={16} /> : <Copy size={16} />}
