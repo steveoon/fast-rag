@@ -1,9 +1,9 @@
 import TranslationWrapper from '@/components/auth-translations';
 import { ActiveClientDisplay } from '@/components/ActiveClientDisplay';
 
-export default function ToolsManagementLayout({ children }: { children: React.ReactNode }) {
+export default function DataManagementLayout({ children }: { children: React.ReactNode }) {
   return (
-    <TranslationWrapper namespace="Platform.ToolsManagement">
+    <TranslationWrapper namespace="Platform.FilesManagement">
       {t => (
         <div className="container mx-auto py-6">
           <div className="pb-6 border-b">
@@ -13,7 +13,7 @@ export default function ToolsManagementLayout({ children }: { children: React.Re
               </h1>
               <ActiveClientDisplay />
             </div>
-            <p className="text-xl text-gray-600 dark:text-gray-400">{t('subtitle1')}</p>
+            <p className="text-xl text-gray-600 dark:text-gray-400">{t('subtitle')}</p>
           </div>
           <div className="py-6">{children}</div>
         </div>

@@ -387,6 +387,15 @@
         "defaultUser": "ユーザー",
         "emailPassword": "メールパスワード"
       }
+    },
+    "ActiveClientDisplay": {
+      "active": "アクティブ",
+      "pending": "保留中",
+      "disabled": "無効",
+      "status": "ステータス",
+      "name": "名前",
+      "id": "クライアントID",
+      "lastUpdated": "最終更新"
     }
   },
   "Utils": {

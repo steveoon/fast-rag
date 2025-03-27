@@ -390,6 +390,15 @@
         "defaultUser": "User",
         "emailPassword": "Email Password"
       }
+    },
+    "ActiveClientDisplay": {
+      "active": "Active",
+      "pending": "Pending",
+      "disabled": "Disabled",
+      "status": "Status",
+      "name": "Name",
+      "id": "Client ID",
+      "lastUpdated": "Last Updated"
     }
   },
   "Utils": {

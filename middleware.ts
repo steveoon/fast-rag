@@ -41,7 +41,7 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith('/api/v1/')) {
     try {
       const apiKey = extractApiKey(request);
-      logger.info(`API Key: ${apiKey}`);
+      logger.info(`API Key: ${apiKey.substring(0, 10)}...`);
       await validateRedisAPIKey(apiKey);
     } catch (error) {
       if (error instanceof CustomError) {

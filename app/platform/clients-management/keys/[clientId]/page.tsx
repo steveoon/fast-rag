@@ -26,7 +26,7 @@ export default async function KeyManagementPage({ params }: { params: { clientId
 
   return (
     <TranslationWrapper namespace="Platform.KeyManagement">
-      {(t) => (
+      {t => (
         <div className="max-w-6xl mx-auto px-4 py-12">
           <BackButton
             href="/platform/clients-management"
@@ -39,7 +39,7 @@ export default async function KeyManagementPage({ params }: { params: { clientId
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-400">{t('subtitle')}</p>
           </div>
-          <TokensList initialTokens={tokens} clientId={clientId} />
+          <TokensList initialTokens={tokens} clientId={clientId} user={user} />
         </div>
       )}
     </TranslationWrapper>

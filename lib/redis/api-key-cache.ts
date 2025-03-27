@@ -58,3 +58,20 @@ export async function removeApiKeyFromCache(apiKey: string): Promise<void> {
 export async function getClientApiKey(clientId: string): Promise<string | null> {
   return redis.get(`${CLIENT_PREFIX}${clientId}`);
 }
+
+// 设置用户当前活跃客户端
+export async function setUserActiveClient(userId: string, clientId: string): Promise<void> {
+  await redis.set(`user:${userId}:active_client`, clientId);
+}
+
+// 获取用户当前活跃客户端
+export async function getUserActiveClient(userId: string): Promise<string | null> {
+  return redis.get(`user:${userId}:active_client`);
+}
+
+// 获取用户当前活跃客户端的API Key
+export async function getUserActiveApiKey(userId: string): Promise<string | null> {
+  const activeClientId = await getUserActiveClient(userId);
+  if (!activeClientId) return null;
+  return getClientApiKey(activeClientId);
+}

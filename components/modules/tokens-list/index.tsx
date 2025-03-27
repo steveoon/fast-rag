@@ -16,6 +16,7 @@ import {
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { createAccessToken } from '@/lib/actions/create-access-token';
 import { setActiveToken } from '@/lib/actions/set-active-token';
+import type { User } from '@supabase/supabase-js';
 
 type Token = {
   id: string;
@@ -28,9 +29,11 @@ type Token = {
 export default function TokensList({
   initialTokens,
   clientId,
+  user,
 }: {
   initialTokens: Token[];
   clientId: string;
+  user: User;
 }) {
   const [tokens, setTokens] = React.useState<Token[]>(initialTokens);
   const [isCreatingToken, setIsCreatingToken] = React.useState(false);
@@ -71,9 +74,9 @@ export default function TokensList({
   const handleSetActiveToken = async (tokenId: string) => {
     setLoadingTokenId(tokenId);
     try {
-      await setActiveToken(clientId, tokenId);
+      await setActiveToken(clientId, tokenId, user.id);
       setTokens(
-        tokens.map((token) =>
+        tokens.map(token =>
           token.id === tokenId ? { ...token, status: 'active' } : { ...token, status: 'inactive' }
         )
       );
@@ -211,9 +214,9 @@ export default function TokensList({
       <div className="rounded-md border">
         <Table>
           <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
+            {table.getHeaderGroups().map(headerGroup => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
+                {headerGroup.headers.map(header => (
                   <TableHead key={header.id}>
                     {header.isPlaceholder
                       ? null
@@ -225,9 +228,9 @@ export default function TokensList({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
+              table.getRowModel().rows.map(row => (
                 <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
-                  {row.getVisibleCells().map((cell) => (
+                  {row.getVisibleCells().map(cell => (
                     <TableCell key={cell.id}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>

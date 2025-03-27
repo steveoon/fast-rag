@@ -390,6 +390,15 @@
         "defaultUser": "用户",
         "emailPassword": "邮箱密码"
       }
+    },
+    "ActiveClientDisplay": {
+      "active": "活跃",
+      "pending": "待处理",
+      "disabled": "已禁用",
+      "status": "状态",
+      "name": "名称",
+      "id": "客户端ID",
+      "lastUpdated": "上次更新"
     }
   },
   "Utils": {
