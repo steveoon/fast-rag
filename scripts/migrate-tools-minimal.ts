@@ -4,6 +4,7 @@ import postgres from 'postgres';
 import * as schema from '@/lib/db/schema/schema';
 import { eq } from 'drizzle-orm';
 import { env } from '@/lib/env.mjs';
+import type { EnabledToolType, AnalysisToolType } from '@/lib/utils/tools/tool-mapping';
 
 // 参数类型枚举值
 type ToolParameterType = 'string' | 'number' | 'boolean' | 'array' | 'object';
@@ -11,7 +12,21 @@ type ToolParameterType = 'string' | 'number' | 'boolean' | 'array' | 'object';
 type ToolStatus = 'active' | 'deprecated' | 'disabled';
 
 // 预定义的工具列表
-const PREDEFINED_TOOLS = [
+const PREDEFINED_TOOLS: {
+  name: EnabledToolType;
+  display_name: string;
+  description: string;
+  icon: string;
+  implementation_key: AnalysisToolType;
+  parameters: {
+    name: string;
+    display_name: string;
+    description: string;
+    type: ToolParameterType;
+    is_required: boolean;
+    default_value: string | number | boolean | string[] | Record<string, unknown> | null;
+  }[];
+}[] = [
   {
     name: 'webSearch',
     display_name: 'Web Search',
@@ -46,7 +61,7 @@ const PREDEFINED_TOOLS = [
     ],
   },
   {
-    name: 'queryKnowledgeBase',
+    name: 'knowledgeBase',
     display_name: 'Knowledge Base',
     description: '查询知识库，从上传的文档中获取相关信息',
     icon: 'database',
@@ -63,7 +78,7 @@ const PREDEFINED_TOOLS = [
     ],
   },
   {
-    name: 'getWeather',
+    name: 'weather',
     display_name: 'Weather',
     description: '获取指定位置的天气信息',
     icon: 'cloud',
@@ -80,8 +95,8 @@ const PREDEFINED_TOOLS = [
     ],
   },
   {
-    name: 'wikidataGetEntity',
-    display_name: 'Wikidata Entity',
+    name: 'wikidata',
+    display_name: 'Wikidata',
     description: '通过实体ID获取Wikidata中的结构化信息',
     icon: 'info',
     implementation_key: 'wikidataGetEntity',
@@ -97,8 +112,8 @@ const PREDEFINED_TOOLS = [
     ],
   },
   {
-    name: 'smartWikidataQuery',
-    display_name: 'Smart Wikidata Query',
+    name: 'smartWikidata',
+    display_name: 'Smart Wikidata',
     description: '智能查询Wikidata实体，只需提供实体名称即可获取结构化数据',
     icon: 'brain',
     implementation_key: 'smartWikidataQuery',
@@ -136,7 +151,21 @@ const migrateTools = async () => {
         .where(eq(schema.tools.implementation_key, tool.implementation_key))
         .limit(1);
 
-      if (existing.length === 0) {
+      if (existing.length > 0) {
+        // 更新现有记录
+        await db
+          .update(schema.tools)
+          .set({
+            name: tool.name,
+            display_name: tool.display_name,
+            description: tool.description,
+            icon: tool.icon,
+            status: 'active' as ToolStatus,
+            version: '1.0',
+            is_public: true,
+          })
+          .where(eq(schema.tools.implementation_key, tool.implementation_key));
+      } else {
         // 使用事务确保完整性
         await db.transaction(async tx => {
           const [inserted] = await tx
