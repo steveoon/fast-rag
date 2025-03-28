@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { type ClientInfo, getActiveClientInfo } from '@/lib/actions/get-active-client';
 import { StatusBadge, type StatusType } from '@/components/tools/tool-detail/status-badge';
@@ -9,45 +9,78 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { RefreshCcw } from 'lucide-react';
 
+// Define a static mapping outside the component for better performance
+const STATUS_MAP: Record<string, StatusType> = {
+  active: 'active',
+  pending: 'deprecated',
+  disabled: 'disabled',
+};
+
 export function ActiveClientDisplay() {
   const t = useTranslations('Platform.ActiveClientDisplay');
   const [clientInfo, setClientInfo] = useState<ClientInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  // 获取客户端信息并处理错误
-  const fetchClientInfo = async () => {
+  // Memoized fetch function to avoid unnecessary re-creations
+  const fetchClientInfo = useCallback(async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const data = await getActiveClientInfo();
       setClientInfo(data);
       setError(null);
+      setLastUpdated(new Date());
     } catch (err) {
       console.error('Error fetching client info:', err);
       setError(err instanceof Error ? err : new Error('Unknown error'));
     } finally {
       setLoading(false);
     }
-  };
-
-  // 组件加载时获取数据，并设置轮询
-  useEffect(() => {
-    fetchClientInfo();
-
-    // 每30秒刷新一次数据
-    const intervalId = setInterval(() => {
-      fetchClientInfo();
-    }, 30000);
-
-    return () => clearInterval(intervalId);
   }, []);
 
-  // 加载状态
+  // Polling: fetch data on mount and then every 30 seconds
+  useEffect(() => {
+    fetchClientInfo();
+    const intervalId = setInterval(fetchClientInfo, 30000);
+    return () => clearInterval(intervalId);
+  }, [fetchClientInfo]);
+
+  // Memoize status and label calculations
+  const { status, statusLabel } = useMemo(() => {
+    if (!clientInfo) {
+      return { status: 'disabled' as StatusType, statusLabel: '' };
+    }
+    const currentStatus = STATUS_MAP[clientInfo.status] || 'disabled';
+    let label = '';
+    switch (clientInfo.status) {
+      case 'active':
+        label = t('active');
+        break;
+      case 'pending':
+        label = t('pending');
+        break;
+      default:
+        label = t('disabled');
+    }
+    return { status: currentStatus, statusLabel: label };
+  }, [clientInfo, t]);
+
+  // Memoize the refresh handler (moved above early returns to ensure hooks are called unconditionally)
+  const handleRefresh = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      fetchClientInfo();
+    },
+    [fetchClientInfo]
+  );
+
+  // Early returns for loading, error, or no client data
   if (loading && !clientInfo) {
     return <Skeleton className="ml-4 h-8 w-40 rounded-full" />;
   }
 
-  // 错误状态
   if (error && !clientInfo) {
     return (
       <div className="ml-4 py-1 px-3 text-xs bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 rounded-full border border-red-200 dark:border-red-800">
@@ -56,7 +89,6 @@ export function ActiveClientDisplay() {
     );
   }
 
-  // 数据为空
   if (!clientInfo) {
     return (
       <div className="ml-4 py-1 px-3 text-xs bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300 rounded-full border border-amber-200 dark:border-amber-800">
@@ -64,24 +96,6 @@ export function ActiveClientDisplay() {
       </div>
     );
   }
-
-  // 将客户端状态映射到StatusBadge支持的状态类型
-  const statusMap: Record<string, StatusType> = {
-    active: 'active',
-    pending: 'deprecated',
-    disabled: 'disabled',
-  };
-
-  // 获取状态
-  const status = statusMap[clientInfo.status] || 'disabled';
-
-  // 状态显示文本
-  const statusLabel =
-    clientInfo.status === 'active'
-      ? t('active')
-      : clientInfo.status === 'pending'
-        ? t('pending')
-        : t('disabled');
 
   return (
     <TooltipProvider>
@@ -95,15 +109,11 @@ export function ActiveClientDisplay() {
           </div>
         </TooltipTrigger>
         <TooltipContent side="bottom" className="p-4 space-y-2 max-w-xs bg-card">
-          {/* 刷新按钮 */}
+          {/* Refresh button */}
           <Button
             variant="ghost"
             size="icon"
-            onClick={e => {
-              e.preventDefault();
-              e.stopPropagation();
-              fetchClientInfo();
-            }}
+            onClick={handleRefresh}
             className="absolute top-1 right-1 p-1 text-xs text-muted-foreground hover:text-foreground rounded-full hover:bg-muted"
             asChild
           >
@@ -123,9 +133,8 @@ export function ActiveClientDisplay() {
             </div>
           </div>
 
-          {/* 上次更新时间 */}
           <div className="text-xs text-muted-foreground mt-2 pt-2 border-t">
-            {t('lastUpdated')}: {new Date().toLocaleTimeString()}
+            {t('lastUpdated')}: {lastUpdated ? lastUpdated.toLocaleTimeString() : ''}
           </div>
         </TooltipContent>
       </Tooltip>
