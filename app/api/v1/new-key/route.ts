@@ -5,15 +5,16 @@ import { handleError } from '@/lib/utils';
 
 const createApiKeySchema = z.object({
   clientId: z.string().min(1, 'Client ID is required'),
+  userId: z.string().min(1, 'User ID is required'),
   tokenDescription: z.string().optional(),
 });
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { clientId, tokenDescription } = createApiKeySchema.parse(body);
+    const { clientId, tokenDescription, userId } = createApiKeySchema.parse(body);
 
-    const result = await createAccessToken(clientId, tokenDescription);
+    const result = await createAccessToken(clientId, userId, tokenDescription);
 
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
