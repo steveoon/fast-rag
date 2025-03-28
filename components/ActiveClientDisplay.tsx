@@ -84,7 +84,7 @@ export function ActiveClientDisplay() {
   if (error && !clientInfo) {
     return (
       <div className="ml-4 py-1 px-3 text-xs bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 rounded-full border border-red-200 dark:border-red-800">
-        {t('error')}
+        {t('error', { error: error.message })}
       </div>
     );
   }

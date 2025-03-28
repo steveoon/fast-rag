@@ -398,7 +398,8 @@
       "status": "状态",
       "name": "名称",
       "id": "客户端ID",
-      "lastUpdated": "上次更新"
+      "lastUpdated": "上次更新",
+      "error": "获取活跃客户端失败: {error}"
     }
   },
   "Utils": {

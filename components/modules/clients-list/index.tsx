@@ -65,9 +65,9 @@ export default function ClientsList({
   const handleCreateApiKey = async (clientId: string, description?: string) => {
     setLoadingClientId(clientId);
     try {
-      const newToken = await createAccessToken(clientId, description);
+      const newToken = await createAccessToken(clientId, userId, description);
       setClients(
-        clients.map((client) =>
+        clients.map(client =>
           client.id === clientId ? { ...client, api_key: newToken.token } : client
         )
       );
@@ -102,7 +102,7 @@ export default function ClientsList({
     <div className="space-y-8">
       <ClientDialog onSubmit={handleCreateClient} isSubmitting={isCreatingClient} />
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {clients.map((client) => (
+        {clients.map(client => (
           <ConfigurableCard
             key={client.id}
             icon={Key}

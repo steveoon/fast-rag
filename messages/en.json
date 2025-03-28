@@ -398,7 +398,8 @@
       "status": "Status",
       "name": "Name",
       "id": "Client ID",
-      "lastUpdated": "Last Updated"
+      "lastUpdated": "Last Updated",
+      "error": "Active Client fetch error: {error}"
     }
   },
   "Utils": {

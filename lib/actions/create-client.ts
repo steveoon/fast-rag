@@ -6,7 +6,7 @@ import { isClientNameUnique } from '../utils';
 import { CustomError } from '@/types';
 import { eq } from 'drizzle-orm';
 import { cacheApiKey } from '../redis/api-key-cache';
-
+import { setUserActiveClient } from '../redis/api-key-cache';
 export async function createClientWithApiKey(
   clientName: string,
   userId: string,
@@ -26,7 +26,7 @@ export async function createClientWithApiKey(
     throw new CustomError('客户端名称已存在', 'CLIENT_NAME_ALREADY_EXISTS');
   }
 
-  return await db.transaction(async (tx) => {
+  const transactionResult = await db.transaction(async tx => {
     // 创建客户端
     const [newClient] = await tx
       .insert(clients)
@@ -61,13 +61,22 @@ export async function createClientWithApiKey(
       throw new CustomError('创建访问令牌失败', 'ACCESS_TOKEN_CREATION_FAILED');
     }
 
-    // 缓存新的 API key 到 Redis
-    await cacheApiKey(newToken.token, newClient.id, newToken.status);
-
     return {
       client: newClient,
       apiKey: apiKey.fullKey,
       accessToken: newToken,
     };
   });
+
+  // 并发执行 Redis 缓存更新
+  await Promise.all([
+    cacheApiKey(
+      transactionResult.accessToken.token,
+      transactionResult.client.id,
+      transactionResult.accessToken.status
+    ),
+    setUserActiveClient(userId, transactionResult.client.id),
+  ]);
+
+  return transactionResult;
 }

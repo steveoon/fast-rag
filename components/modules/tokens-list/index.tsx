@@ -46,7 +46,7 @@ export default function TokensList({
   const handleCreateToken = async (description?: string) => {
     setIsCreatingToken(true);
     try {
-      const newToken = await createAccessToken(clientId, description);
+      const newToken = await createAccessToken(clientId, user.id, description);
       setTokens([...tokens, newToken]);
       toast({
         title: t('Toast.tokenCreated'),

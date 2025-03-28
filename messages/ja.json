@@ -395,7 +395,8 @@
       "status": "ステータス",
       "name": "名前",
       "id": "クライアントID",
-      "lastUpdated": "最終更新"
+      "lastUpdated": "最終更新",
+      "error": "アクティブクライアント取得エラー: {error}"
     }
   },
   "Utils": {

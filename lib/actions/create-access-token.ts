@@ -5,13 +5,15 @@ import { generateAPIKey } from '../api-key/generate-key';
 import { CustomError } from '@/types';
 import { eq, and, not } from 'drizzle-orm';
 import { cacheApiKey } from '../redis/api-key-cache';
+import { setUserActiveClient } from '../redis/api-key-cache';
 
 export async function createAccessToken(
   clientId: string,
+  userId: string,
   description?: string,
   status: AccessToken['status'] = 'active'
 ): Promise<AccessToken> {
-  return await db.transaction(async (tx) => {
+  return await db.transaction(async tx => {
     // 检查客户端是否存在
     const clientExists = await tx
       .select({ id: clients.id })
@@ -40,20 +42,23 @@ export async function createAccessToken(
       throw new CustomError('创建访问令牌失败', 'ACCESS_TOKEN_CREATION_FAILED');
     }
 
-    // 将当前客户端的其他令牌设置为非活动状态
-    await tx
-      .update(access_tokens)
-      .set({ status: 'inactive' })
-      .where(and(eq(access_tokens.client_id, clientId), not(eq(access_tokens.id, newToken.id))));
+    // 并发执行更新操作: 将当前客户端的其他令牌设置为非活动状态 & 更新客户端的 api_key 和 status
+    await Promise.all([
+      tx
+        .update(access_tokens)
+        .set({ status: 'inactive' })
+        .where(and(eq(access_tokens.client_id, clientId), not(eq(access_tokens.id, newToken.id)))),
+      tx
+        .update(clients)
+        .set({ api_key: newToken.token, status: 'active' })
+        .where(eq(clients.id, clientId)),
+    ]);
 
-    // 更新客户端的 api_key 和 status
-    await tx
-      .update(clients)
-      .set({ api_key: newToken.token, status: 'active' })
-      .where(eq(clients.id, clientId));
-
-    // 缓存新的 API key 到 Redis
-    await cacheApiKey(newToken.token, clientId, newToken.status);
+    // 并发执行 Redis 缓存更新
+    await Promise.all([
+      cacheApiKey(newToken.token, clientId, newToken.status),
+      setUserActiveClient(userId, clientId),
+    ]);
 
     return newToken;
   });
