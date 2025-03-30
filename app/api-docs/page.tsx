@@ -5,8 +5,9 @@ export default async function ApiDocsPage() {
   const spec = await getApiDocs();
 
   return (
-    <section className="container mx-auto pt-4 pb-8">
-      <div className="bg-white dark:bg-gray-900 py-2 rounded-lg shadow-md">
+    <section className="container mx-auto pt-8 pb-16">
+      <h1 className="text-2xl font-bold mb-6 px-4">Wolian AI API</h1>
+      <div className="bg-white py-4 px-2 rounded-lg shadow">
         <ReactSwagger spec={spec as Record<string, unknown>} />
       </div>
     </section>
