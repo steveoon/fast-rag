@@ -4,20 +4,20 @@ import { useEffect, useState } from 'react';
 import SwaggerUI from 'swagger-ui-react';
 import 'swagger-ui-react/swagger-ui.css';
 
-interface Props {
-  spec: Record<string, unknown>;
-}
-
-export function ReactSwagger({ spec }: Props) {
+export function ReactSwagger() {
+  const [spec, setSpec] = useState(null);
   const [mounted, setMounted] = useState(false);
 
-  // 确保只在客户端渲染
   useEffect(() => {
     setMounted(true);
+    fetch('/api/swagger')
+      .then(res => res.json())
+      .then(data => setSpec(data))
+      .catch(err => console.error('Failed to load Swagger spec:', err));
   }, []);
 
-  if (!mounted) {
-    return null;
+  if (!mounted || !spec) {
+    return <div className="p-8 text-center">加载 API 文档中...</div>;
   }
 
   return (
