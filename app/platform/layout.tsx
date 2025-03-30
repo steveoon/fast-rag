@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Menu, Users, Key, FileText, Home, Settings, Wrench } from 'lucide-react';
+import { Menu, Users, Key, FileText, Home, Settings, Wrench, Bot } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Suspense } from 'react';
 import Loading from '@/components/loading';
@@ -17,6 +17,7 @@ function Sidebar() {
     { href: '/platform/clients-management', label: t('clientsManagement'), icon: Users },
     { href: '/platform/data-management', label: t('dataManagement'), icon: FileText },
     { href: '/platform/tools-management', label: t('toolsManagement'), icon: Wrench },
+    { href: '/platform/bots-management', label: t('botsManagement'), icon: Bot },
     { href: '/platform/general-settings', label: t('generalSettings'), icon: Settings },
     { href: '/platform/reset-password', label: t('resetPassword'), icon: Key },
   ];

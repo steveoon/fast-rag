@@ -18,6 +18,7 @@ import { z } from 'zod';
 
 export const access_token_status = pgEnum('access_token_status', ['active', 'inactive']);
 export const client_status = pgEnum('client_status', ['disabled', 'active', 'pending']);
+export const chatbot_status = pgEnum('chatbot_status', ['active', 'disabled']);
 export const document_type = pgEnum('document_type', [
   'pdf',
   'ppt',
@@ -205,6 +206,57 @@ export const client_tools = pgTable(
   }
 );
 
+// 聊天机器人表
+export const chat_bots = pgTable(
+  'chat_bots',
+  {
+    id: uuid('id').defaultRandom().primaryKey().notNull(),
+    name: varchar('name', { length: 255 }).notNull(),
+    description: text('description'),
+    client_id: uuid('client_id')
+      .notNull()
+      .references(() => clients.id, { onDelete: 'cascade' }),
+    status: chatbot_status('status').default('disabled').notNull(),
+    url: varchar('url', { length: 1024 }).notNull(),
+    created_at: timestamp('created_at', { mode: 'string' }).defaultNow().notNull(),
+    updated_at: timestamp('updated_at', { mode: 'string' }).defaultNow().notNull(),
+  },
+  table => {
+    return {
+      chat_bots_name_client_unique: unique('chat_bots_name_client_unique').on(
+        table.name,
+        table.client_id
+      ),
+      chat_bots_url_unique: unique('chat_bots_url_unique').on(table.url),
+    };
+  }
+);
+
+// 聊天机器人工具关联表
+export const chat_bot_tools = pgTable(
+  'chat_bot_tools',
+  {
+    id: uuid('id').defaultRandom().primaryKey().notNull(),
+    chat_bot_id: uuid('chat_bot_id')
+      .notNull()
+      .references(() => chat_bots.id, { onDelete: 'cascade' }),
+    client_tool_id: uuid('client_tool_id')
+      .notNull()
+      .references(() => client_tools.id, { onDelete: 'cascade' }),
+    config: jsonb('config'),
+    created_at: timestamp('created_at', { mode: 'string' }).defaultNow().notNull(),
+    updated_at: timestamp('updated_at', { mode: 'string' }).defaultNow().notNull(),
+  },
+  table => {
+    return {
+      chat_bot_tools_bot_tool_unique: unique('chat_bot_tools_bot_tool_unique').on(
+        table.chat_bot_id,
+        table.client_tool_id
+      ),
+    };
+  }
+);
+
 export const clientsSchema = createInsertSchema(clients);
 export const clientsSelectSchema = createSelectSchema(clients);
 export const access_tokensSchema = createInsertSchema(access_tokens);
@@ -241,3 +293,13 @@ export const clientToolsSchema = createInsertSchema(client_tools);
 export const clientToolsSelectSchema = createSelectSchema(client_tools);
 export type ClientTool = z.infer<typeof clientToolsSelectSchema>;
 export type ClientToolInsert = z.infer<typeof clientToolsSchema>;
+
+export const chat_botsSchema = createInsertSchema(chat_bots);
+export const chat_botsSelectSchema = createSelectSchema(chat_bots);
+export type Chatbot = z.infer<typeof chat_botsSelectSchema>;
+export type ChatbotInsert = z.infer<typeof chat_botsSchema>;
+
+export const chat_bot_toolsSchema = createInsertSchema(chat_bot_tools);
+export const chat_bot_toolsSelectSchema = createSelectSchema(chat_bot_tools);
+export type ChatBotTool = z.infer<typeof chat_bot_toolsSelectSchema>;
+export type ChatBotToolInsert = z.infer<typeof chat_bot_toolsSchema>;

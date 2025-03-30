@@ -12,8 +12,15 @@ interface ConfigurableCardProps {
     onClick: () => void;
     icon: LucideIcon;
     loading?: boolean;
+    variant?: 'success' | 'danger';
   };
   secondaryAction?: {
+    label: string;
+    onClick: () => void;
+    icon: LucideIcon;
+    loading?: boolean;
+  };
+  dangerAction?: {
     label: string;
     onClick: () => void;
     icon: LucideIcon;
@@ -27,7 +34,15 @@ export function ConfigurableCard({
   content,
   primaryAction,
   secondaryAction,
+  dangerAction,
 }: ConfigurableCardProps) {
+  const getPrimaryButtonClass = () => {
+    if (primaryAction.variant === 'danger') {
+      return 'flex-1 bg-red-600 hover:bg-red-700 text-white';
+    }
+    return 'flex-1 bg-green-600 hover:bg-green-700 text-white';
+  };
+
   return (
     <Card className="border-0 border-t-2 border-t-pink-400 dark:border-t-pink-600 shadow-lg hover:shadow-xl transition-shadow duration-300 dark:bg-gray-900">
       <CardHeader className="pb-4">
@@ -45,7 +60,7 @@ export function ConfigurableCard({
         <div className="flex space-x-2">
           <Button
             onClick={primaryAction.onClick}
-            className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+            className={getPrimaryButtonClass()}
             disabled={primaryAction.loading}
           >
             <primaryAction.icon className="mr-2 h-4 w-4" />
@@ -64,6 +79,20 @@ export function ConfigurableCard({
                 <secondaryAction.icon className="mr-2 h-4 w-4" />
               )}
               {secondaryAction.label}
+            </Button>
+          )}
+          {dangerAction && (
+            <Button
+              onClick={dangerAction.onClick}
+              variant="destructive"
+              className="flex-shrink-0"
+              disabled={dangerAction.loading}
+            >
+              {dangerAction.loading ? (
+                <div className="animate-spin h-4 w-4 mr-2">🔄</div>
+              ) : (
+                <dangerAction.icon className="h-4 w-4" />
+              )}
             </Button>
           )}
         </div>
