@@ -10,6 +10,79 @@ const applyToolsSchema = z.object({
   toolIds: z.array(z.string().min(1)).min(1, '至少需要选择一个工具'),
 });
 
+/**
+ * @swagger
+ * /api/v1/client-tools/apply-tool:
+ *   post:
+ *     summary: 为客户端应用工具
+ *     description: 为客户端应用指定的工具列表，使其可用
+ *     tags:
+ *       - 工具
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - toolIds
+ *             properties:
+ *               toolIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: 要应用的工具ID列表
+ *                 minItems: 1
+ *           example:
+ *             toolIds: ["knowledgeBase", "webSearch", "weather"]
+ *     responses:
+ *       201:
+ *         description: 工具应用成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   description: 是否成功
+ *                 appliedTools:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         format: uuid
+ *                         description: 客户端工具关联ID
+ *                       tool_id:
+ *                         type: string
+ *                         description: 工具ID
+ *                       applied_at:
+ *                         type: string
+ *                         format: date-time
+ *                         description: 应用时间
+ *       400:
+ *         description: 请求错误
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: 未授权，API Key 无效
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: 服务器错误
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 export async function POST(request: Request) {
   try {
     const apiKey = extractApiKey(request);

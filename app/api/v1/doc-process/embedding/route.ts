@@ -6,6 +6,96 @@ import { handleError, logger, extractApiKey, validateClient } from '@/lib/utils'
 import { loadFile, readFile, embedding } from '@/lib/actions';
 import { EmbedData, CustomError } from '@/types';
 
+/**
+ * @swagger
+ * /api/v1/doc-process/embedding:
+ *   post:
+ *     summary: 生成文档向量嵌入
+ *     description: 对指定文档进行向量嵌入处理，用于后续的向量检索
+ *     tags:
+ *       - 文档
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - files
+ *             properties:
+ *               files:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - fileId
+ *                     - versionId
+ *                   properties:
+ *                     fileId:
+ *                       type: string
+ *                       description: 文档ID
+ *                     versionId:
+ *                       type: string
+ *                       description: 文档版本ID
+ *                 description: 要处理的文件列表
+ *               force:
+ *                 type: boolean
+ *                 description: 是否强制重新生成向量，即使文件已经处理过
+ *                 default: false
+ *           example:
+ *             files: [
+ *               {
+ *                 fileId: "doc_123",
+ *                 versionId: "ver_456"
+ *               }
+ *             ]
+ *             force: false
+ *     responses:
+ *       201:
+ *         description: 向量嵌入处理成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               oneOf:
+ *                 - type: object
+ *                   properties:
+ *                     files:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           fileId:
+ *                             type: string
+ *                           versionId:
+ *                             type: string
+ *                     force:
+ *                       type: boolean
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       type: string
+ *                       example: '所选文件已经做过向量化处理'
+ *       400:
+ *         description: 请求错误
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: 未授权，API Key 无效
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: 服务器错误
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 export async function POST(request: Request) {
   try {
     const body: {
@@ -42,7 +132,7 @@ export async function POST(request: Request) {
       // 读取文档内容并chunk
       const chunkRes = await readFile(file);
 
-      const chunks = chunkRes.chunks.map((chunk) => chunk.content);
+      const chunks = chunkRes.chunks.map(chunk => chunk.content);
       // 向量化
       const embed = await embedding(chunks);
       if (chunks.length !== embed.length) return [];

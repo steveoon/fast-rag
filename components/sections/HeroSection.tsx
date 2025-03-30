@@ -29,11 +29,7 @@ export function HeroSection() {
               className="border-indigo-300 text-indigo-700 hover:bg-indigo-50 dark:border-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-950"
               asChild
             >
-              <Link
-                href="https://verbena-animantarx-4e7.notion.site/Help-Center-Knowledge-Base-1c1364213db48065be8bea173787f4c7?pvs=4"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <Link href="/api-docs">
                 {t('hero.docsButton')}
                 <FileText className="ml-2 h-4 w-4" />
               </Link>

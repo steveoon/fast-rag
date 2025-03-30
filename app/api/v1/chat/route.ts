@@ -34,6 +34,55 @@ const chatRequestSchema = z.object({
   maxSteps: z.number().optional().default(5),
 });
 
+/**
+ * @swagger
+ * /api/v1/chat:
+ *   post:
+ *     summary: 聊天接口
+ *     description: 与AI助手进行对话，支持知识库检索和多种工具
+ *     tags:
+ *       - 对话
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ChatRequest'
+ *     responses:
+ *       200:
+ *         description: 成功返回一个流式响应
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 type:
+ *                   type: string
+ *                   description: 响应类型
+ *                 text:
+ *                   type: string
+ *                   description: 返回内容
+ *       400:
+ *         description: 请求参数错误
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: 未授权访问
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: 服务器内部错误
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *     security:
+ *       - BearerAuth: []
+ */
 export async function POST(request: Request) {
   try {
     const apiKey = extractApiKey(request);
