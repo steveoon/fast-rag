@@ -33,6 +33,8 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const origin = request.headers.get('origin') ?? '';
 
+  request.headers.set('x-pathname', pathname);
+
   // 处理预检请求
   if (request.method === 'OPTIONS') {
     return addCorsHeaders(new NextResponse(null, { status: 200 }), origin);

@@ -7,6 +7,7 @@ import './globals.css';
 import { NavBar } from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import { Toaster } from '@/components/ui/toaster';
+import { headers } from 'next/headers';
 
 const inter = Inter({ subsets: ['latin'] });
 const defaultUrl = process.env.VERCEL_URL
@@ -29,6 +30,9 @@ export default async function RootLayout({
 }>) {
   const locale = await getLocale();
   const messages = await getMessages();
+  const headersList = headers();
+  const pathname = headersList.get('x-pathname') || '';
+  const isChatBotPage = pathname.startsWith('/chat-bot/');
 
   return (
     <html suppressHydrationWarning lang={locale}>
@@ -36,9 +40,9 @@ export default async function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <NextIntlClientProvider locale={locale} messages={messages}>
             <div className="min-h-screen flex flex-col">
-              <NavBar />
-              <main className="flex-grow pt-16">{children}</main>
-              <Footer />
+              {!isChatBotPage && <NavBar />}
+              <main className={`flex-grow ${!isChatBotPage ? 'pt-16' : ''}`}>{children}</main>
+              {!isChatBotPage && <Footer />}
             </div>
           </NextIntlClientProvider>
         </ThemeProvider>
