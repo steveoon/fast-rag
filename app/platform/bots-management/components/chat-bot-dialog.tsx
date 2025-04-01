@@ -105,9 +105,9 @@ export default function ChatbotDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{editChatbot ? t('editChatbot') : t('createChatbot')}</DialogTitle>
+          <DialogTitle>{editChatbot ? t('editAgent') : t('createAgent')}</DialogTitle>
           <DialogDescription>
-            {t('chatbotFormDescription')}
+            {t('agentFormDescription')}
             {showNoActiveClientWarning && (
               <div className="mt-2 p-2 bg-yellow-100 border border-yellow-300 rounded-md text-yellow-800">
                 {t('noActiveClientWarning')}
@@ -125,7 +125,7 @@ export default function ChatbotDialog({
               value={name}
               onChange={e => setName(e.target.value)}
               className="col-span-3"
-              placeholder={t('chatbotNamePlaceholder')}
+              placeholder={t('agentNamePlaceholder')}
               disabled={showNoActiveClientWarning}
             />
           </div>
@@ -138,7 +138,7 @@ export default function ChatbotDialog({
               value={description}
               onChange={e => setDescription(e.target.value)}
               className="col-span-3"
-              placeholder={t('chatbotDescriptionPlaceholder')}
+              placeholder={t('agentDescriptionPlaceholder')}
               disabled={showNoActiveClientWarning}
             />
           </div>

@@ -1,10 +1,11 @@
 import { fontFamily } from 'tailwindcss/defaultTheme';
 import tailwindcssAnimate from 'tailwindcss-animate';
+import tailwindTypography from '@tailwindcss/typography';
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ['class'],
-  content: ['app/**/*.{ts,tsx}', 'components/**/*.{ts,tsx}'],
+  content: ['./pages/**/*.{ts,tsx}', './app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'],
   theme: {
     container: {
       center: true,
@@ -135,7 +136,112 @@ module.exports = {
         'float-medium': 'float-medium 2s ease-in-out infinite',
         'float-fast': 'float-fast 1.5s ease-in-out infinite',
       },
+      typography: {
+        DEFAULT: {
+          css: {
+            color: 'hsl(var(--foreground))',
+            a: {
+              color: 'hsl(var(--primary))',
+              '&:hover': {
+                color: 'hsl(var(--primary) / 0.8)',
+              },
+            },
+            'h1,h2,h3,h4,h5,h6': {
+              color: 'hsl(var(--foreground))',
+              fontWeight: '600',
+            },
+            code: {
+              color: 'hsl(var(--foreground))',
+              backgroundColor: 'hsl(var(--muted) / 0.4)',
+              borderRadius: '0.25rem',
+              padding: '0.15rem 0.3rem',
+            },
+            pre: {
+              backgroundColor: 'hsl(var(--card))',
+              padding: 0,
+              overflow: 'auto',
+            },
+            blockquote: {
+              color: 'hsl(var(--foreground) / 0.8)',
+              borderLeftColor: 'hsl(var(--primary) / 0.2)',
+            },
+            hr: {
+              borderColor: 'hsl(var(--border))',
+            },
+            strong: {
+              color: 'hsl(var(--foreground))',
+              fontWeight: '600',
+            },
+            li: {
+              marginTop: '0.25em',
+              marginBottom: '0.25em',
+            },
+            ul: {
+              listStyleType: 'disc',
+            },
+            ol: {
+              listStyleType: 'decimal',
+            },
+            table: {
+              width: '100%',
+              borderCollapse: 'collapse',
+              overflow: 'hidden',
+              margin: '1em 0',
+            },
+            thead: {
+              backgroundColor: 'hsl(var(--muted) / 0.5)',
+              borderBottom: '2px solid hsl(var(--border))',
+            },
+            'thead th': {
+              verticalAlign: 'bottom',
+              fontWeight: '600',
+              color: 'hsl(var(--foreground))',
+              textAlign: 'left',
+              padding: '0.75rem',
+            },
+            'tbody tr': {
+              borderBottom: '1px solid hsl(var(--border))',
+              '&:last-child': {
+                borderBottom: 'none',
+              },
+            },
+            'tbody td': {
+              padding: '0.75rem',
+              verticalAlign: 'top',
+            },
+            'tbody tr:nth-child(even)': {
+              backgroundColor: 'hsl(var(--muted) / 0.2)',
+            },
+          },
+        },
+        dark: {
+          css: {
+            color: 'hsl(var(--foreground))',
+            a: {
+              color: 'hsl(var(--primary))',
+            },
+            'h1,h2,h3,h4,h5,h6': {
+              color: 'hsl(var(--foreground))',
+            },
+            code: {
+              color: 'hsl(var(--foreground))',
+              backgroundColor: 'hsl(var(--muted) / 0.4)',
+            },
+            blockquote: {
+              color: 'hsl(var(--foreground) / 0.8)',
+              borderLeftColor: 'hsl(var(--primary) / 0.2)',
+            },
+            thead: {
+              backgroundColor: 'hsl(var(--muted) / 0.8)',
+              borderBottom: '2px solid hsl(var(--border))',
+            },
+            'tbody tr:nth-child(even)': {
+              backgroundColor: 'hsl(var(--muted) / 0.3)',
+            },
+          },
+        },
+      },
     },
   },
-  plugins: [tailwindcssAnimate],
+  plugins: [tailwindcssAnimate, tailwindTypography],
 };

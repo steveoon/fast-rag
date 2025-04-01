@@ -209,7 +209,8 @@
       "dataManagement": "データ管理",
       "toolsManagement": "ツール管理",
       "generalSettings": "一般設定",
-      "resetPassword": "パスワードリセット"
+      "resetPassword": "パスワードリセット",
+      "botsManagement": "Agents管理"
     },
     "Home": {
       "title": "はじめに",
@@ -399,8 +400,8 @@
       "error": "アクティブクライアント取得エラー: {error}"
     },
     "BotsManagement": {
-      "title": "ボット管理",
-      "subtitle": "チャットボットの作成と管理",
+      "title": "エージェント管理",
+      "subtitle": "エージェントの作成と管理",
       "create": "作成",
       "edit": "編集",
       "delete": "削除",
@@ -415,29 +416,29 @@
       "confirmDelete": "削除の確認",
       "deleteConfirmation": "ボット「{name}」を削除してもよろしいですか？この操作は取り消せません。",
       "cancel": "キャンセル",
-      "totalChatBots": "合計 {count} 個のボット",
-      "noChatBots": "チャットボットがありません。「作成」ボタンをクリックして追加してください",
+      "totalChatBots": "合計 {count} 個のエージェント",
+      "noChatBots": "エージェントがありません。「作成」ボタンをクリックして追加してください",
       "created": "作成完了",
       "updated": "更新完了",
       "deleted": "削除完了",
       "statusUpdated": "ステータス更新",
       "copied": "コピー完了",
       "error": "操作失敗",
-      "chatbotCreatedDescription": "ボット {name} が作成されました",
-      "chatbotUpdatedDescription": "ボット {name} が更新されました",
-      "chatbotDeletedDescription": "ボット {name} が削除されました",
-      "chatbotEnabledDescription": "ボット {name} が有効化されました",
-      "chatbotDisabledDescription": "ボット {name} が無効化されました",
-      "urlCopiedDescription": "ボットのアクセスURLがクリップボードにコピーされました",
-      "createChatbot": "ボットを作成",
-      "editChatbot": "ボットを編集",
-      "chatbotFormDescription": "以下の情報を入力して新しいチャットボットを作成してください",
+      "agentCreatedDescription": "エージェント {name} が作成されました",
+      "agentUpdatedDescription": "エージェント {name} が更新されました",
+      "agentDeletedDescription": "エージェント {name} が削除されました",
+      "agentEnabledDescription": "エージェント {name} が有効化されました",
+      "agentDisabledDescription": "エージェント {name} が無効化されました",
+      "urlCopiedDescription": "エージェントのアクセスURLがクリップボードにコピーされました",
+      "createAgent": "エージェントを作成",
+      "editAgent": "エージェントを編集",
+      "agentFormDescription": "以下の情報を入力して新しいエージェントを作成してください",
       "name": "名前",
       "description": "説明",
       "client": "クライアント",
       "tools": "ツール",
-      "chatbotNamePlaceholder": "ボット名を入力",
-      "chatbotDescriptionPlaceholder": "ボットの説明を入力（任意）",
+      "agentNamePlaceholder": "エージェント名を入力",
+      "agentDescriptionPlaceholder": "エージェントの説明を入力（任意）",
       "selectClient": "クライアントを選択",
       "clients": "クライアント",
       "selectTool": "ツールを選択",
@@ -452,7 +453,7 @@
       "selectedTools": "選択済みツール",
       "refresh": "更新",
       "refreshSuccess": "更新完了",
-      "refreshSuccessDescription": "ボットデータが更新されました"
+      "refreshSuccessDescription": "エージェントデータが更新されました"
     }
   },
   "Utils": {
@@ -463,6 +464,42 @@
     },
     "Error": {
       "unknown": "未知のエラー"
+    }
+  },
+  "ChatBot": {
+    "notFound": "ボットIDが見つかりません",
+    "notActive": "このチャットボットは現在有効になっていません",
+    "adminDisabled": "管理者がこのチャットアシスタントへのアクセスを一時的に無効にしています。",
+    "tryLater": "後でもう一度お試しいただくか、管理者に連絡してこの機能を有効にしてください。",
+    "noApiKey": "APIキーが見つかりません、ボット設定を確認してください",
+    "noTools": "このボットには使用可能なツールがありません、設定でツールを構成してください",
+    "error": "チャットボットの読み込み中にエラーが発生しました、後でもう一度お試しください",
+    "chat": {
+      "newConversation": "新しい会話を始めましょう！",
+      "inputPlaceholder": "質問を入力してください...",
+      "sendMessage": "メッセージを送信",
+      "attachFile": "ファイルを添付",
+      "voiceInput": "音声入力",
+      "serviceUnavailable": "チャットサービスは一時的に利用できません、後でもう一度お試しください",
+      "fileUploadDeveloping": "ファイルアップロード機能は開発中です...",
+      "voiceInputDeveloping": "音声入力機能は開発中です..."
+    },
+    "toolStatus": {
+      "processStarting": "起動中...",
+      "processing": "処理中...",
+      "toolCalling": "呼び出し中: {tool}",
+      "toolCompleted": "ツール呼び出し完了",
+      "processingComplete": "処理完了",
+      "preparing": "準備中...",
+      "usingTool": "ツールを使用中:",
+      "tools": {
+        "queryKnowledgeBase": "知識ベース",
+        "smartWikidataQuery": "スマート百科事典",
+        "getWeather": "天気情報",
+        "webSearch": "ウェブ検索",
+        "calculator": "計算機",
+        "textCompletion": "テキスト生成"
+      }
     }
   }
 }

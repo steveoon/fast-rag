@@ -209,7 +209,8 @@
       "dataManagement": "Data Management",
       "toolsManagement": "Tools Management",
       "generalSettings": "General Settings",
-      "resetPassword": "Reset Password"
+      "resetPassword": "Reset Password",
+      "botsManagement": "Agents Management"
     },
     "Home": {
       "title": "Getting Started",
@@ -402,8 +403,8 @@
       "error": "Active Client fetch error: {error}"
     },
     "BotsManagement": {
-      "title": "Chatbot Management",
-      "subtitle": "Create and manage chatbots",
+      "title": "Agents Management",
+      "subtitle": "Create and manage agents",
       "create": "Create",
       "edit": "Edit",
       "delete": "Delete",
@@ -416,31 +417,31 @@
       "disabled": "Disabled",
       "noDescription": "No description",
       "confirmDelete": "Confirm Delete",
-      "deleteConfirmation": "Are you sure you want to delete the chatbot '{name}'? This action cannot be undone.",
+      "deleteConfirmation": "Are you sure you want to delete the agent '{name}'? This action cannot be undone.",
       "cancel": "Cancel",
-      "totalChatBots": "{count} chatbots in total",
-      "noChatBots": "No chatbots yet. Click \"Create\" to add one.",
+      "totalChatBots": "{count} agents in total",
+      "noChatBots": "No agents yet. Click \"Create\" to add one.",
       "created": "Created Successfully",
       "updated": "Updated Successfully",
       "deleted": "Deleted Successfully",
       "statusUpdated": "Status Updated",
       "copied": "Copied Successfully",
       "error": "Operation Failed",
-      "chatbotCreatedDescription": "Chatbot {name} created successfully",
-      "chatbotUpdatedDescription": "Chatbot {name} updated successfully",
-      "chatbotDeletedDescription": "Chatbot {name} has been deleted",
-      "chatbotEnabledDescription": "Chatbot {name} has been enabled",
-      "chatbotDisabledDescription": "Chatbot {name} has been disabled",
-      "urlCopiedDescription": "Chatbot access URL has been copied to clipboard",
-      "createChatbot": "Create Chatbot",
-      "editChatbot": "Edit Chatbot",
-      "chatbotFormDescription": "Fill in the information to create a new chatbot",
+      "agentCreatedDescription": "Agent {name} created successfully",
+      "agentUpdatedDescription": "Agent {name} updated successfully",
+      "agentDeletedDescription": "Agent {name} has been deleted",
+      "agentEnabledDescription": "Agent {name} has been enabled",
+      "agentDisabledDescription": "Agent {name} has been disabled",
+      "urlCopiedDescription": "Agent access URL has been copied to clipboard",
+      "createAgent": "Create Agent",
+      "editAgent": "Edit Agent",
+      "agentFormDescription": "Fill in the information to create a new agent",
       "name": "Name",
       "description": "Description",
       "client": "Client",
       "tools": "Tools",
-      "chatbotNamePlaceholder": "Enter chatbot name",
-      "chatbotDescriptionPlaceholder": "Enter chatbot description (optional)",
+      "agentNamePlaceholder": "Enter agent name",
+      "agentDescriptionPlaceholder": "Enter agent description (optional)",
       "selectClient": "Select client",
       "clients": "Clients",
       "selectTool": "Select tools",
@@ -455,7 +456,7 @@
       "selectedTools": "Selected Tools",
       "refresh": "Refresh",
       "refreshSuccess": "Refresh Successful",
-      "refreshSuccessDescription": "Bot data has been updated"
+      "refreshSuccessDescription": "Agent data has been updated"
     }
   },
   "Utils": {
@@ -466,6 +467,42 @@
     },
     "Error": {
       "unknown": "Unknown Error"
+    }
+  },
+  "ChatBot": {
+    "notFound": "Bot ID not found",
+    "notActive": "This chat bot is currently not enabled",
+    "adminDisabled": "The administrator has temporarily disabled access to this chat assistant.",
+    "tryLater": "Please try again later or contact the administrator to enable this feature.",
+    "noApiKey": "API key not found, please check the bot configuration",
+    "noTools": "This bot has no available tools, please configure tools in settings",
+    "error": "Error loading chat bot, please try again later",
+    "chat": {
+      "newConversation": "Start a new conversation!",
+      "inputPlaceholder": "Type your question...",
+      "sendMessage": "Send message",
+      "attachFile": "Attach file",
+      "voiceInput": "Voice input",
+      "serviceUnavailable": "Chat service is temporarily unavailable, please try again later",
+      "fileUploadDeveloping": "File upload feature is under development...",
+      "voiceInputDeveloping": "Voice input feature is under development..."
+    },
+    "toolStatus": {
+      "processStarting": "Starting...",
+      "processing": "Processing...",
+      "toolCalling": "Calling: {tool}",
+      "toolCompleted": "Tool call completed",
+      "processingComplete": "Processing completed",
+      "preparing": "Preparing...",
+      "usingTool": "Using tool:",
+      "tools": {
+        "queryKnowledgeBase": "Knowledge Base",
+        "smartWikidataQuery": "Smart Wiki",
+        "getWeather": "Weather Info",
+        "webSearch": "Web Search",
+        "calculator": "Calculator",
+        "textCompletion": "Text Generator"
+      }
     }
   }
 }

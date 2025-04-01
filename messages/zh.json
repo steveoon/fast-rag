@@ -210,7 +210,7 @@
       "toolsManagement": "工具管理",
       "generalSettings": "通用设置",
       "resetPassword": "重置密码",
-      "botsManagement": "机器人管理"
+      "botsManagement": "智能体管理"
     },
     "Home": {
       "title": "开始使用",
@@ -403,8 +403,8 @@
       "error": "获取活跃客户端失败: {error}"
     },
     "BotsManagement": {
-      "title": "机器人管理",
-      "subtitle": "创建和管理聊天机器人",
+      "title": "智能体管理",
+      "subtitle": "创建和管理智能体",
       "create": "创建",
       "edit": "编辑",
       "delete": "删除",
@@ -417,31 +417,31 @@
       "disabled": "已停用",
       "noDescription": "暂无描述",
       "confirmDelete": "确认删除",
-      "deleteConfirmation": "确定要删除机器人'{name}'吗？此操作不可撤销。",
+      "deleteConfirmation": "确定要删除智能体'{name}'吗？此操作不可撤销。",
       "cancel": "取消",
-      "totalChatBots": "共 {count} 个机器人",
-      "noChatBots": "暂无聊天机器人，点击\"创建\"按钮添加",
+      "totalChatBots": "共 {count} 个智能体",
+      "noChatBots": "暂无智能体，点击\"创建\"按钮添加",
       "created": "创建成功",
       "updated": "更新成功",
       "deleted": "删除成功",
       "statusUpdated": "状态更新",
       "copied": "复制成功",
       "error": "操作失败",
-      "chatbotCreatedDescription": "机器人 {name} 创建成功",
-      "chatbotUpdatedDescription": "机器人 {name} 更新成功",
-      "chatbotDeletedDescription": "机器人 {name} 已删除",
-      "chatbotEnabledDescription": "机器人 {name} 已启用",
-      "chatbotDisabledDescription": "机器人 {name} 已停用",
-      "urlCopiedDescription": "机器人访问链接已复制到剪贴板",
-      "createChatbot": "创建机器人",
-      "editChatbot": "编辑机器人",
-      "chatbotFormDescription": "填写以下信息创建新的聊天机器人",
+      "agentCreatedDescription": "智能体 {name} 创建成功",
+      "agentUpdatedDescription": "智能体 {name} 更新成功",
+      "agentDeletedDescription": "智能体 {name} 已删除",
+      "agentEnabledDescription": "智能体 {name} 已启用",
+      "agentDisabledDescription": "智能体 {name} 已停用",
+      "urlCopiedDescription": "智能体访问链接已复制到剪贴板",
+      "createAgent": "创建智能体",
+      "editAgent": "编辑智能体",
+      "agentFormDescription": "填写以下信息创建新的智能体",
       "name": "名称",
       "description": "描述",
       "client": "客户端",
       "tools": "工具",
-      "chatbotNamePlaceholder": "输入机器人名称",
-      "chatbotDescriptionPlaceholder": "输入机器人描述（可选）",
+      "agentNamePlaceholder": "输入智能体名称",
+      "agentDescriptionPlaceholder": "输入智能体描述（可选）",
       "selectClient": "选择客户端",
       "clients": "客户端",
       "selectTool": "选择工具",
@@ -456,7 +456,7 @@
       "selectedTools": "已选择工具",
       "refresh": "刷新",
       "refreshSuccess": "刷新成功",
-      "refreshSuccessDescription": "机器人数据已更新"
+      "refreshSuccessDescription": "智能体数据已更新"
     }
   },
   "Utils": {
@@ -467,6 +467,42 @@
     },
     "Error": {
       "unknown": "未知错误"
+    }
+  },
+  "ChatBot": {
+    "notFound": "找不到机器人ID",
+    "notActive": "该聊天机器人当前未启用",
+    "adminDisabled": "管理员暂时关闭了此聊天助手的访问权限。",
+    "tryLater": "请稍后再试或联系管理员开启此功能。",
+    "noApiKey": "找不到相关API密钥，请检查机器人配置",
+    "noTools": "此机器人没有可用工具，请在设置中配置工具",
+    "error": "加载聊天机器人时出错，请稍后再试",
+    "chat": {
+      "newConversation": "开始一段新的对话吧！",
+      "inputPlaceholder": "输入您的问题...",
+      "sendMessage": "发送消息",
+      "attachFile": "附加文件",
+      "voiceInput": "语音输入",
+      "serviceUnavailable": "聊天服务暂时不可用，请稍后再试",
+      "fileUploadDeveloping": "文件上传功能正在开发中...",
+      "voiceInputDeveloping": "语音输入功能正在开发中..."
+    },
+    "toolStatus": {
+      "processStarting": "正在启动...",
+      "processing": "处理中...",
+      "toolCalling": "正在调用: {tool}",
+      "toolCompleted": "工具调用完成",
+      "processingComplete": "处理完成",
+      "preparing": "准备中...",
+      "usingTool": "正在使用工具:",
+      "tools": {
+        "queryKnowledgeBase": "知识库",
+        "smartWikidataQuery": "智能百科",
+        "getWeather": "天气查询",
+        "webSearch": "网络搜索",
+        "calculator": "计算器",
+        "textCompletion": "文本生成"
+      }
     }
   }
 }

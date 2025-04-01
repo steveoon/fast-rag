@@ -91,3 +91,19 @@ async function enrichChatBotsWithTools(chatBots: Chatbot[]) {
 
   return result;
 }
+
+/**
+ * 获取单个聊天机器人信息
+ */
+export async function getChatBotById(botId: string) {
+  // 获取聊天机器人信息
+  const chatbot = await db.select().from(chat_bots).where(eq(chat_bots.id, botId)).limit(1);
+
+  if (chatbot.length === 0) {
+    return null;
+  }
+
+  // 为机器人添加工具配置信息
+  const result = await enrichChatBotsWithTools([chatbot[0]]);
+  return result[0];
+}

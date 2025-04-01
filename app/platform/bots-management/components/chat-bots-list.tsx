@@ -135,7 +135,7 @@ export default function ChatBotsList({
 
       toast({
         title: t('created'),
-        description: t('chatbotCreatedDescription', { name: result.chatbot.name }),
+        description: t('agentCreatedDescription', { name: result.chatbot.name }),
       });
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -178,7 +178,7 @@ export default function ChatBotsList({
 
       toast({
         title: t('updated'),
-        description: t('chatbotUpdatedDescription', { name: result.chatbot.name }),
+        description: t('agentUpdatedDescription', { name: result.chatbot.name }),
       });
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -217,8 +217,8 @@ export default function ChatBotsList({
         title: t('statusUpdated'),
         description:
           newStatus === 'active'
-            ? t('chatbotEnabledDescription', { name: chatbot.name })
-            : t('chatbotDisabledDescription', { name: chatbot.name }),
+            ? t('agentEnabledDescription', { name: chatbot.name })
+            : t('agentDisabledDescription', { name: chatbot.name }),
       });
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -249,7 +249,7 @@ export default function ChatBotsList({
 
       toast({
         title: t('deleted'),
-        description: t('chatbotDeletedDescription', { name: chatbotToDelete.name }),
+        description: t('agentDeletedDescription', { name: chatbotToDelete.name }),
       });
     } catch (error: unknown) {
       if (error instanceof Error) {

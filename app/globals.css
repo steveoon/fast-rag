@@ -89,5 +89,166 @@
   content: '•';
   position: absolute;
   left: -1em;
-  color: #3b82f6; /* 蓝色，你可以根据需要更改这个颜色 */
+  color: #3b82f6;
+}
+
+.custom-li::marker {
+  @apply text-blue-600;
+  @apply font-normal;
+}
+
+.text-slate-override .prose,
+.text-slate-override .prose a,
+.text-slate-override .prose code {
+  @apply text-slate-50 !important;
+}
+
+.gradient-border {
+  position: relative;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  padding: 3px;
+  background: linear-gradient(to top left, #00c6ff, #0072ff);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: -1;
+}
+
+@keyframes loading {
+  0% {
+    left: 0;
+    opacity: 0;
+  }
+  35% {
+    left: 41%;
+    transform: rotate(0deg);
+    opacity: 1;
+  }
+  65% {
+    left: 59%;
+    transform: rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    left: 100%;
+    transform: rotate(-180deg);
+    opacity: 0;
+  }
+}
+
+/* KaTeX 数学公式样式 */
+.katex {
+  font:
+    normal 1.1em KaTeX_Main,
+    Times New Roman,
+    serif;
+  line-height: 1.2;
+  text-indent: 0;
+  text-rendering: auto;
+}
+
+.katex-display {
+  display: block;
+  margin: 1em 0;
+  text-align: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 1em 0;
+}
+
+.math-inline {
+  padding: 0 0.2em;
+  font-size: 1.05em;
+}
+
+.katex .mfrac {
+  margin: 0 0.2em;
+}
+
+.katex .sqrt {
+  margin: 0 0.2em;
+  padding-top: 0.1em;
+}
+
+.katex .mop {
+  margin: 0 0.1em;
+}
+
+.katex .msupsub {
+  text-align: left;
+}
+
+.katex .delimsizing {
+  vertical-align: middle;
+}
+
+/* 特殊符号样式 */
+.katex .mord {
+  margin: 0 0.1em;
+}
+
+.katex .mbin {
+  margin: 0 0.22em;
+}
+
+.katex .mrel {
+  margin: 0 0.27em;
+}
+
+.katex .mopen,
+.katex .mclose {
+  margin: 0 0.05em;
+}
+
+/* 分数样式 */
+.katex .frac-line {
+  border-bottom-width: 0.04em;
+}
+
+/* 大型运算符样式 */
+.katex .mop {
+  margin-top: 0.1em;
+}
+
+/* 上下标样式 */
+.katex .vlist-t {
+  border-collapse: collapse;
+}
+
+/* cases 环境样式 */
+.katex .cases-l {
+  text-align: left;
+}
+
+.katex .cases-r {
+  text-align: right;
+}
+
+/* 箭头样式 */
+.katex .arrow-rightarrow {
+  position: relative;
+  margin: 0 0.1em;
+}
+
+/* 括号样式 */
+.katex .delimsizing.size1 {
+  font-family: KaTeX_Size1;
+}
+
+.katex .delimsizing.size2 {
+  font-family: KaTeX_Size2;
 }

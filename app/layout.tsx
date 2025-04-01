@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 import { ThemeProvider } from 'next-themes';
 import './globals.css';
+import 'katex/dist/katex.min.css';
 import { NavBar } from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import { Toaster } from '@/components/ui/toaster';
