@@ -5,7 +5,7 @@ const withNextIntl = createNextIntlPlugin();
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    serverComponentsExternalPackages: ['pino'],
+    serverComponentsExternalPackages: ['pino', 'swagger-ui-react'],
   },
   output: 'standalone',
   webpack: (config, { isServer }) => {

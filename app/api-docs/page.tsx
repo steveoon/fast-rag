@@ -1,3 +1,5 @@
+'use client';
+
 import { ReactSwagger } from './react-swagger';
 
 export default function ApiDocsPage() {
