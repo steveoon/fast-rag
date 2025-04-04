@@ -113,6 +113,22 @@ Performance Optimization(Next.js Features)
 - Use Server Actions with proper error handling and validation for form submissions.
 - Apply the new prefetching strategies to improve navigation performance.
 
+Database Access (Next.js 15 + Drizzle)
+
+- Next.js 15 enforces strict client-server code separation:
+  - Node.js core modules (fs, net, tls) are only available on the server
+  - Database modules like Drizzle with PostgreSQL rely on these Node.js modules
+- Follow these best practices for database access:
+  - Mark database connection files with `'use server'` directive
+  - Create dedicated Server Actions for all database operations
+  - Call these Server Actions from Client Components instead of importing database modules directly
+  - Use server-side data fetching whenever possible with React Server Components
+- When using Drizzle ORM:
+  - Define schema and database connections in server-only files
+  - Export typed Server Actions that handle database queries
+  - Apply proper error handling and input validation in Server Actions before database operations
+  - Consider using Zod to validate inputs before they reach database queries
+
 Forms and Validation
 
 - Use controlled components for form inputs.

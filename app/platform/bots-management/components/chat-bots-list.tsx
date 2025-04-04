@@ -418,7 +418,7 @@ export default function ChatBotsList({
           <AlertDialogHeader>
             <AlertDialogTitle>{t('confirmDelete')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('deleteConfirmation', { name: chatbotToDelete?.name })}
+              {t('deleteConfirmation', { name: chatbotToDelete?.name || '' })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
