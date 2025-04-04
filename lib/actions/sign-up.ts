@@ -6,7 +6,10 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getTranslation } from '@/lib/utils';
 
-export const signUpAction = async (formData: FormData) => {
+// 可能需要在项目中其他地方使用的返回类型
+export type SignUpResult = { error: string } | void;
+
+export const signUpAction = async (formData: FormData): Promise<void> => {
   const email = formData.get('email')?.toString();
   const password = formData.get('password')?.toString();
   const supabase = await createClient();
@@ -14,7 +17,12 @@ export const signUpAction = async (formData: FormData) => {
   const locale = (await headers()).get('Accept-Language')?.split(',')[0].split('-')[0] || 'en';
 
   if (!email || !password) {
-    return { error: getTranslation(locale, 'Auth.SignUpPage.emailAndPasswordRequired') };
+    encodedRedirect(
+      'error',
+      '/sign-up',
+      getTranslation(locale, 'Auth.SignUpPage.emailAndPasswordRequired')
+    );
+    return;
   }
 
   const { data, error } = await supabase.auth.signUp({
@@ -27,23 +35,21 @@ export const signUpAction = async (formData: FormData) => {
 
   if (error) {
     console.error(error.code + ' ' + error.message);
-    return encodedRedirect('error', '/sign-up', error.message);
+    encodedRedirect('error', '/sign-up', error.message);
+    return;
   }
 
   // 检查邮箱是否已注册
   if (data.user && data.user.identities && data.user.identities.length === 0) {
-    return encodedRedirect(
+    encodedRedirect(
       'error',
       '/sign-up',
       getTranslation(locale, 'Auth.SignUpPage.emailAlreadyRegistered')
     );
+    return;
   }
 
-  return encodedRedirect(
-    'success',
-    '/sign-up',
-    getTranslation(locale, 'Auth.SignUpPage.signUpSuccess')
-  );
+  encodedRedirect('success', '/sign-up', getTranslation(locale, 'Auth.SignUpPage.signUpSuccess'));
 };
 
 export const signInAction = async (formData: FormData) => {

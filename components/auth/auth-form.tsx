@@ -18,13 +18,15 @@ export type AuthField = {
   disabled?: boolean;
 };
 
+export type FormActionType = (formData: FormData) => void | Promise<void>;
+
 export type AuthFormProps = {
   title: string;
   description?: React.ReactNode;
   fields: AuthField[];
   submitText: string;
   submitPendingText: string;
-  formAction: (formData: FormData) => Promise<unknown>;
+  formAction: FormActionType;
   message?: Message;
   footer?: React.ReactNode;
   className?: string;
@@ -49,7 +51,7 @@ export function AuthForm({
     <div
       className={`relative backdrop-blur-sm bg-white/60 dark:bg-gray-900/60 border border-indigo-100 dark:border-indigo-800 rounded-xl shadow-2xl shadow-indigo-500/10 dark:shadow-indigo-900/30 p-8 w-full max-w-md mx-auto ${className}`}
     >
-      <form className="flex flex-col">
+      <form action={formAction} className="flex flex-col">
         <h1 className="text-3xl font-bold mb-2 text-indigo-900 dark:text-white">{title}</h1>
         <div className="h-1 w-16 bg-gradient-to-r from-indigo-500 to-blue-500 dark:from-indigo-400 dark:to-blue-400 mb-6"></div>
 
@@ -80,7 +82,6 @@ export function AuthForm({
 
           <SubmitButton
             pendingText={submitPendingText}
-            formAction={formAction}
             disabled={isFormDisabled}
             className="mt-4 bg-indigo-600 hover:bg-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400 text-white font-medium py-2 rounded-md flex items-center justify-center"
           >

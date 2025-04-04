@@ -22,9 +22,8 @@ export default function Signup(props: { searchParams: Promise<Message> }) {
           fields={[]}
           submitText=""
           submitPendingText=""
-          formAction={async () => {
-            // 这种情况下无需表单操作，只显示消息
-            return { message: '' };
+          formAction={() => {
+            // 不返回任何值
           }}
           message={searchParams}
         />

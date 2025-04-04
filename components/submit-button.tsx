@@ -3,9 +3,11 @@
 import { Button } from '@/components/ui/button';
 import { type ComponentProps } from 'react';
 import { useFormStatus } from 'react-dom';
+import { FormActionType } from '@/components/auth/auth-form';
 
 type Props = ComponentProps<typeof Button> & {
   pendingText?: string;
+  formAction?: string | FormActionType;
 };
 
 export function SubmitButton({ children, pendingText = 'Submitting...', ...props }: Props) {
