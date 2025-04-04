@@ -1,3 +1,5 @@
+'use server';
+
 import { db } from '@/lib/db';
 import { sql, eq } from 'drizzle-orm';
 import { documents, document_versions } from '@/lib/db/schema/schema';

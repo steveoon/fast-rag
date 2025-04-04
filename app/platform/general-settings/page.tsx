@@ -5,7 +5,7 @@ import { UserProfileCard } from '@/components/user-profile-card';
 import { PreferencesCard } from '@/components/preferences-card';
 
 export default async function GeneralSettingsPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user },

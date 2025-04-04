@@ -4,16 +4,17 @@ import AuthTranslations from '@/components/auth-translations';
 import { HashRedirect } from './hash-redirect';
 import { AuthForm } from '@/components/auth/auth-form';
 
-export default async function ResetPassword({
-  searchParams,
-}: {
-  searchParams: Message & {
-    error?: string;
-    error_description?: string;
-    success?: string;
-    message?: string;
-  };
+export default async function ResetPassword(props: {
+  searchParams: Promise<
+    Message & {
+      error?: string;
+      error_description?: string;
+      success?: string;
+      message?: string;
+    }
+  >;
 }) {
+  const searchParams = await props.searchParams;
   let message: Message | null = null;
   if (searchParams.error) {
     message = {

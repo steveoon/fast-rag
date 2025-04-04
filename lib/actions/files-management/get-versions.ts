@@ -1,3 +1,5 @@
+'use server';
+
 import { db } from '@/lib/db';
 import { document_versions } from '@/lib/db/schema/schema';
 import { CustomError } from '@/types';

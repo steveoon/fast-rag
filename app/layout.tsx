@@ -31,7 +31,7 @@ export default async function RootLayout({
 }>) {
   const locale = await getLocale();
   const messages = await getMessages();
-  const headersList = headers();
+  const headersList = await headers();
   const pathname = headersList.get('x-pathname') || '';
   const isChatBotPage = pathname.startsWith('/chat-bot/');
 

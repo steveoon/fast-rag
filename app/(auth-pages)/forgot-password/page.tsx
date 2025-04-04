@@ -1,3 +1,4 @@
+import { use } from 'react';
 import { forgotPasswordAction } from '@/lib/actions/sign-up';
 import { FormMessage, Message } from '@/components/form-message';
 import { SubmitButton } from '@/components/submit-button';
@@ -7,7 +8,8 @@ import Link from 'next/link';
 import { SmtpMessage } from '@/components/smtp-message';
 import { useTranslations } from 'next-intl';
 
-export default function ForgotPassword({ searchParams }: { searchParams: Message }) {
+export default function ForgotPassword(props: { searchParams: Promise<Message> }) {
+  const searchParams = use(props.searchParams);
   const t = useTranslations('Auth');
 
   return (

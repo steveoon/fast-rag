@@ -15,7 +15,7 @@ import {
 export async function getUserActiveKey(): Promise<string> {
   try {
     // 创建Supabase客户端并获取用户信息
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data, error: authError } = await supabase.auth.getUser();
 
     // 身份验证错误处理

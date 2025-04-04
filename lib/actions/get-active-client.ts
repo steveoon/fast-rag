@@ -20,7 +20,7 @@ export interface ClientInfo {
  */
 export async function getActiveClientInfo(): Promise<ClientInfo> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data, error: authError } = await supabase.auth.getUser();
 
     if (authError) {

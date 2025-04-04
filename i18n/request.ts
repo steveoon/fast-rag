@@ -1,9 +1,9 @@
 import { getRequestConfig } from 'next-intl/server';
 import { cookies, headers } from 'next/headers';
-import { SUPPORTED_LOCALES, SupportedLocale } from './constant';
+import { SUPPORTED_LOCALES, SupportedLocale } from '../constant';
 
 function getLocaleFromAcceptLanguage(acceptLanguage: string): SupportedLocale {
-  const languages = acceptLanguage.split(',').map((lang) => lang.split(';')[0]);
+  const languages = acceptLanguage.split(',').map(lang => lang.split(';')[0]);
 
   for (const lang of languages) {
     if (lang.startsWith('en')) return 'en';
@@ -15,8 +15,8 @@ function getLocaleFromAcceptLanguage(acceptLanguage: string): SupportedLocale {
 }
 
 export default getRequestConfig(async () => {
-  const cookieStore = cookies();
-  const headersList = headers();
+  const cookieStore = await cookies();
+  const headersList = await headers();
 
   // 尝试从 cookie 中获取语言设置
   let locale = cookieStore.get('NEXT_LOCALE')?.value as SupportedLocale | undefined;
@@ -34,6 +34,6 @@ export default getRequestConfig(async () => {
 
   return {
     locale,
-    messages: (await import(`./messages/${locale}.json`)).default,
+    messages: (await import(`../messages/${locale}.json`)).default,
   };
 });

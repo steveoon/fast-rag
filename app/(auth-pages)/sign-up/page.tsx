@@ -1,3 +1,4 @@
+import { use } from 'react';
 import { signUpAction } from '@/lib/actions/sign-up';
 import { Message } from '@/components/form-message';
 import Link from 'next/link';
@@ -9,7 +10,8 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Mail } from 'lucide-react';
 
-export default function Signup({ searchParams }: { searchParams: Message }) {
+export default function Signup(props: { searchParams: Promise<Message> }) {
+  const searchParams = use(props.searchParams);
   const t = useTranslations('Auth');
 
   if ('message' in searchParams) {

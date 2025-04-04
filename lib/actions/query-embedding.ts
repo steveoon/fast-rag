@@ -1,3 +1,5 @@
+'use server';
+
 import { db } from '@/lib/db';
 import { embeddings, documents, document_versions } from '@/lib/db/schema/schema';
 import { gt, sql, cosineDistance, eq, and, inArray } from 'drizzle-orm';
@@ -50,5 +52,5 @@ export async function queryEmbeddings(args: {
     .where(and(...whereConditions))
     .limit(4);
 
-  return queryRes.map((item) => item.content);
+  return queryRes.map(item => item.content);
 }

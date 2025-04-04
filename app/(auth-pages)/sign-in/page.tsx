@@ -1,10 +1,12 @@
+import { use } from 'react';
 import { signInAction } from '@/lib/actions/sign-up';
 import { type Message } from '@/components/form-message';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { AuthForm } from '@/components/auth/auth-form';
 
-export default function Login({ searchParams }: { searchParams: Message }) {
+export default function Login(props: { searchParams: Promise<Message> }) {
+  const searchParams = use(props.searchParams);
   const t = useTranslations('Auth');
 
   return (

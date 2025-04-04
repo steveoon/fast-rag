@@ -7,7 +7,7 @@ import { AuroraBackground } from '@/components/aurora-background';
 import { getTranslations } from 'next-intl/server';
 
 export default async function ChatBotPage() {
-  const headersList = headers();
+  const headersList = await headers();
   const pathname = headersList.get('x-pathname');
   const botId = pathname?.split('/chat-bot/')[1];
 

@@ -1,3 +1,5 @@
+'use server';
+
 import { db } from '@/lib/db';
 import { documents, document_versions, embeddings } from '@/lib/db/schema/schema';
 import { validateClient } from '@/lib/utils';
@@ -16,7 +18,7 @@ export async function delFiles(fileIds: string[], apiKey: string) {
     db.delete(embeddings).where(
       inArray(
         embeddings.document_version_id,
-        delVersions.map((v) => v.document_id)
+        delVersions.map(v => v.document_id)
       )
     ),
   ]);

@@ -6,7 +6,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useClientToolsStore } from '@/components/tools/client-tools-store';
 import { ClientToolCard } from './client-tool-card';
 
-export function ClientToolsTab(): React.ReactElement {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function ClientToolsTab(): React.ReactElement<any> {
   const { clientTools, isLoading, error, fetchClientTools } = useClientToolsStore();
 
   useEffect(() => {

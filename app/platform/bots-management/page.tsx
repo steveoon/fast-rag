@@ -18,7 +18,7 @@ type ExtendedChatbot = Chatbot & {
 };
 
 export default async function BotsManagementPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user },

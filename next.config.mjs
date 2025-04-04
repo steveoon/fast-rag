@@ -1,11 +1,12 @@
 import createNextIntlPlugin from 'next-intl/plugin';
 
-const withNextIntl = createNextIntlPlugin();
+const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  serverExternalPackages: ['pino'],
   experimental: {
-    serverComponentsExternalPackages: ['pino'],
+    // 已移除 serverComponentsExternalPackages，移至根级配置
   },
   output: 'standalone',
   webpack: (config, { isServer }) => {

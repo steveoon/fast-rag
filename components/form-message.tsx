@@ -1,3 +1,4 @@
+import type { JSX } from 'react';
 export type Message = { success: string } | { error: string } | { message: string };
 
 export function FormMessage({ message }: { message: Message }): [JSX.Element, boolean] {

@@ -5,9 +5,10 @@ import { createClient } from '@/lib/utils/supabase/server';
 import AuthTranslations from './auth-translations';
 
 export default async function AuthButton() {
+  const supabase = await createClient();
   const {
     data: { user },
-  } = await createClient().auth.getUser();
+  } = await supabase.auth.getUser();
 
   return (
     <AuthTranslations namespace="Auth">

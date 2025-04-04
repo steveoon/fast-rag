@@ -52,11 +52,44 @@ React Best Practices
 - Use cleanup functions in useEffect to prevent memory leaks.
 - Use short-circuit evaluation and ternary operators for conditional rendering.
 
+React 19 and Next.js 15 Features
+
+- Use the new `use` hook for data fetching and promise handling in client components:
+  - It's a built-in React hook for unwrapping promises directly in component render
+  - Provides a simpler alternative to useEffect-based data fetching
+  - Works well with React Suspense for loading states
+- Leverage Document Metadata API for managing document titles and meta tags:
+  - Use `useDocumentTitle` and `useDocumentHead` hooks instead of custom solutions
+  - Provides better SEO management without third-party libraries
+- Implement actions from React to simplify forms and user interactions:
+  - Use `useFormStatus` and `useFormState` for form handling
+  - Provides better integration with server actions in Next.js
+- Utilize the improved Suspense API:
+  - Take advantage of the new selective hydration capabilities
+  - Better error handling with improved Error Boundary integration
+- Apply asset loading optimization with Next.js 15:
+  - Use the optimized image and font loading strategies
+  - Implement Partial Prerendering (PPR) for faster initial page loads
+  - Take advantage of server-side rendering improvements
+- Use React compiler (formerly React Forget):
+  - Automatic memoization benefits without manually using `useMemo` and `useCallback`
+  - Write code that looks like it would re-render often but is optimized by the compiler
+- Implement the new Web Streaming features:
+  - Use streaming SSR for faster time-to-first-byte
+  - Leverage improved hydration strategies for progressive enhancement
+
 State Management
 
 - Use Zustand for global state management.
 - Lift state up when needed to share state between components.
 - Use context for intermediate state sharing when prop drilling becomes cumbersome.
+- Consider React's new built-in state management improvements:
+  - Leverage React's Context with automatic memoization for shared state
+  - Use the `use` hook with Context for more ergonomic access to shared state
+  - Apply selective hydration for state that needs to be transferred from server to client
+- For complex state, continue using Zustand while taking advantage of React 19 optimizations:
+  - Utilize React compiler's automatic memoization with Zustand stores
+  - Implement server actions to mutate state on the server when appropriate
 
 UI and Styling
 
@@ -71,6 +104,14 @@ Performance Optimization(Next.js Features)
 - Use dynamic loading for non-critical components.
 - Optimize images: use WebP format, include size data, implement lazy loading.
 - Implement route-based code splitting in Next.js.
+- Adopt Partial Prerendering (PPR) to combine static and dynamic content:
+  - Use `<Suspense>` boundaries around dynamic content for faster initial page loads
+  - Apply streaming for progressive rendering of dynamic parts
+- Take advantage of the View Transitions API for smooth page transitions.
+- Utilize the new HTTP/3 protocol support for faster network performance.
+- Implement React compiler optimizations to reduce client-side JavaScript.
+- Use Server Actions with proper error handling and validation for form submissions.
+- Apply the new prefetching strategies to improve navigation performance.
 
 Forms and Validation
 

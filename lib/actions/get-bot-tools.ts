@@ -1,3 +1,5 @@
+'use server';
+
 import { db } from '@/lib/db';
 import { chat_bot_tools, client_tools, tools } from '@/lib/db/schema/schema';
 import { eq, and } from 'drizzle-orm';

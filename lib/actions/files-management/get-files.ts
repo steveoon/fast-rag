@@ -1,3 +1,5 @@
+'use server';
+
 import { db } from '@/lib/db';
 import { documents, document_versions } from '@/lib/db/schema/schema';
 import { validateClient } from '@/lib/utils';
@@ -45,7 +47,7 @@ export async function getFiles(apiKey: string) {
     .where(eq(documents.client_id, client.id))
     .orderBy(desc(documents.created_at));
 
-  return fileList.map((file) => {
+  return fileList.map(file => {
     return file;
   });
 }

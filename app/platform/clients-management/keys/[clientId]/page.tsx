@@ -5,8 +5,9 @@ import TokensList from '@/components/modules/tokens-list';
 import TranslationWrapper from '@/components/auth-translations';
 import BackButton from '@/components/back-button';
 
-export default async function KeyManagementPage({ params }: { params: { clientId: string } }) {
-  const supabase = createClient();
+export default async function KeyManagementPage(props: { params: Promise<{ clientId: string }> }) {
+  const params = await props.params;
+  const supabase = await createClient();
 
   const {
     data: { user },

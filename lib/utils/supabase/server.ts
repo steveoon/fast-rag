@@ -7,8 +7,8 @@ import { logger } from '../logger/logger';
  * 用于在服务器组件中创建Supabase客户端
  * @returns
  */
-export const createClient = () => {
-  const cookieStore = cookies();
+export const createClient = async () => {
+  const cookieStore = await cookies();
 
   return createServerClient(SUPABASE_URL!, SUPABASE_PUBLIC_ANON_KEY!, {
     cookies: {

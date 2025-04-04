@@ -13,9 +13,9 @@ import { getVersions } from '@/lib/actions';
 import { getUserActiveKey } from '@/lib/actions/get-user-active-key';
 import BackButton from '@/components/back-button';
 
-export default async function VersionsPage(props: { params: { documentId: string } }) {
-  const { documentId } = props.params;
-  const supabase = createClient();
+export default async function VersionsPage(props: { params: Promise<{ documentId: string }> }) {
+  const { documentId } = await props.params;
+  const supabase = await createClient();
 
   const [
     {
@@ -32,7 +32,7 @@ export default async function VersionsPage(props: { params: { documentId: string
 
   return (
     <TranslationWrapper namespace="Platform.VersionsManagement">
-      {(t) => (
+      {t => (
         <div>
           <BackButton href="/platform/data-management" size="default" label={t('backToFiles')} />
           <div className="mb-12">
@@ -51,7 +51,7 @@ export default async function VersionsPage(props: { params: { documentId: string
               </TableRow>
             </TableHeader>
             <TableBody>
-              {docVersions.map((item) => {
+              {docVersions.map(item => {
                 const { id, version, created_at, name } = item;
                 return (
                   <TableRow key={id}>
