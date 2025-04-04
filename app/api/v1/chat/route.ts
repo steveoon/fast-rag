@@ -170,7 +170,7 @@ export async function POST(request: Request) {
           },
         });
 
-        answer.mergeIntoDataStream(dataStream);
+        answer.mergeIntoDataStream(dataStream, { sendReasoning: true });
       },
     });
   } catch (error) {

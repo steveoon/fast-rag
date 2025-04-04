@@ -8,7 +8,7 @@ import { ChatInput } from '@/components/ui/chat-input';
 import { useChat } from '@ai-sdk/react';
 import { useTranslations } from 'next-intl';
 import { ChatBotToolStatus } from './components/chat-bot-tool-status';
-import { MessageContent } from '@/hooks/message-content';
+import { MessageContentAdapter } from '@/hooks/message-content-adapter';
 
 interface ChatClientProps {
   apiKey: string;
@@ -27,6 +27,7 @@ export function ChatClient({ apiKey, tools, botName = 'AI Assistant' }: ChatClie
     },
     body: {
       enabledTools: tools,
+      model: 'anthropic:claude-3-7-sonnet-20250219',
     },
     onError: error => {
       console.error('Chat error:', error);
@@ -103,7 +104,7 @@ export function ChatClient({ apiKey, tools, botName = 'AI Assistant' }: ChatClie
                     : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
                 }
               >
-                <MessageContent
+                <MessageContentAdapter
                   content={message.content}
                   showCopyButton={message.role !== 'user'}
                 />
