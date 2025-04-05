@@ -1,5 +1,4 @@
 import { wikidata } from '@agentic/wikidata';
-
 /**
  * 格式化Wikidata属性为可读格式
  * @param entity Wikidata实体对象
@@ -88,18 +87,17 @@ export function formatWikidataProperties(entity: wikidata.SimplifiedEntity | nul
  * @returns 提取到的实体ID或null
  */
 export function extractEntityId(text: string): string | null {
-  // 使用更宽松的正则表达式匹配Wikidata ID
+  // 仅保留最可靠的匹配模式
   const patterns = [
-    /\bQ\d+\b/g, // 标准格式 Q + 数字
     /wikidata\.org\/entity\/(Q\d+)/i, // 实体URL格式
     /wikidata\.org\/wiki\/(Q\d+)/i, // Wiki URL格式
-    /\/([QP]\d+)(?:\W|$)/, // 路径末尾的ID
+    /Wikidata ID[\s\n]*[:：][\s\n]*(Q\d+)/i,
   ];
 
   for (const pattern of patterns) {
     const matches = text.match(pattern);
-    if (matches && matches.length > 0) {
-      return matches[0].replace(/^\//, ''); // 移除可能的前导斜杠
+    if (matches && matches.length > 1 && matches[1].startsWith('Q')) {
+      return matches[1];
     }
   }
   return null;

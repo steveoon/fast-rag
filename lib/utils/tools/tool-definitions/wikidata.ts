@@ -131,7 +131,7 @@ export const smartWikidataQueryTool: ToolDefinition = {
                   englishName: z.string().describe('实体的英文名称或翻译'),
                   confidence: z.number().min(0).max(10).describe('翻译准确度的信心值(0-10)'),
                 }),
-                prompt: `请将以下中文实体名称翻译成英文，返回最准确的英文名称:
+                prompt: `请将以下中文实体名称翻译成英文，返回最准确的英文名称。
                 
                 "${query}"
                 
@@ -181,7 +181,7 @@ export const smartWikidataQueryTool: ToolDefinition = {
               numResults: 3,
               type: 'keyword', // 使用关键词搜索更适合查找特定ID
               contents: {
-                text: { maxCharacters: 8000 },
+                text: { maxCharacters: 6000 },
               },
             });
 
@@ -190,7 +190,7 @@ export const smartWikidataQueryTool: ToolDefinition = {
               const resultIds = searchResults.results.map(result => result.id);
               const contentsResponse = await exaClient.getContents({
                 ids: resultIds as [string, ...string[]],
-                text: { maxCharacters: 10000 },
+                text: { maxCharacters: 6000 },
               });
 
               // 合并所有搜索结果内容
