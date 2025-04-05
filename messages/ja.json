@@ -319,7 +319,13 @@
         "selectFiles": "ファイルを選択"
       },
       "Messages": {
-        "selectFiles": "ファイルを選択してください"
+        "selectFiles": "ファイルを選択してください",
+        "deleteDialogTitle": "これらのファイルを削除してもよろしいですか？",
+        "deleteDialogDescription": "この操作は取り消せません。",
+        "embeddingStarted": "文書の解析を開始します",
+        "embeddingProcessing": "文書の解析中です，ページを更新しないでください",
+        "embeddingSuccess": "文書の解析が完了しました",
+        "embeddingFailed": "文書の解析に失敗しました"
       }
     },
     "VersionsManagement": {

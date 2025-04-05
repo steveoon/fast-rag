@@ -53,7 +53,7 @@ const useFilesManagementStore = create<FilesManagementStore>((set, get) => ({
     }
     set({ isOperation: true });
 
-    await api.post('/files-management/delete', { fileIds: files.map((file) => file.fileId) });
+    await api.post('/files-management/delete', { fileIds: files.map(file => file.fileId) });
     getTableData();
     set({ isOperation: false });
   },
@@ -71,15 +71,38 @@ const useFilesManagementStore = create<FilesManagementStore>((set, get) => ({
     }
 
     set({ isOperation: true });
-    await api.post('/doc-process/embedding', {
-      files,
-      force: true,
+
+    toast({
+      title: t('Platform.FilesManagement.Messages.embeddingStarted') || '开始向量化处理',
+      description: t('Platform.FilesManagement.Messages.embeddingProcessing', {
+        count: files.length,
+      }),
+      variant: 'default',
     });
 
-    getTableData();
-    set({ isOperation: false });
+    try {
+      await api.post('/doc-process/embedding', {
+        files,
+        force: true,
+      });
+
+      toast({
+        title: t('Platform.FilesManagement.Messages.embeddingSuccess') || '向量化成功',
+        variant: 'default',
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '未知错误';
+      toast({
+        title: t('Platform.FilesManagement.Messages.embeddingFailed') || '向量化失败',
+        description: message,
+        variant: 'destructive',
+      });
+    } finally {
+      getTableData();
+      set({ isOperation: false });
+    }
   },
-  currentEmbedding: async (file) => {
+  currentEmbedding: async file => {
     const { getTableData } = get();
 
     set({ isOperation: true });
@@ -90,18 +113,18 @@ const useFilesManagementStore = create<FilesManagementStore>((set, get) => ({
     getTableData();
     set({ isOperation: false });
   },
-  updateUploadingProgress: (data) => {
+  updateUploadingProgress: data => {
     const fileName = data.completed ? data.files[0].name : data.fileName;
 
-    set((state) => {
+    set(state => {
       const { uploadingProgress } = state;
       if (data.completed || data.percent === '100.00') {
         // 如果完成，从列表中移除
         return {
-          uploadingProgress: uploadingProgress.filter((item) => item.fileName !== fileName),
+          uploadingProgress: uploadingProgress.filter(item => item.fileName !== fileName),
         };
       } else {
-        const existingItemIndex = uploadingProgress.findIndex((item) => item.fileName === fileName);
+        const existingItemIndex = uploadingProgress.findIndex(item => item.fileName === fileName);
 
         if (existingItemIndex === -1) {
           // 如果不存在，添加到列表
@@ -141,7 +164,7 @@ const useFilesManagementStore = create<FilesManagementStore>((set, get) => ({
       api.sse({
         url: '/files-management/upload',
         data: formData,
-        onData: (data) => {
+        onData: data => {
           updateUploadingProgress(
             data as {
               completed: boolean;

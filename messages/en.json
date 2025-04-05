@@ -322,7 +322,11 @@
       "Messages": {
         "selectFiles": "Please select files",
         "deleteDialogTitle": "Are you sure you want to delete these files?",
-        "deleteDialogDescription": "This action cannot be undone."
+        "deleteDialogDescription": "This action cannot be undone.",
+        "embeddingStarted": "Start parsing documents",
+        "embeddingProcessing": "Processing {count} documents, please wait and do not refresh the page",
+        "embeddingSuccess": "Parsing completed",
+        "embeddingFailed": "Parsing failed"
       }
     },
     "VersionsManagement": {

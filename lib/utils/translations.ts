@@ -18,11 +18,20 @@ export function getTranslation(locale: string, key: string): string {
   return typeof result === 'string' ? result : key;
 }
 
-export function t(message: string) {
+export function t(message: string, params?: Record<string, unknown>): string {
   const locale = document.cookie
     .split('; ')
-    .find((row) => row.startsWith('NEXT_LOCALE='))
+    .find(row => row.startsWith('NEXT_LOCALE='))
     ?.split('=')[1] as SupportedLocale;
 
-  return getTranslation(locale, message);
+  let translatedText = getTranslation(locale, message);
+
+  // 处理参数替换
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      translatedText = translatedText.replace(new RegExp(`{${key}}`, 'g'), String(value));
+    });
+  }
+
+  return translatedText;
 }

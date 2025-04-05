@@ -322,7 +322,11 @@
       "Messages": {
         "selectFiles": "请选择文件",
         "deleteDialogTitle": "确定删除这些文件吗？",
-        "deleteDialogDescription": "删除后将无法恢复，请谨慎操作。"
+        "deleteDialogDescription": "删除后将无法恢复，请谨慎操作。",
+        "embeddingStarted": "开始解析文档",
+        "embeddingProcessing": "正在处理 {count} 个文档，请耐心等待，不要刷新页面",
+        "embeddingSuccess": "已完成文档解析",
+        "embeddingFailed": "文档解析失败"
       }
     },
     "VersionsManagement": {
