@@ -1,22 +1,40 @@
+import { ToolDefinition } from '../types';
 import knowledgeBaseTool from './knowledge-base';
 import weatherTool from './weather';
 import webSearchTool from './web-search';
 import { wikidataEntityTool, smartWikidataQueryTool } from './wikidata';
-import { ToolDefinition } from '../types';
+import imageGenerationTool from './image-generation';
+import placeInfoTool from './place-info';
 
-// 所有可用工具的定义集合
+/**
+ * 可用的工具定义列表
+ */
 export const toolDefinitions: ToolDefinition[] = [
   knowledgeBaseTool,
   weatherTool,
   webSearchTool,
   wikidataEntityTool,
   smartWikidataQueryTool,
+  imageGenerationTool,
+  placeInfoTool,
 ];
 
+/**
+ * 按名称获取工具定义
+ */
+export function getToolDefinitionByName(toolName: string): ToolDefinition | undefined {
+  return toolDefinitions.find(def => def.toolName === toolName);
+}
+
+/**
+ * 工具定义的导出
+ */
 export {
   knowledgeBaseTool,
   weatherTool,
   webSearchTool,
   wikidataEntityTool,
   smartWikidataQueryTool,
+  imageGenerationTool,
+  placeInfoTool,
 };

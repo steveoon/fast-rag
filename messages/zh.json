@@ -505,7 +505,9 @@
         "getWeather": "天气查询",
         "webSearch": "网络搜索",
         "calculator": "计算器",
-        "textCompletion": "文本生成"
+        "textCompletion": "文本生成",
+        "getPlaceInfoQuery": "旅行信息查询",
+        "generateImageQuery": "图像生成"
       }
     }
   }

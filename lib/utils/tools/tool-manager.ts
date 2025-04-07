@@ -40,6 +40,25 @@ export function selectTools(config: ToolSelectorConfig): ToolSet {
     if (enabledTools.includes('webSearch') && allTools.webSearch) {
       selectedTools.webSearch = allTools.webSearch;
     }
+  } else if (queryAnalysis.queryType === 'weather') {
+    // 天气查询优先使用天气工具
+    if (enabledTools.includes('weather') && allTools.getWeather) {
+      selectedTools.getWeather = allTools.getWeather;
+    }
+  } else if (queryAnalysis.queryType === 'travel') {
+    // 旅行相关查询优先使用地点信息工具
+    if (enabledTools.includes('getPlaceInfo') && allTools.getPlaceInfoQuery) {
+      selectedTools.getPlaceInfoQuery = allTools.getPlaceInfoQuery;
+    }
+    // 旅行查询也常需要搜索最新信息
+    if (enabledTools.includes('webSearch') && allTools.webSearch) {
+      selectedTools.webSearch = allTools.webSearch;
+    }
+  } else if (queryAnalysis.queryType === 'visualization') {
+    // 可视化相关查询优先使用图像生成工具
+    if (enabledTools.includes('generateImage') && allTools.generateImageQuery) {
+      selectedTools.generateImageQuery = allTools.generateImageQuery;
+    }
   }
 
   // 特殊处理：当检测到需要使用wikidataGetEntity时，优先使用smartWikidataQuery替代
@@ -88,6 +107,12 @@ export function generateToolSystemPrompt(tools: ToolSet): string {
           return `- wikidataGetEntity: 用于获取Wikidata中的结构化实体数据，包含属性、关系等信息。适合查询具体的人物、地点、组织等实体的详细信息，但需要知道实体ID`;
         } else if (tool === 'smartWikidataQuery') {
           return `- smartWikidataQuery: 智能查询Wikidata实体，只需提供实体名称（如"苏东坡"）即可获取结构化数据，无需事先知道实体ID`;
+        } else if (tool === 'generateImageQuery') {
+          return `- generateImageQuery: 根据提供的描述生成图片，支持卡通、写实和插画三种风格，可用于创建旅行地点的示意图、路线图等视觉内容`;
+        } else if (tool === 'getPlaceInfoQuery') {
+          return `- getPlaceInfoQuery: 获取北欧特定城市、景点、地标的详细信息，包括介绍、历史背景、游玩小贴士、交通建议等旅行相关信息`;
+        } else if (tool === 'getWeather') {
+          return `- getWeather: 查询指定地点和日期的天气预报信息，包括温度、降水概率等数据，适用于旅行规划`;
         } else {
           return `- ${tool}`;
         }
@@ -109,6 +134,11 @@ export function generateToolSystemPrompt(tools: ToolSet): string {
     - 在搜索结果中寻找多个来源的共识，识别可靠的信息
     - 检查搜索结果的发布日期，优先参考最新的信息
     - 当结果包含数字、统计数据或具体观点时，始终标明信息来源
+    
+    旅行信息工具使用指南:
+    - 对于北欧旅行目的地查询，优先使用getPlaceInfoQuery工具获取结构化的旅行信息
+    - 当需要可视化展示时，可使用generateImageQuery工具生成相关图片
+    - 结合getWeather工具获取目的地天气状况，帮助用户进行旅行规划
     
     回答要求:
     - 回答要基于工具调用获取的信息
@@ -140,15 +170,22 @@ export function generateQueryAnalysisPrompt(content: string): string {
      - technical: 技术类问题
      - comparison: 对比或比较分析
      - historical: 历史事件或过去的信息
+     - travel: 旅行规划、目的地信息、旅游攻略相关查询
+     - visualization: 图像生成、视觉内容创建相关查询
   
   2. requiredTools: 选择解答问题所需的工具
      - queryKnowledgeBase: 适用于内部文档和专有知识
-     - getWeather: 适用于天气查询
+     - getWeather: 适用于天气查询，或需要了解特定地点天气状况
      - webSearch: 适用于需要最新信息、事实核查、流行话题
      - smartWikidataQuery: 适用于需要结构化事实数据的情况，如人物信息、地点数据等（首选）
      - wikidataGetEntity: 仅当已知具体Wikidata实体ID时使用（极少用到）
+     - getPlaceInfoQuery: 适用于北欧旅行目的地信息查询，可获取城市、景点的详细介绍和旅行建议
+     - generateImageQuery: 适用于需要生成图像的场景，如创建旅行地点的示意图、路线图等视觉内容
             
   3. reasoning: 说明你的推理过程
 
-  重要提示：对于查询人物、地点、组织等实体信息时，应优先选择smartWikidataQuery而非wikidataGetEntity。`;
+  重要提示：
+  - 对于查询人物、地点、组织等实体信息时，应优先选择smartWikidataQuery而非wikidataGetEntity
+  - 对于北欧旅行相关的查询，优先考虑使用getPlaceInfoQuery工具
+  - 当用户需要图片或视觉内容时，应选择generateImageQuery工具`;
 }

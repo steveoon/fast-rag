@@ -505,7 +505,9 @@
         "getWeather": "Weather Info",
         "webSearch": "Web Search",
         "calculator": "Calculator",
-        "textCompletion": "Text Generator"
+        "textCompletion": "Text Generator",
+        "getPlaceInfoQuery": "Travel Info",
+        "generateImageQuery": "Image Generator"
       }
     }
   }

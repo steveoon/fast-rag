@@ -27,6 +27,8 @@ export const queryAnalysisSchema = z.object({
     'technical', // 技术类问题
     'comparison', // 比较分析
     'historical', // 历史信息
+    'travel', // 旅行相关查询
+    'visualization', // 图像生成相关查询
   ]),
   requiredTools: z.array(z.enum(ANALYSIS_TOOLS)),
   reasoning: z.string(),

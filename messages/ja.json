@@ -504,7 +504,9 @@
         "getWeather": "天気情報",
         "webSearch": "ウェブ検索",
         "calculator": "計算機",
-        "textCompletion": "テキスト生成"
+        "textCompletion": "テキスト生成",
+        "getPlaceInfoQuery": "旅行情報",
+        "generateImageQuery": "画像生成"
       }
     }
   }

@@ -128,6 +128,73 @@ const PREDEFINED_TOOLS: {
       },
     ],
   },
+  {
+    name: 'generateImage',
+    display_name: '图像生成',
+    description: '根据描述生成图像，支持不同风格（卡通、真实、插画）',
+    icon: 'image',
+    implementation_key: 'generateImageQuery',
+    parameters: [
+      {
+        name: 'prompt',
+        display_name: '图像描述',
+        description: '详细的图像描述',
+        type: 'string' as ToolParameterType,
+        is_required: true,
+        default_value: null,
+      },
+      {
+        name: 'style',
+        display_name: '图像风格',
+        description: '图像风格，默认为卡通风格',
+        type: 'string' as ToolParameterType,
+        is_required: false,
+        default_value: 'cartoon',
+      },
+      {
+        name: 'size',
+        display_name: '图像尺寸',
+        description: '图像尺寸（宽*高），默认为1024*1024',
+        type: 'string' as ToolParameterType,
+        is_required: false,
+        default_value: '1024*1024',
+      },
+      {
+        name: 'negativePrompt',
+        display_name: '反向提示词',
+        description: '反向提示词，描述不希望在图像中出现的内容',
+        type: 'string' as ToolParameterType,
+        is_required: false,
+        default_value: null,
+      },
+    ],
+  },
+  {
+    name: 'getPlaceInfo',
+    display_name: '旅行地点信息',
+    description:
+      '获取北欧特定城市、景点、地标的详细信息，包括介绍、历史背景、游玩小贴士、交通建议等',
+    icon: 'map-pin',
+    implementation_key: 'getPlaceInfoQuery',
+    parameters: [
+      {
+        name: 'placeName',
+        display_name: '地点名称',
+        description: '需要查询信息的地点名称（如 "松恩峡湾", "特罗姆瑟"）',
+        type: 'string' as ToolParameterType,
+        is_required: true,
+        default_value: null,
+      },
+      {
+        name: 'language',
+        display_name: '语言',
+        description: '期望返回信息的语言，默认中文',
+        type: 'string' as ToolParameterType,
+        is_required: false,
+        default_value: 'zh',
+      },
+    ],
+  },
 ];
 
 const migrateTools = async () => {
