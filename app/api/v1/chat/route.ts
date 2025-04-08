@@ -38,7 +38,7 @@ const chatRequestSchema = z.object({
         ),
     ])
     .optional()
-    .default('openai:gpt-4o-2024-11-20'),
+    .default('anthropic/claude-3-7-sonnet'),
   enabledTools: z
     .array(z.enum(ENABLED_TOOLS))
     .optional()
