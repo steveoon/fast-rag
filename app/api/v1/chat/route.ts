@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { streamText, generateObject, ToolResult, createDataStreamResponse } from 'ai';
 import { z } from 'zod';
-import { registry } from '@/lib/utils/models-registry';
+import { openrouter } from '@/lib/utils/models-registry';
 import { handleError, extractApiKey, validateClient } from '@/lib/utils';
 import { CustomError } from '@/types';
 import {
@@ -28,13 +28,13 @@ const chatRequestSchema = z.object({
   similarityThreshold: z.number().min(0).max(1).optional(),
   model: z
     .union([
-      z.literal('openai:gpt-4o-2024-11-20'),
+      z.literal('openai/gpt-4o-2024-11-20'),
       z
         .string()
         .refine(
           val =>
-            val.startsWith('openai:') || val.startsWith('anthropic:') || val.startsWith('google:'),
-          { message: '模型ID必须以 openai:, anthropic: 或 google: 开头' }
+            val.startsWith('openai/') || val.startsWith('anthropic/') || val.startsWith('google/'),
+          { message: '模型ID必须以 openai/, anthropic/ 或 google/ 开头' }
         ),
     ])
     .optional()
@@ -108,7 +108,7 @@ export async function POST(request: Request) {
       chatRequestSchema.parse(body);
 
     // 确保model是正确的格式字符串
-    const modelId = model as `anthropic:${string}` | `openai:${string}` | `google:${string}`;
+    const modelId = model as `anthropic/${string}` | `openai/${string}` | `google/${string}`;
 
     return createDataStreamResponse({
       execute: async dataStream => {
@@ -133,7 +133,7 @@ export async function POST(request: Request) {
         // 步骤1: 查询分析 - 在streamText之前进行
         const userContent = messages[messages.length - 1].content;
         const { object: queryAnalysis } = await generateObject({
-          model: registry.languageModel(modelId),
+          model: openrouter(modelId),
           schema: queryAnalysisSchema,
           prompt: generateQueryAnalysisPrompt(userContent),
         });
@@ -150,7 +150,7 @@ export async function POST(request: Request) {
         // 步骤3: 生成回答
         const answer = streamText({
           system: generateToolSystemPrompt(selectedTools),
-          model: registry.languageModel(modelId),
+          model: openrouter(modelId),
           messages: messages,
           tools: selectedTools,
           toolChoice: 'auto',

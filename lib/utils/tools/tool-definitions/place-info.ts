@@ -312,7 +312,7 @@ const placeInfoTool: ToolDefinition = {
 
           // 调用LLM进行信息综合和结构化
           const { object } = await generateObject({
-            model: registry.languageModel('anthropic:claude-3-5-sonnet-latest'),
+            model: registry.languageModel('openai/gpt-4o'),
             schema: PlaceInfoSchema,
             system: `你是一位旅游编辑专家，精通整理和结构化旅游目的地信息。
             你的任务是根据提供的各种来源数据，为旅行者生成一个全面、实用且结构良好的目的地信息对象。
