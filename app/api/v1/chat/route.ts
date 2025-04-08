@@ -185,7 +185,7 @@ export async function POST(request: Request) {
           },
         });
 
-        answer.mergeIntoDataStream(dataStream, { sendReasoning: true });
+        answer.mergeIntoDataStream(dataStream, { sendReasoning: true, sendSources: true });
       },
     });
   } catch (error) {

@@ -442,12 +442,10 @@
       "agentFormDescription": "Fill in the information to create a new agent",
       "name": "Name",
       "description": "Description",
-      "client": "Client",
       "tools": "Tools",
       "agentNamePlaceholder": "Enter agent name",
       "agentDescriptionPlaceholder": "Enter agent description (optional)",
       "selectClient": "Select client",
-      "clients": "Clients",
       "selectTool": "Select tools",
       "availableTools": "Available Tools",
       "unnamedTool": "Unnamed Tool",
@@ -460,7 +458,14 @@
       "selectedTools": "Selected Tools",
       "refresh": "Refresh",
       "refreshSuccess": "Refresh Successful",
-      "refreshSuccessDescription": "Agent data has been updated"
+      "refreshSuccessDescription": "Agent data has been updated",
+      "noActiveClientWarning": "Please select an active client",
+      "noAvailableToolsNoActiveClient": "Please select an active client first, then select tools",
+      "createYourFirst": "Create your first agent",
+      "basicInfo": "Basic Info",
+      "selectTools": "Select Tools",
+      "toolsFilteredWarning": "Tools Filtered Warning",
+      "toolsFilteredWarningDescription": "The following tools are not available due to client restrictions: {count}"
     }
   },
   "Utils": {

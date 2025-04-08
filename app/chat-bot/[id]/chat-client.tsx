@@ -27,7 +27,7 @@ export function ChatClient({ apiKey, tools, botName = 'AI Assistant' }: ChatClie
     },
     body: {
       enabledTools: tools,
-      model: 'openai:gpt-4o',
+      model: 'anthropic:claude-3-7-sonnet-20250219',
       maxSteps: 6,
     },
     onError: error => {
@@ -105,10 +105,28 @@ export function ChatClient({ apiKey, tools, botName = 'AI Assistant' }: ChatClie
                     : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
                 }
               >
-                <MessageContentAdapter
-                  content={message.content}
-                  showCopyButton={message.role !== 'user'}
-                />
+                {/* 使用MessageContentAdapter处理所有内容 */}
+                {Array.isArray(message.parts) ? (
+                  <MessageContentAdapter
+                    key={`${message.id}-${JSON.stringify(message.parts).length}`}
+                    content={message.parts.filter(
+                      part =>
+                        part.type === 'text' ||
+                        part.type === 'tool-invocation' ||
+                        part.type === 'reasoning' ||
+                        part.type === 'source' ||
+                        part.type === 'file'
+                    )}
+                    showCopyButton={message.role !== 'user'}
+                    showOnly={['text', 'reasoning', 'tool-invocation', 'source']}
+                  />
+                ) : (
+                  <MessageContentAdapter
+                    key={`${message.id}-${message.content?.length || 0}`}
+                    content={message.content}
+                    showCopyButton={message.role !== 'user'}
+                  />
+                )}
 
                 {/* 如果是最后一条AI消息且正在处理中，显示工具状态 */}
                 {message.role === 'assistant' &&

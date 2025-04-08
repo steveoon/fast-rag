@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { tool } from 'ai';
 import { z } from 'zod';
 import { generateObject } from 'ai';
 import { registry } from '@/lib/utils/models-registry';
 import { ToolDefinition, ToolConfig } from '../types';
 import { mapToolNameToEnabledTool } from '../tool-mapping';
-import { wikipediaClient } from '@/lib/clients';
+import { smartWikidataQueryTool } from './wikidata';
 import webSearchTool from './web-search';
 
 // 地点信息Schema定义
@@ -68,11 +69,11 @@ const placeInfoTool: ToolDefinition = {
 
           // 收集数据源
           const dataSources: string[] = [];
-          let wikipediaData: {
+          let wikidataInfo: {
             title?: string;
-            extract?: string;
             description?: string;
-            url?: string;
+            properties?: Record<string, any>;
+            entityId?: string;
           } | null = null;
           let searchResults: Array<{
             domain?: string;
@@ -81,87 +82,120 @@ const placeInfoTool: ToolDefinition = {
             highlights?: string[];
           }> = [];
 
-          // 1. 从Wikipedia获取基本信息 - 安全处理API调用
-          try {
-            console.log(`正在从Wikipedia获取"${placeName}"摘要...`);
+          // 创建工具实例
+          let wikiDataTool = null;
+          let webSearchInstance = null;
 
-            // 尝试搜索相关页面
-            const searchResult = await wikipediaClient.search({
-              query: placeName,
-              limit: 1,
-            });
-
-            // 确保有搜索结果并提取第一个结果的标题
-            let pageTitle = null;
-
-            // 尝试安全地访问searchResult的结构
-            if (
-              searchResult &&
-              typeof searchResult === 'object' &&
-              'query' in searchResult &&
-              searchResult.query &&
-              typeof searchResult.query === 'object' &&
-              'search' in searchResult.query &&
-              Array.isArray(searchResult.query.search) &&
-              searchResult.query.search.length > 0 &&
-              typeof searchResult.query.search[0] === 'object' &&
-              'title' in searchResult.query.search[0]
-            ) {
-              pageTitle = searchResult.query.search[0].title;
-            }
-
-            if (pageTitle) {
-              // 获取页面摘要
-              const summary = await wikipediaClient.getPageSummary({
-                title: pageTitle,
-              });
-
-              if (summary) {
-                wikipediaData = {
-                  title: summary.title || pageTitle,
-                  extract: summary.extract || '',
-                  description: summary.description || '',
-                  url: summary.content_urls?.desktop?.page || '',
-                };
-
-                dataSources.push('Wikipedia');
-                console.log(`成功获取Wikipedia数据: ${wikipediaData.title}`);
-              }
-            }
-          } catch (error) {
-            console.error('Wikipedia获取失败:', error);
+          // 仅当工具被启用时才创建实例
+          if (config.enabledTools.includes(mapToolNameToEnabledTool('smartWikidataQuery'))) {
+            wikiDataTool = smartWikidataQueryTool.createTool(config);
           }
 
-          // 2. 如果启用了Web搜索，进行一次基本搜索
           if (config.enabledTools.includes(mapToolNameToEnabledTool('webSearch'))) {
-            try {
-              const webSearchImpl = webSearchTool.createTool(config);
-              const searchQuery = `${placeName} 旅游 景点 介绍 交通`;
+            webSearchInstance = webSearchTool.createTool(config);
+          }
 
-              // 为了避免TypeScript错误，使用any类型执行网络搜索
+          // 并行获取数据
+          const results = await Promise.allSettled([
+            // 1. 从Wikidata获取结构化数据
+            (async () => {
+              if (!wikiDataTool) return null;
+              try {
+                console.log(`正在从Wikidata查询"${placeName}"信息...`);
+
+                // 使用any类型安全地调用工具
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const wikiDataExec = wikiDataTool as any;
+                if (wikiDataExec && typeof wikiDataExec.execute === 'function') {
+                  const result = await wikiDataExec.execute(
+                    { query: placeName },
+                    { toolCallId, abortSignal, messages: [] }
+                  );
+
+                  if (result && result.success && result.formattedProperties) {
+                    return { source: 'Wikidata', data: result };
+                  }
+                }
+                return null;
+              } catch (error) {
+                console.error('Wikidata查询失败:', error);
+                return null;
+              }
+            })(),
+
+            // 2. 执行Web搜索获取更多最新信息
+            (async () => {
+              if (!webSearchInstance) return null;
+              console.log(`正在进行"${placeName} 旅游信息"网络搜索...`);
+
+              // 使用any类型安全地调用工具
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const webSearchExec = webSearchImpl as any;
+              const webSearchExec = webSearchInstance as any;
               if (webSearchExec && typeof webSearchExec.execute === 'function') {
-                const searchResult = await webSearchExec.execute(
-                  { query: searchQuery, numResults: 5, useNeural: true },
-                  { toolCallId, abortSignal, messages: [] }
-                );
+                // 执行两个重要搜索
+                const searchQueries = [
+                  `${placeName} 旅游 景点 介绍`,
+                  `${placeName} 旅游 交通 最佳时间 小贴士`,
+                ];
 
-                if (
-                  searchResult &&
-                  typeof searchResult === 'object' &&
-                  'results' in searchResult &&
-                  Array.isArray(searchResult.results) &&
-                  searchResult.results.length > 0
-                ) {
-                  searchResults = searchResult.results;
-                  dataSources.push('Web Search');
-                  console.log(`成功获取Web搜索结果: ${searchResults.length}个相关页面`);
+                const allSearchResults = [];
+
+                for (const query of searchQueries) {
+                  try {
+                    const searchResult = await webSearchExec.execute(
+                      { query, numResults: 4, useNeural: true },
+                      { toolCallId, abortSignal, messages: [] }
+                    );
+
+                    if (searchResult && searchResult.results) {
+                      allSearchResults.push(searchResult);
+                    }
+                  } catch (searchError) {
+                    console.error(`搜索 "${query}" 失败:`, searchError);
+                  }
+                }
+
+                if (allSearchResults.length > 0) {
+                  return { source: 'WebSearch', data: allSearchResults };
                 }
               }
-            } catch (error) {
-              console.error('Web搜索失败:', error);
+              return null;
+            })(),
+          ]);
+
+          // 处理并过滤成功的结果
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const successfulResults: Array<{ source: string; data: any }> = [];
+
+          results.forEach(result => {
+            if (result.status === 'fulfilled' && result.value !== null) {
+              successfulResults.push(result.value);
+              dataSources.push(result.value.source);
             }
+          });
+
+          // 处理Wikidata结果 - 提取结构化信息
+          const wikiDataResult = successfulResults.find(r => r.source === 'Wikidata');
+          if (wikiDataResult) {
+            const data = wikiDataResult.data;
+            wikidataInfo = {
+              title: data.entity?.labels?.zh || data.entity?.labels?.en,
+              description: data.entity?.descriptions?.zh || data.entity?.descriptions?.en,
+              properties: data.formattedProperties,
+              entityId: data.entityId,
+            };
+            console.log(`成功获取Wikidata数据: ${wikidataInfo.title || wikidataInfo.entityId}`);
+          }
+
+          // 处理WebSearch结果
+          const webSearchResult = successfulResults.find(r => r.source === 'WebSearch');
+          if (webSearchResult && webSearchResult.data && Array.isArray(webSearchResult.data)) {
+            webSearchResult.data.forEach(batch => {
+              if (batch.results && Array.isArray(batch.results)) {
+                searchResults = searchResults.concat(batch.results);
+              }
+            });
+            console.log(`成功获取Web搜索结果: ${searchResults.length}个相关页面`);
           }
 
           if (dataSources.length === 0) {
@@ -178,24 +212,63 @@ const placeInfoTool: ToolDefinition = {
             });
           }
 
-          // 构建提示
+          // 构建提示词
           let prompt = `为目的地"${placeName}"整理完整的旅游信息。以下是从多个来源收集的数据:\n\n`;
 
-          // 添加Wikipedia数据
-          if (wikipediaData) {
-            prompt += `## Wikipedia描述:\n`;
-            if (wikipediaData.extract) {
-              prompt += `${wikipediaData.extract}\n\n`;
+          // 添加Wikidata结构化数据
+          if (wikidataInfo) {
+            prompt += `## Wikidata结构化数据:\n`;
+            if (wikidataInfo.description) {
+              prompt += `描述: ${wikidataInfo.description}\n\n`;
             }
-            if (wikipediaData.description) {
-              prompt += `简短描述: ${wikipediaData.description}\n\n`;
-            }
-            if (wikipediaData.url) {
-              prompt += `维基百科链接: ${wikipediaData.url}\n\n`;
+
+            if (wikidataInfo.properties) {
+              // 添加有用的属性，格式化以便于阅读
+              const propertiesToDisplay = [
+                'instance of',
+                'country',
+                'located in',
+                'coordinate location',
+                'official website',
+                'inception',
+                'heritage designation',
+                'part of',
+                'popular',
+                'has part',
+                'located on terrain feature',
+              ];
+
+              const locationProps = [
+                'country',
+                'located in',
+                'coordinate location',
+                'located on terrain feature',
+              ];
+              prompt += `### 位置信息:\n`;
+              locationProps.forEach(prop => {
+                if (wikidataInfo?.properties?.[prop]) {
+                  prompt += `${prop}: ${wikidataInfo.properties[prop]}\n`;
+                }
+              });
+              prompt += '\n';
+
+              const otherProps = propertiesToDisplay.filter(p => !locationProps.includes(p));
+              prompt += `### 其他属性:\n`;
+              otherProps.forEach(prop => {
+                if (wikidataInfo?.properties?.[prop]) {
+                  prompt += `${prop}: ${wikidataInfo.properties[prop]}\n`;
+                }
+              });
+              prompt += '\n';
+
+              // 提取官方网站信息
+              if (wikidataInfo.properties['official website']) {
+                prompt += `官方网站: ${wikidataInfo.properties['official website']}\n\n`;
+              }
             }
           }
 
-          // 添加搜索结果
+          // 添加Web搜索结果
           if (searchResults.length > 0) {
             prompt += `## Web搜索结果:\n\n`;
             searchResults.forEach((result, idx) => {
@@ -203,9 +276,10 @@ const placeInfoTool: ToolDefinition = {
                 prompt += `- 来源 ${idx + 1} [${result.domain || '未知来源'}]:\n`;
                 if (result.title) prompt += `  标题: ${result.title}\n`;
                 if (result.text) {
+                  // 对于搜索结果，保留更长的文本以获取更多信息
                   const truncatedText =
-                    typeof result.text === 'string' && result.text.length > 300
-                      ? result.text.substring(0, 300) + '...'
+                    typeof result.text === 'string' && result.text.length > 500
+                      ? result.text.substring(0, 500) + '...'
                       : result.text;
                   prompt += `  内容: ${truncatedText}\n`;
                 }
@@ -233,18 +307,19 @@ const placeInfoTool: ToolDefinition = {
             7. 官方网站和其他重要链接
             8. 信息来源归属
 
-            对于任何缺失的信息，请标注为未知，而不是编造。优先使用最新、最权威的信息源。`;
+            对于任何缺失的信息，请标注为未知或不适用，而不是编造。优先使用最新、最权威的信息源。
+            对于官方网站字段(officialWebsite)，只有在源数据中找到有效URL时才提供，否则请完全省略此字段。`;
 
           // 调用LLM进行信息综合和结构化
           const { object } = await generateObject({
             model: registry.languageModel('anthropic:claude-3-5-sonnet-latest'),
             schema: PlaceInfoSchema,
             system: `你是一位旅游编辑专家，精通整理和结构化旅游目的地信息。
-                    你的任务是根据提供的各种来源数据，为旅行者生成一个全面、实用且结构良好的目的地信息对象。
-                    信息应该对计划旅行的人有实际帮助，并包含实用的细节。
-                    如果来源数据之间有冲突，优先考虑最可靠和最近期的信息。
-                    对于缺失的信息，明确标注为未知或不适用，而不是编造。
-                    **特别注意：对于 'officialWebsite' 字段，只有在源数据中明确找到有效的URL时才包含此字段。如果没有找到有效的URL，请完全省略 'officialWebsite' 字段，不要填入'未知'或'不适用'等文字。**`,
+            你的任务是根据提供的各种来源数据，为旅行者生成一个全面、实用且结构良好的目的地信息对象。
+            信息应该对计划旅行的人有实际帮助，并包含实用的细节。
+            如果来源数据之间有冲突，优先考虑最可靠和最近期的信息。
+            对于缺失的信息，明确标注为未知或不适用，而不是编造。
+            **特别注意：对于 'officialWebsite' 字段，只有在源数据中明确找到有效的URL时才包含此字段。如果没有找到有效的URL，请完全省略 'officialWebsite' 字段，不要填入'未知'或'不适用'等文字。**`,
             prompt,
           });
 

@@ -38,6 +38,7 @@ function MessageContentComponent({ content, showCopyButton = false }: MessageCon
                       dark:text-zinc-300"
       >
         <MemoizedReactMarkdown
+          key={content}
           remarkPlugins={[remarkGfm, remarkMath]}
           rehypePlugins={[rehypeKatex]}
           components={markdownComponents}

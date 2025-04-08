@@ -441,12 +441,10 @@
       "agentFormDescription": "以下の情報を入力して新しいエージェントを作成してください",
       "name": "名前",
       "description": "説明",
-      "client": "クライアント",
       "tools": "ツール",
       "agentNamePlaceholder": "エージェント名を入力",
       "agentDescriptionPlaceholder": "エージェントの説明を入力（任意）",
       "selectClient": "クライアントを選択",
-      "clients": "クライアント",
       "selectTool": "ツールを選択",
       "availableTools": "利用可能なツール",
       "unnamedTool": "名前のないツール",
@@ -459,7 +457,14 @@
       "selectedTools": "選択済みツール",
       "refresh": "更新",
       "refreshSuccess": "更新完了",
-      "refreshSuccessDescription": "エージェントデータが更新されました"
+      "refreshSuccessDescription": "エージェントデータが更新されました",
+      "noActiveClientWarning": "アクティブなクライアントを選択してください",
+      "noAvailableToolsNoActiveClient": "まずアクティブなクライアントを選択してからツールを選択してください",
+      "toolsFilteredWarning": "ツールフィルター警告",
+      "toolsFilteredWarningDescription": "以下のツールはクライアントの制限により使用できません: {count}",
+      "createYourFirst": "最初のエージェントを作成しましょう",
+      "basicInfo": "基本情報",
+      "selectTools": "ツールを選択"
     }
   },
   "Utils": {

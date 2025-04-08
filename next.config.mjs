@@ -9,6 +9,18 @@ const nextConfig = {
     // 已移除 serverComponentsExternalPackages，移至根级配置
   },
   output: 'standalone',
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '*.oss-cn-wulanchabu-acdr-1.aliyuncs.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.aliyuncs.com',
+      },
+    ],
+  },
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {

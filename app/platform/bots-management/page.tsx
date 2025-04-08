@@ -1,21 +1,11 @@
 import { createClient } from '@/lib/utils/supabase/server';
 import { redirect } from 'next/navigation';
-import { getUserChatBots } from '@/lib/actions/get-user-chat-bots';
+import { Suspense } from 'react';
 import { ActiveClientDisplay } from '@/components/ActiveClientDisplay';
 import TranslationWrapper from '@/components/auth-translations';
-import { Chatbot } from '@/lib/db/schema/schema';
 import ChatBotsList from './components/chat-bots-list';
-import { getToolsForActiveClient } from '@/lib/actions/get-client-tools-for-active-client';
-
-// 扩展聊天机器人类型以包含工具配置
-type ExtendedChatbot = Chatbot & {
-  client_tools_config?: Array<{
-    client_tool_id: string;
-    tool_id: string;
-    tool_name: string;
-    config: Record<string, unknown>;
-  }>;
-};
+import ClientToolsProvider from './components/client-tools-provider';
+import { getUserChatBots } from '@/lib/actions/get-user-chat-bots';
 
 export default async function BotsManagementPage() {
   const supabase = await createClient();
@@ -28,34 +18,31 @@ export default async function BotsManagementPage() {
     return redirect('/sign-in');
   }
 
-  // 并行获取用户的聊天机器人和活跃客户端的工具
-  const [chatBots, activeClientTools] = await Promise.all([
-    getUserChatBots(user.id),
-    getToolsForActiveClient(user.id),
-  ]);
+  // 预获取聊天机器人数据，确保加载状态能正确显示
+  // 这会触发 loading.tsx 的显示
+  const initialChatBots = await getUserChatBots(user.id);
 
   return (
     <TranslationWrapper namespace="Platform.BotsManagement">
       {t => (
-        <div className="max-w-6xl mx-auto px-4 py-12">
-          <div className="pb-6 border-b">
-            <div className="flex items-center justify-between">
-              <h1 className="text-4xl font-bold text-blue-900 dark:text-blue-300 mb-4">
-                {t('title')}
-              </h1>
-              <ActiveClientDisplay />
+        <ClientToolsProvider>
+          <div className="max-w-6xl mx-auto px-4 py-12">
+            <div className="pb-6 border-b">
+              <div className="flex items-center justify-between">
+                <h1 className="text-4xl font-bold text-blue-900 dark:text-blue-300 mb-4">
+                  {t('title')}
+                </h1>
+                <ActiveClientDisplay />
+              </div>
+              <p className="text-xl text-gray-600 dark:text-gray-400">{t('subtitle')}</p>
             </div>
-            <p className="text-xl text-gray-600 dark:text-gray-400">{t('subtitle')}</p>
+            <div className="py-6">
+              <Suspense fallback={null}>
+                <ChatBotsList userId={user.id} initialChatBots={initialChatBots} />
+              </Suspense>
+            </div>
           </div>
-          <div className="py-6">
-            <ChatBotsList
-              initialChatBots={chatBots as ExtendedChatbot[]}
-              userId={user.id}
-              availableTools={activeClientTools.tools}
-              hasActiveClient={activeClientTools.hasActiveClient}
-            />
-          </div>
-        </div>
+        </ClientToolsProvider>
       )}
     </TranslationWrapper>
   );

@@ -2,14 +2,17 @@
 
 import { db } from '@/lib/db';
 import { client_tools, tools } from '@/lib/db/schema/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { getUserActiveClient } from '@/lib/redis/api-key-cache';
 import { CustomError } from '@/types';
 
-// 定义工具信息类型
+// 定义工具信息类型，增加client_id和is_enabled字段
 export type ToolInfo = {
-  id: string;
-  name: string;
+  id: string; // client_tools的ID
+  toolId: string; // 工具的实际ID
+  name: string; // 工具名称
+  client_id: string; // 客户端ID
+  is_enabled: boolean; // 工具是否启用
 };
 
 /**
@@ -29,16 +32,20 @@ export async function getToolsForActiveClient(userId: string): Promise<{
       return { tools: [], hasActiveClient: false };
     }
 
-    // 直接查询工具详情，确保每个工具只出现一次
+    // 查询工具详情，包含client_id和is_enabled字段，并过滤出已启用的工具
     const toolsData = await db
       .select({
-        id: client_tools.id, // 使用client_tools的ID作为标识符
-        toolId: tools.id, // 工具的实际ID，用于去重
-        name: tools.name,
+        id: client_tools.id, // client_tools的ID
+        toolId: tools.id, // 工具的实际ID
+        name: tools.name, // 工具名称
+        client_id: client_tools.client_id, // 客户端ID
+        is_enabled: client_tools.is_enabled, // 工具是否启用
       })
       .from(client_tools)
       .innerJoin(tools, eq(client_tools.tool_id, tools.id))
-      .where(eq(client_tools.client_id, activeClientId));
+      .where(and(eq(client_tools.client_id, activeClientId), eq(client_tools.is_enabled, true)));
+
+    console.log(`找到 ${toolsData.length} 个已启用的工具，客户端ID: ${activeClientId}`);
 
     return {
       tools: toolsData,

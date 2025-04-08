@@ -442,12 +442,10 @@
       "agentFormDescription": "填写以下信息创建新的智能体",
       "name": "名称",
       "description": "描述",
-      "client": "客户端",
       "tools": "工具",
       "agentNamePlaceholder": "输入智能体名称",
       "agentDescriptionPlaceholder": "输入智能体描述（可选）",
       "selectClient": "选择客户端",
-      "clients": "客户端",
       "selectTool": "选择工具",
       "availableTools": "可用工具",
       "unnamedTool": "未命名工具",
@@ -460,7 +458,14 @@
       "selectedTools": "已选择工具",
       "refresh": "刷新",
       "refreshSuccess": "刷新成功",
-      "refreshSuccessDescription": "智能体数据已更新"
+      "refreshSuccessDescription": "智能体数据已更新",
+      "noActiveClientWarning": "请先选择一个活跃的客户端",
+      "noAvailableToolsNoActiveClient": "请先选择一个活跃的客户端，然后才能选择工具",
+      "toolsFilteredWarning": "工具过滤警告",
+      "toolsFilteredWarningDescription": "以下工具由于客户端限制无法使用：{count}",
+      "createYourFirst": "创建你的第一个智能体",
+      "basicInfo": "基本信息",
+      "selectTools": "选择工具"
     }
   },
   "Utils": {

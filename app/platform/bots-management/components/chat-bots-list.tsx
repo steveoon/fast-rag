@@ -1,16 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { ConfigurableCard } from '@/components/configurable-card';
-import { createChatBot } from '@/lib/actions/create-chat-bot';
-import { updateChatBotStatus } from '@/lib/actions/update-chat-bot-status';
-import { deleteChatBot } from '@/lib/actions/delete-chat-bot';
-import { updateChatBot } from '@/lib/actions/update-chat-bot';
-import { getUserChatBots } from '@/lib/actions/get-user-chat-bots';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslations } from 'next-intl';
-import { Edit, Power, Copy, RefreshCw, Trash2, Plus } from 'lucide-react';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { Plus, RefreshCw, Bot } from 'lucide-react';
 import ChatbotDialog from './chat-bot-dialog';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -23,288 +16,235 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Chatbot } from '@/lib/db/schema/schema';
 import { Button } from '@/components/ui/button';
-import { ToolInfo } from '@/lib/actions/get-client-tools-for-active-client';
-
-// 定义客户端工具配置类型
-type ClientToolConfig = {
-  client_tool_id: string;
-  tool_id: string;
-  tool_name: string;
-  config: Record<string, unknown>;
-};
-
-// 扩展聊天机器人类型以包含工具配置
-type ExtendedChatbot = Chatbot & {
-  client_tools_config?: Array<ClientToolConfig> | string;
-};
-
-type ChatbotWithUrl = ExtendedChatbot & {
-  fullUrl: string;
-};
-
+import { useClientToolsStore } from '@/components/tools/client-tools-store';
+import { useChatBotsStore } from '../store';
+import { useDialogManager } from '@/hooks/use-dialog-manager';
+import { ChatBotCard } from './chat-bot-card';
+import { Chatbot } from '@/lib/db/schema/schema';
 export default function ChatBotsList({
-  initialChatBots,
   userId,
-  availableTools = [],
-  hasActiveClient = false,
+  initialChatBots = [],
 }: {
-  initialChatBots: ExtendedChatbot[];
   userId: string;
-  availableTools?: ToolInfo[];
-  hasActiveClient?: boolean;
+  initialChatBots: Chatbot[];
 }) {
-  const [chatBots, setChatBots] = useState<ChatbotWithUrl[]>(
-    initialChatBots.map(bot => ({
-      ...bot,
-      fullUrl: '', // 初始化为空字符串，避免服务器端渲染时使用window
-    }))
-  );
-  const [isCreatingChatbot, setIsCreatingChatbot] = useState(false);
-  const [isUpdatingChatbot, setIsUpdatingChatbot] = useState(false);
-  const [loadingChatbotId, setLoadingChatbotId] = useState<string | null>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  // 使用store获取状态和方法，并用initialChatBots初始化
+  const {
+    chatbots,
+    selectedChatbot,
+    isUpdating,
+    error,
+    fetchChatBots,
+    createChatBot,
+    updateChatBot,
+    toggleChatBotStatus,
+    deleteChatBot,
+    selectChatbot,
+    setChatBots,
+  } = useChatBotsStore();
+
+  // 客户端工具store
+  const { clientTools } = useClientToolsStore();
+
+  // 对话框管理
+  const { dialogs, openDialog, closeDialog } = useDialogManager();
+
+  // 待删除的机器人
   const [chatbotToDelete, setChatbotToDelete] = useState<Chatbot | null>(null);
-  const [editChatbot, setEditChatbot] = useState<ExtendedChatbot | null>(null);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   const { toast } = useToast();
   const t = useTranslations('Platform.BotsManagement');
   const tUtils = useTranslations('Utils.Error');
 
-  // 在客户端渲染后设置完整URL
+  // 初始化store数据
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setChatBots(prev =>
-        prev.map(bot => ({
-          ...bot,
-          fullUrl: `${window.location.origin}${bot.url}`,
-        }))
-      );
-    }
-  }, [initialChatBots]);
-
-  // 更新刷新机器人列表数据的函数，防止频繁请求
-  const refreshChatBots = async () => {
-    if (isRefreshing) return; // 防止重复请求
-
-    try {
-      setIsRefreshing(true);
-      const refreshedChatBots = await getUserChatBots(userId);
+    if (initialChatBots.length > 0) {
       setChatBots(
-        refreshedChatBots.map(bot => ({
+        initialChatBots.map(bot => ({
           ...bot,
           fullUrl: typeof window !== 'undefined' ? `${window.location.origin}${bot.url}` : '',
-        })) as ChatbotWithUrl[]
+        }))
       );
-      toast({
-        title: t('refreshSuccess'),
-        description: t('refreshSuccessDescription'),
-      });
-    } catch (error) {
-      console.error('刷新聊天机器人列表失败:', error);
-      toast({
-        title: t('error'),
-        description: tUtils('unknown'),
-        variant: 'destructive',
-      });
-    } finally {
-      setIsRefreshing(false);
+    } else {
+      fetchChatBots(userId);
     }
+  }, [initialChatBots, setChatBots, fetchChatBots, userId]);
+
+  // 从clientTools中提取工具信息的工具函数
+  const getAvailableTools = useCallback(() => {
+    return clientTools
+      .filter(tool => tool.is_enabled)
+      .map(tool => ({
+        id: tool.id,
+        toolId: tool.tool.id,
+        name: tool.tool.name,
+        client_id: tool.client_id,
+        is_enabled: tool.is_enabled,
+      }));
+  }, [clientTools]);
+
+  // 缓存计算结果
+  const availableTools = useMemo(() => getAvailableTools(), [getAvailableTools]);
+  const hasActiveClient = useMemo(() => clientTools.length > 0, [clientTools]);
+
+  // 刷新数据的处理函数
+  const handleRefresh = () => {
+    fetchChatBots(userId);
   };
 
-  const handleCreateChatbot = async (data: {
+  // 处理创建提交
+  const handleCreateSubmit = async (data: {
     name: string;
     description: string;
     clientToolIds: string[];
   }) => {
-    setIsCreatingChatbot(true);
     try {
-      const result = await createChatBot({
-        name: data.name,
-        description: data.description,
-        clientToolIds: data.clientToolIds,
-        userId,
-      });
-
-      // 创建成功后刷新数据
-      await refreshChatBots();
-
+      await createChatBot(data, userId);
+      closeDialog('create');
       toast({
         title: t('created'),
-        description: t('agentCreatedDescription', { name: result.chatbot.name }),
+        description: t('agentCreatedDescription', { name: data.name }),
       });
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        toast({
-          title: t('error'),
-          description: error.message,
-          variant: 'destructive',
-        });
-      } else {
-        toast({
-          title: t('error'),
-          description: tUtils('unknown'),
-          variant: 'destructive',
-        });
-      }
-    } finally {
-      setIsCreatingChatbot(false);
+    } catch (error) {
+      toast({
+        title: t('error'),
+        description: error instanceof Error ? error.message : tUtils('unknown'),
+        variant: 'destructive',
+      });
     }
   };
 
-  const handleUpdateChatbot = async (data: {
+  // 处理更新提交
+  const handleUpdateSubmit = async (data: {
     name: string;
     description: string;
     clientToolIds: string[];
   }) => {
-    if (!editChatbot) return;
+    if (!selectedChatbot) return;
 
-    setIsUpdatingChatbot(true);
     try {
-      const result = await updateChatBot({
-        id: editChatbot.id,
-        name: data.name,
-        description: data.description,
-        clientToolIds: data.clientToolIds,
-        userId,
-      });
+      // 检查是否有工具被过滤（通过比较原始工具ID和提交的工具ID）
+      let originalToolIds: string[] = [];
+      if (Array.isArray(selectedChatbot.client_tools_config)) {
+        originalToolIds = selectedChatbot.client_tools_config.map(t => t.client_tool_id);
+      } else if (typeof selectedChatbot.client_tools_config === 'string') {
+        try {
+          const toolsConfig = JSON.parse(selectedChatbot.client_tools_config);
+          originalToolIds = toolsConfig.map((t: { client_tool_id: string }) => t.client_tool_id);
+        } catch (e) {
+          console.error('Error parsing client_tools_config:', e);
+        }
+      }
 
-      // 更新成功后刷新数据
-      await refreshChatBots();
+      const filteredOutCount =
+        originalToolIds.length -
+        originalToolIds.filter(id => data.clientToolIds.includes(id)).length;
 
-      toast({
-        title: t('updated'),
-        description: t('agentUpdatedDescription', { name: result.chatbot.name }),
-      });
-    } catch (error: unknown) {
-      if (error instanceof Error) {
+      if (filteredOutCount > 0) {
+        // 显示警告信息
         toast({
-          title: t('error'),
-          description: error.message,
-          variant: 'destructive',
-        });
-      } else {
-        toast({
-          title: t('error'),
-          description: tUtils('unknown'),
-          variant: 'destructive',
+          title: t('toolsFilteredWarning'),
+          description: t('toolsFilteredWarningDescription', { count: filteredOutCount }),
+          variant: 'default',
         });
       }
-    } finally {
-      setIsUpdatingChatbot(false);
-      setEditChatbot(null);
-    }
-  };
 
-  const handleToggleStatus = async (chatbotId: string) => {
-    setLoadingChatbotId(chatbotId);
-    try {
-      const chatbot = chatBots.find(bot => bot.id === chatbotId);
-      if (!chatbot) return;
-
-      const newStatus = chatbot.status === 'active' ? 'disabled' : 'active';
-      await updateChatBotStatus(chatbotId, newStatus, userId);
-
-      setChatBots(
-        chatBots.map(bot => (bot.id === chatbotId ? { ...bot, status: newStatus } : bot))
+      await updateChatBot(
+        {
+          id: selectedChatbot.id,
+          ...data,
+        },
+        userId
       );
 
+      closeDialog('edit');
       toast({
-        title: t('statusUpdated'),
-        description:
-          newStatus === 'active'
-            ? t('agentEnabledDescription', { name: chatbot.name })
-            : t('agentDisabledDescription', { name: chatbot.name }),
+        title: t('updated'),
+        description: t('agentUpdatedDescription', { name: data.name }),
       });
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        toast({
-          title: t('error'),
-          description: error.message,
-          variant: 'destructive',
-        });
-      } else {
-        toast({
-          title: t('error'),
-          description: tUtils('unknown'),
-          variant: 'destructive',
-        });
-      }
-    } finally {
-      setLoadingChatbotId(null);
+    } catch (error) {
+      toast({
+        title: t('error'),
+        description: error instanceof Error ? error.message : tUtils('unknown'),
+        variant: 'destructive',
+      });
     }
   };
 
+  // 处理状态切换
+  const handleToggleStatus = async (chatbotId: string) => {
+    try {
+      await toggleChatBotStatus(chatbotId, userId);
+
+      const chatbot = chatbots.find(bot => bot.id === chatbotId);
+      if (chatbot) {
+        const newStatus = chatbot.status === 'active' ? 'disabled' : 'active';
+        toast({
+          title: t('statusUpdated'),
+          description:
+            newStatus === 'active'
+              ? t('agentEnabledDescription', { name: chatbot.name })
+              : t('agentDisabledDescription', { name: chatbot.name }),
+        });
+      }
+    } catch (error) {
+      toast({
+        title: t('error'),
+        description: error instanceof Error ? error.message : tUtils('unknown'),
+        variant: 'destructive',
+      });
+    }
+  };
+
+  // 处理删除
   const handleDelete = async () => {
     if (!chatbotToDelete) return;
 
     try {
       await deleteChatBot(chatbotToDelete.id, userId);
-
-      setChatBots(chatBots.filter(bot => bot.id !== chatbotToDelete.id));
-
+      closeDialog('delete');
       toast({
         title: t('deleted'),
         description: t('agentDeletedDescription', { name: chatbotToDelete.name }),
       });
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        toast({
-          title: t('error'),
-          description: error.message,
-          variant: 'destructive',
-        });
-      } else {
-        toast({
-          title: t('error'),
-          description: tUtils('unknown'),
-          variant: 'destructive',
-        });
-      }
-    } finally {
-      setDeleteDialogOpen(false);
       setChatbotToDelete(null);
+    } catch (error) {
+      toast({
+        title: t('error'),
+        description: error instanceof Error ? error.message : tUtils('unknown'),
+        variant: 'destructive',
+      });
     }
   };
 
-  const copyUrl = (url: string) => {
-    navigator.clipboard.writeText(url);
-    toast({
-      title: t('copied'),
-      description: t('urlCopiedDescription'),
-    });
+  // 处理编辑点击
+  const handleEditClick = (chatbot: Chatbot) => {
+    selectChatbot(chatbot);
+    openDialog('edit');
   };
 
-  // 点击编辑按钮时设置编辑对象并打开对话框
-  const handleEditClick = (chatbot: ExtendedChatbot) => {
-    setEditChatbot(chatbot);
-    setEditDialogOpen(true);
-  };
-
-  // 编辑对话框关闭时清空编辑对象
-  const handleEditDialogOpenChange = (open: boolean) => {
-    setEditDialogOpen(open);
-    if (!open) {
-      setEditChatbot(null);
-    }
-  };
-
-  const openDeleteDialog = (chatbot: Chatbot) => {
+  // 处理删除点击
+  const handleDeleteClick = (chatbot: Chatbot) => {
     setChatbotToDelete(chatbot);
-    setDeleteDialogOpen(true);
+    openDialog('delete');
   };
 
   return (
     <div className="space-y-8">
+      {/* 显示错误信息 */}
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          {error}
+        </div>
+      )}
+
+      {/* 列表头部 */}
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-2">
           <Button
-            onClick={() => setCreateDialogOpen(true)}
-            disabled={isCreatingChatbot}
+            onClick={() => openDialog('create')}
+            disabled={isUpdating}
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >
             <Plus className="mr-2 h-4 w-4" />
@@ -314,106 +254,88 @@ export default function ChatBotsList({
           <Button
             variant="outline"
             size="default"
-            onClick={refreshChatBots}
-            disabled={isRefreshing}
+            onClick={handleRefresh}
+            disabled={isUpdating}
             className="flex items-center gap-1"
           >
-            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 ${isUpdating ? 'animate-spin' : ''}`} />
             {t('refresh')}
           </Button>
         </div>
 
         <Badge variant="outline" className="px-2 text-blue-900 dark:text-blue-300">
-          {t('totalChatBots', { count: chatBots.length })}
+          {t('totalChatBots', { count: chatbots.length })}
         </Badge>
       </div>
 
+      {/* 创建对话框 */}
       <ChatbotDialog
-        open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
-        onSubmit={handleCreateChatbot}
-        isSubmitting={isCreatingChatbot}
+        open={dialogs.create}
+        onOpenChange={open => {
+          if (!open) closeDialog('create');
+          else openDialog('create');
+        }}
+        onSubmit={handleCreateSubmit}
+        isSubmitting={isUpdating}
         availableTools={availableTools}
         hasActiveClient={hasActiveClient}
       />
 
+      {/* 编辑对话框 */}
       <ChatbotDialog
-        open={editDialogOpen}
-        onOpenChange={handleEditDialogOpenChange}
-        onSubmit={handleUpdateChatbot}
-        isSubmitting={isUpdatingChatbot}
+        open={dialogs.edit}
+        onOpenChange={open => {
+          if (!open) {
+            closeDialog('edit');
+            selectChatbot(null);
+          } else {
+            openDialog('edit');
+          }
+        }}
+        onSubmit={handleUpdateSubmit}
+        isSubmitting={isUpdating}
         availableTools={availableTools}
         hasActiveClient={hasActiveClient}
-        editChatbot={editChatbot}
+        editChatbot={selectedChatbot}
       />
 
+      {/* 机器人卡片列表 */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {chatBots.map(chatbot => (
-          <ConfigurableCard
+        {chatbots.map(chatbot => (
+          <ChatBotCard
             key={chatbot.id}
-            icon={Power}
-            title={chatbot.name}
-            content={
-              <>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  {chatbot.description || t('noDescription')}
-                </p>
-                <p className="text-gray-600 dark:text-gray-400 mb-2">
-                  {t('status')}:{' '}
-                  <span
-                    className={`font-semibold ${chatbot.status === 'active' ? 'text-green-500' : 'text-gray-400'}`}
-                  >
-                    {chatbot.status === 'active' ? t('active') : t('disabled')}
-                  </span>
-                </p>
-                <div className="text-gray-600 dark:text-gray-400">
-                  <div className="mb-1 flex items-center justify-between">
-                    <div>{t('url')}:</div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => copyUrl(chatbot.fullUrl)}
-                      className="h-6 px-2 text-xs"
-                    >
-                      <Copy className="h-3.5 w-3.5 mr-1" />
-                      {t('copyUrl')}
-                    </Button>
-                  </div>
-                  <ScrollArea className="w-full h-10 relative pr-20">
-                    <div className="w-full h-10 flex items-center">
-                      <code className="text-xs">{chatbot.fullUrl}</code>
-                    </div>
-                    <ScrollBar orientation="horizontal" />
-                  </ScrollArea>
-                </div>
-              </>
-            }
-            primaryAction={{
-              label: chatbot.status === 'active' ? t('disable') : t('enable'),
-              onClick: () => handleToggleStatus(chatbot.id),
-              icon: Power,
-              loading: loadingChatbotId === chatbot.id,
-              variant: chatbot.status === 'active' ? 'danger' : 'success',
-            }}
-            secondaryAction={{
-              label: t('edit'),
-              onClick: () => handleEditClick(chatbot),
-              icon: Edit,
-            }}
-            dangerAction={{
-              label: t('delete'),
-              onClick: () => openDeleteDialog(chatbot),
-              icon: Trash2,
-            }}
+            chatbot={chatbot}
+            onEdit={handleEditClick}
+            onDelete={handleDeleteClick}
+            onToggleStatus={handleToggleStatus}
+            isUpdating={isUpdating}
           />
         ))}
 
-        {chatBots.length === 0 && (
-          <div className="col-span-3 text-center py-10 text-gray-500">{t('noChatBots')}</div>
+        {/* 空状态显示 */}
+        {!isUpdating && chatbots.length === 0 && (
+          <div className="col-span-3 text-center py-12 text-gray-500 bg-gray-50 dark:bg-gray-800/30 rounded-lg border border-dashed border-gray-300 dark:border-gray-700">
+            <Bot className="h-10 w-10 mx-auto mb-2 text-gray-400" />
+            <p className="text-gray-600 dark:text-gray-400">{t('noChatBots')}</p>
+            <Button variant="outline" className="mt-4" onClick={() => openDialog('create')}>
+              <Plus className="h-4 w-4 mr-1" /> {t('createYourFirst')}
+            </Button>
+          </div>
         )}
       </div>
 
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      {/* 删除确认对话框 */}
+      <AlertDialog
+        open={dialogs.delete}
+        onOpenChange={open => {
+          if (!open) {
+            closeDialog('delete');
+            setChatbotToDelete(null);
+          } else {
+            openDialog('delete');
+          }
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t('confirmDelete')}</AlertDialogTitle>
