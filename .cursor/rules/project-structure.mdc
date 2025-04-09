@@ -1,9 +1,9 @@
 ---
-description: Project structure and file organization guidelines
+description: Project structure and file organization guidelines globs: 
 globs: 
 alwaysApply: false
 ---
-# Project Structure
+ # Project Structure
 
 ## Main Structure
 
@@ -28,7 +28,7 @@ alwaysApply: false
 │   ├── auth/            # Auth-related routes
 │   ├── chat-bot/        # Chat bot features
 │   └── platform/        # Platform-specific pages
-│       ├── bots-management/      # Bot(Agents) management UI
+│       ├── bots-management/      # Bot management UI
 │       ├── general-settings/     # General settings
 │       ├── reset-password/       # Password reset feature
 │       ├── clients-management/   # Client management UI
