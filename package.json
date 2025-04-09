@@ -19,8 +19,8 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@agentic/ai-sdk": "^7.3.3",
-    "@agentic/exa": "^7.3.3",
+    "@agentic/ai-sdk": "^7.6.3",
+    "@agentic/exa": "^7.6.3",
     "@agentic/weather": "^7.3.3",
     "@agentic/wikidata": "^7.3.3",
     "@agentic/wikipedia": "^7.3.3",

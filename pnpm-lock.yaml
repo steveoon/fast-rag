@@ -13,11 +13,11 @@ importers:
   .:
     dependencies:
       '@agentic/ai-sdk':
-        specifier: ^7.3.3
-        version: 7.3.3(ai@4.3.4(react@19.1.0)(zod@3.24.2))(zod@3.24.2)
+        specifier: ^7.6.3
+        version: 7.6.3(ai@4.3.4(react@19.1.0)(zod@3.24.2))(zod@3.24.2)
       '@agentic/exa':
-        specifier: ^7.3.3
-        version: 7.3.3(zod@3.24.2)
+        specifier: ^7.6.3
+        version: 7.6.3(zod@3.24.2)
       '@agentic/weather':
         specifier: ^7.3.3
         version: 7.3.3(zod@3.24.2)
@@ -301,18 +301,23 @@ importers:
 
 packages:
 
-  '@agentic/ai-sdk@7.3.3':
-    resolution: {integrity: sha512-/2HT5yNMdWGsCq4Pngvt7CTycLya4w9g8eEmKZrwdyMMjHqI/+INmMEgwECqqtk6nuNTVrNKKO91N3YSlxbJnw==}
+  '@agentic/ai-sdk@7.6.3':
+    resolution: {integrity: sha512-dwajziCvKOLosHybv/in+7Um3KnR+JbEIfhS1R1SFJTnKEYl0qi1AhW34w/Ku1+PHq4KCuh/lOsnjdlmLC6KkQ==}
     peerDependencies:
-      ai: ^4.1.42
+      ai: ^4.2.8
 
   '@agentic/core@7.3.3':
     resolution: {integrity: sha512-DSKhfUXwpvYc3/aVUA5H/7w7MnJxQJRrY1CTFUKTvxej7IFrKoE+PoeFM2q1SBZLs5Y/DORawwQ3VX3fn+ih9w==}
     peerDependencies:
       zod: ^3.24.2
 
-  '@agentic/exa@7.3.3':
-    resolution: {integrity: sha512-Kh5C5VHVZFUIsk/jqei/Tj4Kp7bhrsbS0UyhZnSJoLWMPd1Kg905mrhx2d4GMKKPz91u7HHSlamO71RwQLfOCQ==}
+  '@agentic/core@7.6.3':
+    resolution: {integrity: sha512-Bin1p7+XJFq01wAQOLKaUVusNg4vt+gjZc3AMSipTd0sU26CnVHr45p917igt1JmMX3c1giBxb4nfbK5LJDLOA==}
+    peerDependencies:
+      zod: ^3.24.2
+
+  '@agentic/exa@7.6.3':
+    resolution: {integrity: sha512-HBdyaqlhsVJBLEMenO1DDfCjzHwkf+64+6f4vGd6wtlMEe8zCUpcuNR0SJtjp+tr2SGsfWw9JPA2ohDpoFhZpg==}
     peerDependencies:
       zod: ^3.24.2
 
@@ -3988,6 +3993,10 @@ packages:
     resolution: {integrity: sha512-HzhziW6sc5m0pwi5M196+7cEBtbt0lCYi67wNsiwMUmz833wloE0gbzJPWKs1gliFKQb34huItDQX97LyOdPdA==}
     engines: {node: '>=18'}
 
+  ky@1.8.0:
+    resolution: {integrity: sha512-DoKGmG27nT8t/1F9gV8vNzggJ3mLAyD49J8tTMWHeZvS8qLc7GlyTieicYtFzvDznMe/q2u38peOjkWc5/pjvw==}
+    engines: {node: '>=18'}
+
   language-subtag-registry@0.3.23:
     resolution: {integrity: sha512-0K65Lea881pHotoGEa5gDlMxt3pctLi2RplBb7Ezh4rRdLEOtgi7n4EwK9lamnUCkKBqaeKRVebTq6BAxSkpXQ==}
 
@@ -5429,6 +5438,10 @@ packages:
     resolution: {integrity: sha512-S/5/0kFftkq27FPNye0XM1e2NsnoD/3FS+pBmbjmmtLT6I+i344KoOf7pvXreaFsDamWeaJX55nczA1m5PsBDg==}
     engines: {node: '>=16'}
 
+  type-fest@4.39.1:
+    resolution: {integrity: sha512-uW9qzd66uyHYxwyVBYiwS4Oi0qZyUqwjU+Oevr6ZogYiXt99EOYtwvzMSLw1c3lYo2HzJsep/NB23iEVEgjG/w==}
+    engines: {node: '>=16'}
+
   typed-array-buffer@1.0.2:
     resolution: {integrity: sha512-gEymJYKZtKXzzBzM4jqa9w6Q1Jjm7x2d+sh19AdsD4wqnMPDYyvwpsIc2Q/835kHuo3BEQ7CjelGhfTsoBb2MQ==}
     engines: {node: '>= 0.4'}
@@ -5808,9 +5821,9 @@ packages:
 
 snapshots:
 
-  '@agentic/ai-sdk@7.3.3(ai@4.3.4(react@19.1.0)(zod@3.24.2))(zod@3.24.2)':
+  '@agentic/ai-sdk@7.6.3(ai@4.3.4(react@19.1.0)(zod@3.24.2))(zod@3.24.2)':
     dependencies:
-      '@agentic/core': 7.3.3(zod@3.24.2)
+      '@agentic/core': 7.6.3(zod@3.24.2)
       ai: 4.3.4(react@19.1.0)(zod@3.24.2)
     transitivePeerDependencies:
       - babel-plugin-macros
@@ -5831,10 +5844,24 @@ snapshots:
     transitivePeerDependencies:
       - babel-plugin-macros
 
-  '@agentic/exa@7.3.3(zod@3.24.2)':
+  '@agentic/core@7.6.3(zod@3.24.2)':
     dependencies:
-      '@agentic/core': 7.3.3(zod@3.24.2)
-      ky: 1.7.5
+      dedent: 1.5.3
+      delay: 6.0.0
+      jsonrepair: 3.12.0
+      ky: 1.8.0
+      openai-zod-to-json-schema: 1.0.3(zod@3.24.2)
+      p-throttle: 6.2.0
+      type-fest: 4.39.1
+      zod: 3.24.2
+      zod-validation-error: 3.4.0(zod@3.24.2)
+    transitivePeerDependencies:
+      - babel-plugin-macros
+
+  '@agentic/exa@7.6.3(zod@3.24.2)':
+    dependencies:
+      '@agentic/core': 7.6.3(zod@3.24.2)
+      ky: 1.8.0
       zod: 3.24.2
     transitivePeerDependencies:
       - babel-plugin-macros
@@ -9657,6 +9684,8 @@ snapshots:
 
   ky@1.7.5: {}
 
+  ky@1.8.0: {}
+
   language-subtag-registry@0.3.23: {}
 
   language-tags@1.0.9:
@@ -11477,6 +11506,8 @@ snapshots:
   type-fest@0.20.2: {}
 
   type-fest@4.37.0: {}
+
+  type-fest@4.39.1: {}
 
   typed-array-buffer@1.0.2:
     dependencies:
