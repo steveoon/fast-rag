@@ -1,0 +1,72 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+You are an expert in TypeScript, React, Node.js, Next.js App Router, Zustand, Shadcn UI, Radix UI, Tailwind, Drizzle ORM, Vercel AI SDK, and deployment (Vercel, Docker on Cloud).
+
+**Core Principles & Style**
+
+*   Write concise, modular, technical TypeScript following "Effective TypeScript" principles (avoid `any`, prefer specific types, use `readonly`, utility types, etc.).
+*   Use descriptive variable names (e.g., `isLoading`).
+*   Structure files logically: exported component, subcomponents, helpers, static content.
+*   Naming: Use `lowercase-with-dashes` for directories, favor named exports.
+
+**React & Next.js (incl. React 19 / Next.js 15)**
+
+*   Use functional components and hooks correctly (following Rules of Hooks).
+*   Prioritize composition over inheritance (`children`, render props).
+*   Optimize performance:
+    *   Memoization: `React.memo`, `useCallback`, `useMemo` (or rely on React Compiler).
+    *   Code Splitting: `React.lazy`, `Suspense`, Next.js dynamic loading.
+    *   Minimize `'use client'`, `useEffect`, `useState`; favor RSC.
+    *   Use Suspense for client components.
+    *   Optimize images (WebP, size, lazy loading).
+    *   Adopt Partial Prerendering (PPR) with Suspense boundaries.
+    *   Leverage React Compiler for automatic memoization.
+    *   Utilize Server Actions for mutations and form handling (`useFormStatus`, `useFormState`).
+*   New Features:
+    *   Use `use` hook for data fetching/promises in client components.
+    *   Use Document Metadata API (`useDocumentTitle`, `useDocumentHead`).
+    *   Use View Transitions API.
+*   Use controlled components for forms.
+*   Use refs sparingly (DOM access).
+*   Implement Error Boundaries and `useEffect` cleanup.
+
+**State Management**
+
+*   Use Zustand for complex global state.
+*   Lift state or use Context (with `use` hook) for simpler sharing.
+*   Use Server Actions for server-side state mutations where appropriate.
+
+**UI & Styling**
+
+*   Use Shadcn UI & Radix UI for component foundations.
+*   Use Tailwind CSS for utility-first, responsive (mobile-first) design.
+
+**Database (Next.js 15 + Drizzle)**
+
+*   Strict client-server separation: Database logic is server-only.
+*   Mark DB connection/utility files with `'use server'`.
+*   Create typed Server Actions for ALL database operations (CRUD).
+*   Call Server Actions from Client Components (never import DB modules directly).
+*   Use RSC for server-side data fetching.
+*   Apply validation (e.g., Zod) within Server Actions before DB calls.
+
+**Error Handling & Validation**
+
+*   Prioritize error handling: Handle errors/edge cases early (guard clauses, early returns).
+*   Place happy path last. Avoid unnecessary `else`.
+*   Implement proper logging and user-friendly error messages.
+*   Model expected errors as return values in Server Actions.
+*   Use Zod/Joi for schema validation (forms, API inputs).
+
+**Key Conventions & Others**
+
+*   Use `nuqs` for URL search param state.
+*   Optimize Web Vitals (LCP, CLS, FID).
+*   Accessibility (a11y): Semantic HTML, ARIA, keyboard navigation.
+*   Testing: Unit tests (Jest/RTL), integration tests.
+*   Security: Sanitize inputs (XSS prevention).
+*   i18n: Use libraries like `next-intl`.
+*   Follow Next.js docs for Data Fetching, Rendering, Routing.

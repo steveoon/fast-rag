@@ -1,0 +1,138 @@
+---
+description: Project structure and file organization guidelines
+globs: 
+alwaysApply: false
+---
+# Project Structure
+
+## Main Structure
+
+```tree
+.
+├── app/                 # Next.js App Router
+│   ├── layout.tsx       # Root layout
+│   ├── page.tsx         # Root page
+│   ├── globals.css      # Global CSS styles
+│   ├── (auth-pages)/    # Authentication pages
+│   ├── api/             # API Routes
+│   │   └── v1/          # API Version 1
+│   │       ├── chat/             # Chat API
+│   │       ├── new-key/          # API Key management
+│   │       ├── set-active-key/   # Key activation API
+│   │       ├── validate-key/     # Key validation API
+│   │       ├── new-client/       # Client creation API
+│   │       ├── client-tools/     # Client tools API
+│   │       ├── files-management/ # File management API
+│   │       └── doc-process/      # Document processing API
+│   ├── api-docs/        # API Documentation
+│   ├── auth/            # Auth-related routes
+│   ├── chat-bot/        # Chat bot features
+│   └── platform/        # Platform-specific pages
+│       ├── bots-management/      # Bot(Agents) management UI
+│       ├── general-settings/     # General settings
+│       ├── reset-password/       # Password reset feature
+│       ├── clients-management/   # Client management UI
+│       ├── data-management/      # Data management features
+│       ├── tools-management/     # Tools configuration UI
+│       └── layout.tsx            # Platform layout
+├── components/          # Reusable React components
+│   ├── ui/              # Shadcn UI components
+│   ├── auth/            # Authentication components
+│   ├── sections/        # Page section components 
+│   ├── tools/           # Tool-related components
+│   ├── modules/         # Feature modules components
+│   └── *.tsx            # Individual components
+├── lib/                 # Utilities and libraries
+│   ├── actions/         # Server Actions
+│   │   ├── doc-process/       # Document processing actions
+│   │   ├── files-management/  # File management actions
+│   │   ├── tools-quire/       # Tools query actions
+│   │   └── *.ts               # Individual action files
+│   ├── clients/         # Client API implementations
+│   ├── utils/           # Utility functions
+│   │   ├── models-registry/   # Model registry for AI providers
+│   │   ├── tools/             # AI tools utilities
+│   │   │   └── tool-definitions/  # Tool implementation definitions
+│   │   │       └── clients/       # Tool client instances
+│   │   ├── supabase/          # Supabase utilities
+│   │   ├── unique-verification/ # Verification utilities
+│   │   ├── error/             # Error handling utilities
+│   │   ├── logger/            # Logging utilities
+│   │   ├── file-utils.ts      # File manipulation utilities
+│   │   ├── extract-api-key.ts # API key extraction from requests
+│   │   ├── auth.ts            # Authentication helpers
+│   │   ├── retry.ts           # Retry logic for API calls
+│   │   └── translations.ts    # Internationalization utilities
+│   ├── api-key/         # API key management utilities
+│   │   ├── validate-key.ts      # API key validation logic
+│   │   ├── validate-redis-key.ts # Redis key validation
+│   │   └── generate-key.ts      # API key generation
+│   ├── db/              # Database utilities and schema
+│   ├── redis/           # Redis utilities
+│   ├── request/         # Request handling utilities
+│   └── env.mjs          # Environment variables configuration
+├── hooks/               # Custom React hooks
+├── types/               # TypeScript type definitions
+├── public/              # Static assets
+├── i18n/                # Internationalization
+├── scripts/             # Utility scripts
+│   └── migrate-tools-minimal.ts # Database migration for tools
+├── constant/            # Constant values and configurations
+├── messages/            # Localization messages
+├── __tests__/           # Test files
+└── [config files]       # Various configuration files
+```
+
+## File Naming and Organization
+
+- Use kebab-case for route directories and API routes (e.g., `api/v1/new-key`)
+- Use PascalCase for components (e.g. `components/NavBar.tsx`)
+- Shadcn UI components are in `components/ui`
+- All other components are in the `components` directory 
+- Server actions are in `lib/actions` directory
+
+## Component Organization
+
+- Individual components are at the root of `components/`
+- Feature-specific components are grouped in subdirectories
+- UI/Design system components are in `components/ui`
+- Component naming follows PascalCase convention
+- Use `.tsx` extension for all React components
+
+## API Routes
+
+- All API routes are under `app/api`
+- Versioned APIs are under `app/api/v1/`
+- Each API endpoint has its own directory with a `route.ts` file
+
+## Server Actions
+
+- Server actions are placed in `lib/actions/`
+- Each action is in a separate file with a descriptive name
+- Related actions are grouped in subdirectories
+- Server action files use the `.ts` extension
+
+## Tools Structure
+
+- Tool definitions are in `lib/utils/tools/tool-definitions/`
+- Tool clients for external services are in `lib/utils/tools/tool-definitions/clients/`
+- Tools implementation logic is in `lib/utils/tools/`
+
+## Utilities and Helpers
+
+- Utility functions are in the `lib/utils` directory
+- Environment configuration is in `lib/env.mjs`
+- API key management is in `lib/api-key/`
+- Database utilities are in `lib/db`
+
+## New Pages
+
+- Create new pages at the appropriate route in the `app` directory
+- Pages are Server Components by default for direct data fetching
+- Client Components should use `'use client'` directive
+- Server action files must include `'use server'` directive
+
+## Utility Functions
+
+- Create utility functions in `lib/utils/` folder for reusable logic
+- Organize related utilities in subdirectories

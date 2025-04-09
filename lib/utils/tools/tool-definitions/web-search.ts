@@ -1,6 +1,6 @@
 import { tool } from 'ai';
 import { z } from 'zod';
-import { exaClient } from '@/lib/clients';
+import { exaClient } from '@/lib/utils/tools/tool-definitions/clients';
 import { exa } from '@agentic/exa';
 import { ToolDefinition, ToolConfig } from '../types';
 import { mapToolNameToEnabledTool } from '../tool-mapping';

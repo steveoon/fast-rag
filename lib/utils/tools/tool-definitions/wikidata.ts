@@ -2,7 +2,7 @@ import { tool } from 'ai';
 import { z } from 'zod';
 import { generateObject } from 'ai';
 import { registry } from '@/lib/utils/models-registry';
-import { wikidataClient, exaClient } from '@/lib/clients';
+import { wikidataClient, exaClient } from '@/lib/utils/tools/tool-definitions/clients';
 import { retryRateLimited } from '@/lib/utils/retry';
 import { ToolDefinition, ToolConfig } from '../types';
 import { mapToolNameToEnabledTool } from '../tool-mapping';

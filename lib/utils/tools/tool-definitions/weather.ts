@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { tool } from 'ai';
 import { z } from 'zod';
-import { weatherClient } from '@/lib/clients';
+import { weatherClient } from '@/lib/utils/tools/tool-definitions/clients';
 import { ToolDefinition, ToolConfig } from '../types';
 import { mapToolNameToEnabledTool } from '../tool-mapping';
 

@@ -1,0 +1,162 @@
+---
+description: Data fetch and API request best practice
+globs: 
+alwaysApply: false
+---
+# 数据获取
+
+## 请求方式
+
+我们在应用中获取数据的方式：
+
+1. 使用`lib/request`封装的请求（会自动处理API key验证）
+2. 在Zustand store中集中管理数据获取和更新
+3. 服务器组件中直接获取数据
+4. 服务器操作（Server Actions）用于数据修改
+
+## API请求原则
+
+- **始终使用封装的请求类**：对于需要API Key验证的请求，使用`lib/request`中的API类
+- **自动化验证**：封装好的请求会自动处理API key的获取和添加
+- **错误处理**：封装中包含统一的错误处理和提示
+- **类型安全**：请求方法支持泛型，提供更好的类型提示
+
+## 请求示例
+
+```typescript
+import api from '@/lib/request';
+
+// 基本GET请求
+const fetchData = async () => {
+  const response = await api.get<DataType>('/endpoint');
+  return response.data;
+};
+
+// POST请求带数据
+const createItem = async (data: ItemData) => {
+  const response = await api.post<ResponseType>('/items', data);
+  return response.data;
+};
+
+// 带URL参数的请求
+const searchItems = async (query: string) => {
+  const response = await api.get('/search', { 
+    params: { q: query } 
+  });
+  return response.data;
+};
+```
+
+## 在Zustand Store中使用
+
+推荐在Zustand store中集中管理API请求和状态，参照以下模式：
+
+```typescript
+import { create } from 'zustand';
+import api from '@/lib/request';
+import { toast } from '@/hooks/use-toast';
+
+interface MyStore {
+  data: DataType[];
+  isLoading: boolean;
+  fetchData: () => Promise<void>;
+  createItem: (item: NewItemType) => Promise<void>;
+}
+
+const useMyStore = create<MyStore>((set, get) => ({
+  data: [],
+  isLoading: false,
+  
+  fetchData: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get<DataType[]>('/items');
+      set({ 
+        data: response.data,
+        isLoading: false 
+      });
+    } catch (error) {
+      set({ isLoading: false });
+      // 错误已在api类中处理
+    }
+  },
+  
+  createItem: async (item) => {
+    set({ isLoading: true });
+    try {
+      await api.post('/items', item);
+      // 重新获取最新数据
+      await get().fetchData();
+    } finally {
+      set({ isLoading: false });
+    }
+  }
+}));
+```
+
+## 处理文件上传和SSE流
+
+对于文件上传和需要流式接收响应的场景，使用SSE方法：
+
+```typescript
+// 文件上传示例
+const uploadFile = async (file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  api.sse({
+    url: '/files-management/upload',
+    data: formData,
+    onData: (data) => {
+      // 处理上传进度
+      if (data.percent) {
+        updateProgress(data.percent);
+      }
+      
+      // 处理完成事件
+      if (data.completed) {
+        handleUploadComplete(data.files);
+      }
+    }
+  });
+};
+```
+
+## 服务器操作中的API请求
+
+对于服务器操作（Server Actions）中的请求，使用相同的请求库：
+
+```typescript
+// 在actions文件中
+'use server';
+
+import api from '@/lib/request';
+
+export async function updateItem(id: string, data: ItemUpdateData) {
+  try {
+    const response = await api.put(`/items/${id}`, data);
+    return { success: true, data: response.data };
+  } catch (error) {
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : '更新失败' 
+    };
+  }
+}
+```
+
+## 错误处理
+
+API类中已集成错误处理和提示功能。如需自定义错误处理：
+
+```typescript
+try {
+  const response = await api.post('/endpoint', data);
+  // 处理成功响应
+} catch (error) {
+  // 自定义错误处理
+  console.error('操作失败:', error);
+  // 错误提示已在api类中处理，这里可以添加额外逻辑
+}
+```
+```
