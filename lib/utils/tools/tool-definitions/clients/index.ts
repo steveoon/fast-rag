@@ -43,7 +43,9 @@ class ClientManager {
 
   public get exaClient(): ExaClient {
     if (!this._exaClient) {
-      this._exaClient = new ExaClient();
+      this._exaClient = new ExaClient({
+        apiKey: process.env.EXA_API_KEY,
+      });
     }
     return this._exaClient;
   }

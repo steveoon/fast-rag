@@ -35,20 +35,27 @@ const webSearchTool: ToolDefinition = {
             });
           }
 
-          // 执行搜索
-          const searchResults = await exaClient.search({
-            query,
-            numResults,
-            type: useNeural ? 'neural' : 'keyword',
-            contents: {
-              text: { maxCharacters: 8000 },
-              highlights: {
-                query,
-                numSentences: 3,
-                highlightsPerUrl: 3,
-              },
-            },
+          const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('搜索请求超时')), 30000);
           });
+
+          // 执行搜索
+          const searchResults = (await Promise.race([
+            exaClient.search({
+              query,
+              numResults,
+              type: useNeural ? 'neural' : 'keyword',
+              contents: {
+                text: { maxCharacters: 8000 },
+                highlights: {
+                  query,
+                  numSentences: 3,
+                  highlightsPerUrl: 3,
+                },
+              },
+            }),
+            timeoutPromise,
+          ])) as exa.SearchResponse;
 
           if (!searchResults.results || searchResults.results.length === 0) {
             if (config.dataStream) {
@@ -63,7 +70,7 @@ const webSearchTool: ToolDefinition = {
           }
 
           const relevantResults = searchResults.results.slice(0, numResults);
-          const resultIds = relevantResults.map(result => result.id);
+          const resultIds = relevantResults.map((result: exa.SearchResult) => result.id);
 
           if (config.dataStream) {
             config.dataStream.writeData({
