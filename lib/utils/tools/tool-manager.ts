@@ -1,7 +1,7 @@
 import { ToolSet, ToolCall, ToolResult } from 'ai';
 import { toolDefinitions } from './tool-definitions';
 import { ToolConfig, ToolSelectorConfig, AllToolCalls, AllToolResults } from './types';
-import { mapToolNameToEnabledTool } from './tool-mapping';
+import { mapToolNameToEnabledTool, AnalysisToolType, EnabledToolType } from './tool-mapping';
 
 /**
  * 根据配置创建所有可用的工具
@@ -42,84 +42,65 @@ export function selectTools(config: ToolSelectorConfig): ToolSet {
   const { enabledTools, queryAnalysis, allTools } = config;
   const selectedTools: ToolSet = {};
 
-  // 基于查询类型添加首选工具
+  // Helper function to add a tool if it is enabled and available
+  const addTool = (toolName: string) => {
+    // 检查是否是有效的分析工具类型
+    try {
+      // 尝试将工具名称转换为启用工具类型
+      const enabledToolName = mapToolNameToEnabledTool(toolName as AnalysisToolType);
+      if (enabledTools.includes(enabledToolName) && allTools[toolName]) {
+        selectedTools[toolName] = allTools[toolName];
+      }
+    } catch {
+      // 如果转换失败，直接检查是否存在
+      if (enabledTools.includes(toolName as EnabledToolType) && allTools[toolName]) {
+        selectedTools[toolName] = allTools[toolName];
+      }
+    }
+  };
+
+  // Mapping from query types to their default tools
+  const queryTypeToolMap: Record<string, string[]> = {
+    current: ['webSearch'],
+    weather: ['getWeather'],
+    travel: [
+      'getPlaceInfoQuery',
+      'googleMapsQuery',
+      'getWeather',
+      'webSearch',
+      'generateImageQuery',
+    ],
+    location: ['googleMapsQuery'],
+    visualization: ['generateImageQuery'],
+  };
+
+  // Apply default tools based on query type
   if (
     queryAnalysis.queryType === 'current' ||
     (queryAnalysis.queryType === 'factual' &&
       !queryAnalysis.requiredTools.includes('queryKnowledgeBase'))
   ) {
-    // 当前事件和一些事实查询默认优先使用web搜索
-    if (enabledTools.includes('webSearch') && allTools.webSearch) {
-      selectedTools.webSearch = allTools.webSearch;
-    }
-  } else if (queryAnalysis.queryType === 'weather') {
-    // 天气查询优先使用天气工具
-    if (enabledTools.includes('weather') && allTools.getWeather) {
-      selectedTools.getWeather = allTools.getWeather;
-    }
-  } else if (queryAnalysis.queryType === 'travel') {
-    // 旅行相关查询同时使用多个工具，优先级从高到低排列
-
-    // 1. 北欧地点信息工具（最高优先级）
-    if (enabledTools.includes('getPlaceInfo') && allTools.getPlaceInfoQuery) {
-      selectedTools.getPlaceInfoQuery = allTools.getPlaceInfoQuery;
-    }
-
-    // 2. Google Maps工具（提高优先级，确保始终被包含）
-    if (enabledTools.includes('googleMaps') && allTools.googleMapsQuery) {
-      selectedTools.googleMapsQuery = allTools.googleMapsQuery;
-    }
-
-    // 3. 天气工具（对旅行规划很重要）
-    if (enabledTools.includes('weather') && allTools.getWeather) {
-      selectedTools.getWeather = allTools.getWeather;
-    }
-
-    // 4. Web搜索（获取最新信息）
-    if (enabledTools.includes('webSearch') && allTools.webSearch) {
-      selectedTools.webSearch = allTools.webSearch;
-    }
-
-    // 5. 图像生成（针对旅行内容可能需要的视觉辅助）
-    if (enabledTools.includes('generateImage') && allTools.generateImageQuery) {
-      selectedTools.generateImageQuery = allTools.generateImageQuery;
-    }
-  } else if (queryAnalysis.queryType === 'location') {
-    // 添加位置类型查询
-    // 位置相关查询优先使用Google Maps工具
-    if (enabledTools.includes('googleMaps') && allTools.googleMapsQuery) {
-      selectedTools.googleMapsQuery = allTools.googleMapsQuery;
-    }
-  } else if (queryAnalysis.queryType === 'visualization') {
-    // 可视化相关查询优先使用图像生成工具
-    if (enabledTools.includes('generateImage') && allTools.generateImageQuery) {
-      selectedTools.generateImageQuery = allTools.generateImageQuery;
-    }
+    (queryTypeToolMap.current || []).forEach(addTool);
+  } else if (queryTypeToolMap[queryAnalysis.queryType]) {
+    queryTypeToolMap[queryAnalysis.queryType].forEach(addTool);
   }
 
-  // 特殊处理：当检测到需要使用wikidataGetEntity时，优先使用smartWikidataQuery替代
-  const optimizedRequiredTools = queryAnalysis.requiredTools.map(toolName => {
-    if (toolName === 'wikidataGetEntity' && enabledTools.includes('smartWikidata')) {
-      console.log('自动将wikidataGetEntity工具替换为smartWikidataQuery');
-      return 'smartWikidataQuery' as const;
-    }
-    return toolName;
+  // Process required tools, with special handling for wikidataGetEntity
+  queryAnalysis.requiredTools.forEach(toolName => {
+    const finalToolName =
+      toolName === 'wikidataGetEntity' && enabledTools.includes('smartWikidata')
+        ? 'smartWikidataQuery'
+        : toolName;
+    addTool(finalToolName);
   });
 
-  // 添加分析推荐的工具
-  optimizedRequiredTools.forEach(toolName => {
-    const mappedToolName = mapToolNameToEnabledTool(toolName);
-    if (allTools[toolName] && enabledTools.includes(mappedToolName)) {
-      selectedTools[toolName] = allTools[toolName];
-    }
-  });
-
-  // 确保至少有一个工具可用
-  if (Object.keys(selectedTools).length === 0) {
-    // 回退到知识库工具
-    if (enabledTools.includes('knowledgeBase') && allTools.queryKnowledgeBase) {
-      selectedTools.queryKnowledgeBase = allTools.queryKnowledgeBase;
-    }
+  // Fallback to knowledgeBase tool if no tools have been selected
+  if (
+    Object.keys(selectedTools).length === 0 &&
+    enabledTools.includes('knowledgeBase') &&
+    allTools.queryKnowledgeBase
+  ) {
+    selectedTools.queryKnowledgeBase = allTools.queryKnowledgeBase;
   }
 
   console.log('选择的工具:', Object.keys(selectedTools));
@@ -159,6 +140,28 @@ export async function handleToolResults<T extends ToolSet>(
 }
 
 /**
+ * 工具描述映射 - 集中管理各工具的描述文本
+ */
+const toolDescriptionMap: Record<string, string> = {
+  webSearch: '用于在互联网上搜索最新、最相关的信息。这是获取时事、最新发展和事实验证的首选工具',
+  wikidataGetEntity:
+    '用于获取Wikidata中的结构化实体数据，包含属性、关系等信息。适合查询具体的人物、地点、组织等实体的详细信息，但需要知道实体ID',
+  smartWikidataQuery:
+    '智能查询Wikidata实体，只需提供实体名称（如"苏东坡"）即可获取结构化数据，无需事先知道实体ID',
+  generateImageQuery:
+    '根据提供的描述生成图片，支持卡通、写实和插画三种风格，可用于创建旅行地点的示意图、路线图等视觉内容',
+  getPlaceInfoQuery:
+    '获取北欧特定城市、景点、地标的详细信息，包括介绍、历史背景、游玩小贴士、交通建议等旅行相关信息',
+  getWeather: '查询指定地点和日期的天气预报信息，包括温度、降水概率等数据，适用于旅行规划',
+  googleMapsQuery: `使用Google Maps API查询地点位置、路线规划、周边搜索等地理信息，支持多种操作:
+    * geocode: 将地址转换为坐标
+    * reverse_geocode: 将坐标转换为地址
+    * search_places: 搜索特定区域内的地点
+    * place_details: 获取地点详情
+    * directions: 获取两点之间的路线`,
+};
+
+/**
  * 生成系统提示，描述可用工具
  * @param tools 工具集合
  * @returns 系统提示文本
@@ -168,29 +171,9 @@ export function generateToolSystemPrompt(tools: ToolSet): string {
 
     可用工具:
     ${Object.keys(tools)
-      .map(tool => {
-        if (tool === 'webSearch') {
-          return `- webSearch: 用于在互联网上搜索最新、最相关的信息。这是获取时事、最新发展和事实验证的首选工具`;
-        } else if (tool === 'wikidataGetEntity') {
-          return `- wikidataGetEntity: 用于获取Wikidata中的结构化实体数据，包含属性、关系等信息。适合查询具体的人物、地点、组织等实体的详细信息，但需要知道实体ID`;
-        } else if (tool === 'smartWikidataQuery') {
-          return `- smartWikidataQuery: 智能查询Wikidata实体，只需提供实体名称（如"苏东坡"）即可获取结构化数据，无需事先知道实体ID`;
-        } else if (tool === 'generateImageQuery') {
-          return `- generateImageQuery: 根据提供的描述生成图片，支持卡通、写实和插画三种风格，可用于创建旅行地点的示意图、路线图等视觉内容`;
-        } else if (tool === 'getPlaceInfoQuery') {
-          return `- getPlaceInfoQuery: 获取北欧特定城市、景点、地标的详细信息，包括介绍、历史背景、游玩小贴士、交通建议等旅行相关信息`;
-        } else if (tool === 'getWeather') {
-          return `- getWeather: 查询指定地点和日期的天气预报信息，包括温度、降水概率等数据，适用于旅行规划`;
-        } else if (tool === 'googleMapsQuery') {
-          return `- googleMapsQuery: 使用Google Maps API查询地点位置、路线规划、周边搜索等地理信息，支持多种操作:
-            * geocode: 将地址转换为坐标
-            * reverse_geocode: 将坐标转换为地址
-            * search_places: 搜索特定区域内的地点
-            * place_details: 获取地点详情
-            * directions: 获取两点之间的路线`;
-        } else {
-          return `- ${tool}`;
-        }
+      .map(toolName => {
+        const description = toolDescriptionMap[toolName] || toolName;
+        return `- ${toolName}: ${description}`;
       })
       .join('\n')}
     

@@ -11,6 +11,18 @@ interface MessageContentAdapterProps {
   showOnly?: ('reasoning' | 'tool-invocation' | 'source' | 'text')[];
 }
 
+// 使用代理获取图片URL
+const getProxyImageUrl = (url: string): string => {
+  if (!url) return '';
+
+  // 检测是否为阿里云OSS图片链接
+  if (url.includes('aliyuncs.com')) {
+    return `/api/image-proxy?url=${encodeURIComponent(url)}`;
+  }
+
+  return url;
+};
+
 const renderPart = (
   part: MessagePart,
   index: number,
@@ -72,20 +84,25 @@ const renderPart = (
         <div key={index} className="text-sm my-1">
           {/* 图片结果直接显示 */}
           {hasImageResult && (
-            <div className="rounded-md overflow-hidden my-2">
-              <Image
-                src={
-                  toolInvocation.result &&
-                  typeof toolInvocation.result === 'object' &&
-                  'imageUrl' in toolInvocation.result
-                    ? (toolInvocation.result.imageUrl as string)
-                    : ''
-                }
-                alt="生成的图片"
-                width={400}
-                height={400}
-                className="object-contain rounded-md"
-              />
+            <div className="rounded-md overflow-hidden my-2 w-full">
+              <div className="relative aspect-auto w-full max-w-full">
+                <Image
+                  src={getProxyImageUrl(
+                    toolInvocation.result &&
+                      typeof toolInvocation.result === 'object' &&
+                      'imageUrl' in toolInvocation.result
+                      ? (toolInvocation.result.imageUrl as string)
+                      : ''
+                  )}
+                  alt="生成的图片"
+                  style={{ objectFit: 'contain' }}
+                  width={0}
+                  height={0}
+                  sizes="100vw"
+                  className="w-full h-auto max-h-[600px] rounded-md"
+                  unoptimized={true}
+                />
+              </div>
             </div>
           )}
 
@@ -163,13 +180,16 @@ const renderPart = (
     }
     case 'file':
       return (
-        <div key={index} className="rounded-md overflow-hidden my-2">
+        <div key={index} className="rounded-md overflow-hidden my-2 w-full">
           <Image
             src={`data:${part.mimeType};base64,${part.data}`}
             alt="媒体文件"
-            width={400}
-            height={400}
-            className="object-contain"
+            width={0}
+            height={0}
+            sizes="100vw"
+            style={{ objectFit: 'contain' }}
+            className="w-full h-auto max-h-[600px] rounded-md"
+            unoptimized={true}
           />
         </div>
       );
