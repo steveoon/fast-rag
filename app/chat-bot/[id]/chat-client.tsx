@@ -28,7 +28,7 @@ export function ChatClient({ apiKey, tools, botName = 'AI Assistant' }: ChatClie
     body: {
       enabledTools: tools,
       model: 'anthropic/claude-3.7-sonnet',
-      maxSteps: 6,
+      maxSteps: 10,
     },
     onError: error => {
       console.error('Chat error:', error);

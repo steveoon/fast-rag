@@ -195,6 +195,31 @@ const PREDEFINED_TOOLS: {
       },
     ],
   },
+  {
+    name: 'googleMaps',
+    display_name: 'Google 地图',
+    description: '使用Google Maps API查询地点、路线、地址坐标等信息',
+    icon: 'map',
+    implementation_key: 'googleMapsQuery',
+    parameters: [
+      {
+        name: 'query',
+        display_name: '查询内容',
+        description: '地图查询内容，例如"北京天安门附近的餐厅"',
+        type: 'string' as ToolParameterType,
+        is_required: true,
+        default_value: null,
+      },
+      {
+        name: 'operation',
+        display_name: '操作类型',
+        description: '地图操作类型',
+        type: 'string' as ToolParameterType,
+        is_required: true,
+        default_value: 'search_places',
+      },
+    ],
+  },
 ];
 
 const migrateTools = async () => {

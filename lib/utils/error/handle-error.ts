@@ -1,8 +1,78 @@
+import {
+  NoSuchToolError,
+  InvalidToolArgumentsError,
+  ToolExecutionError,
+  ToolCallRepairError,
+} from 'ai';
 import { logger } from '../logger';
 import { type ErrorResponse, CustomError } from '@/types';
 import { ZodError } from 'zod';
 
+// 为AI SDK错误添加格式化函数
+export function formatAiSdkError(error: unknown): {
+  message: string;
+  errorType: string;
+  code: string;
+} {
+  if (NoSuchToolError.isInstance(error)) {
+    return {
+      message: '助手尝试调用不存在的工具',
+      errorType: 'NoSuchToolError',
+      code: 'TOOL_NOT_FOUND',
+    };
+  } else if (InvalidToolArgumentsError.isInstance(error)) {
+    return {
+      message: '助手使用了无效的工具参数',
+      errorType: 'InvalidToolArgumentsError',
+      code: 'INVALID_TOOL_ARGS',
+    };
+  } else if (ToolExecutionError.isInstance(error)) {
+    return {
+      message: '工具执行过程中发生错误',
+      errorType: 'ToolExecutionError',
+      code: 'TOOL_EXECUTION_ERROR',
+    };
+  } else if (ToolCallRepairError.isInstance(error)) {
+    return {
+      message: '修复工具调用时发生错误',
+      errorType: 'ToolCallRepairError',
+      code: 'TOOL_REPAIR_ERROR',
+    };
+  }
+
+  // 默认错误信息
+  return {
+    message: '工具调用过程中发生未知错误',
+    errorType: 'UnknownToolError',
+    code: 'UNKNOWN_TOOL_ERROR',
+  };
+}
+
 export function handleError(error: unknown): ErrorResponse {
+  // 先检查AI SDK特定错误
+  if (
+    NoSuchToolError.isInstance(error) ||
+    InvalidToolArgumentsError.isInstance(error) ||
+    ToolExecutionError.isInstance(error) ||
+    ToolCallRepairError.isInstance(error)
+  ) {
+    const { message, errorType, code } = formatAiSdkError(error);
+
+    logger.error({
+      msg: `AI SDK Tool Error: ${errorType}`,
+      error: {
+        message,
+        code,
+      },
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+
+    return {
+      message,
+      code,
+    };
+  }
+
   if (error instanceof CustomError) {
     logger.error({
       msg: 'Custom Error',
@@ -29,7 +99,7 @@ export function handleError(error: unknown): ErrorResponse {
     return {
       message: '参数验证失败',
       code: 'VALIDATION_ERROR',
-      details: error.errors.map((error) => error.message).join(', '),
+      details: error.errors.map(error => error.message).join(', '),
     };
   }
 

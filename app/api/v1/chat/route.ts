@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { streamText, generateObject, ToolResult, createDataStreamResponse } from 'ai';
+import { streamText, generateObject, createDataStreamResponse } from 'ai';
 import { z } from 'zod';
 import { openrouter } from '@/lib/utils/models-registry';
 import { handleError, extractApiKey, validateClient } from '@/lib/utils';
@@ -11,6 +11,8 @@ import {
   selectTools,
   generateToolSystemPrompt,
   generateQueryAnalysisPrompt,
+  handleToolResults,
+  ToolResultsFrom,
 } from '@/lib/utils/tools';
 
 // 定义请求体的验证模式
@@ -147,6 +149,9 @@ export async function POST(request: Request) {
           allTools,
         });
 
+        // 定义工具结果类型 - 使用类型安全助手
+        type SelectedToolResults = ToolResultsFrom<typeof selectedTools>;
+
         // 步骤3: 生成回答
         const answer = streamText({
           system: generateToolSystemPrompt(selectedTools),
@@ -156,20 +161,34 @@ export async function POST(request: Request) {
           toolChoice: 'auto',
           maxSteps,
           onStepFinish: async ({ text, toolResults, usage, stepType }) => {
-            const toolResult = toolResults.map((result: ToolResult<string, unknown, unknown>) => ({
-              tool: result.toolName,
-              result: result.result,
-            }));
+            // 使用类型安全的工具结果处理
+            const processedResults: Array<{ tool: string; result: unknown }> = [];
+
+            // 处理工具结果
+            await handleToolResults(
+              selectedTools,
+              toolResults as Array<SelectedToolResults>,
+              async (toolName, result) => {
+                processedResults.push({
+                  tool: toolName,
+                  result,
+                });
+              }
+            );
 
             const textLength = text.length;
 
-            console.log(`步骤 ${stepType} 完成`, { textLength, toolResult, usage });
+            console.log(`步骤 ${stepType} 完成`, {
+              textLength,
+              toolResults: processedResults,
+              usage,
+            });
 
             dataStream.writeData({
               type: 'stepComplete',
               stepType,
-              hasToolCall: toolResult.length > 0,
-              tool: toolResult.map(t => t.tool),
+              hasToolCall: processedResults.length > 0,
+              tool: processedResults.map(t => t.tool),
               text: text || null,
             });
           },

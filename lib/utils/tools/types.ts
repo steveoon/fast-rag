@@ -1,11 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Tool, ToolSet } from 'ai';
+import { Tool, ToolSet, ToolCall, ToolResult, ToolCallUnion, ToolResultUnion } from 'ai';
 import { z } from 'zod';
 import { ANALYSIS_TOOLS } from './tool-mapping';
 
 // 重新导出这些类型，确保不与tool-mapping.ts中的导出冲突
 import type { EnabledToolType, AnalysisToolType } from './tool-mapping';
 export type { EnabledToolType, AnalysisToolType };
+
+// 导出AI SDK的类型工具
+export type { ToolCall, ToolResult, ToolCallUnion, ToolResultUnion };
 
 // JSON值类型
 type JSONValue = string | number | boolean | null | { [key: string]: JSONValue } | JSONValue[];
@@ -28,6 +31,7 @@ export const queryAnalysisSchema = z.object({
     'comparison', // 比较分析
     'historical', // 历史信息
     'travel', // 旅行相关查询
+    'location', // 位置相关查询
     'visualization', // 图像生成相关查询
   ]),
   requiredTools: z.array(z.enum(ANALYSIS_TOOLS)),
@@ -63,3 +67,7 @@ export interface ToolSelectorConfig {
   queryAnalysis: QueryAnalysis;
   allTools: ToolSet;
 }
+
+// 为工具调用和结果定义辅助类型
+export type AllToolCalls<T extends ToolSet> = ToolCallUnion<T>;
+export type AllToolResults<T extends ToolSet> = ToolResultUnion<T>;

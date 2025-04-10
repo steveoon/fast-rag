@@ -1,6 +1,6 @@
-import { ToolSet } from 'ai';
+import { ToolSet, ToolCall, ToolResult } from 'ai';
 import { toolDefinitions } from './tool-definitions';
-import { ToolConfig, ToolSelectorConfig } from './types';
+import { ToolConfig, ToolSelectorConfig, AllToolCalls, AllToolResults } from './types';
 import { mapToolNameToEnabledTool } from './tool-mapping';
 
 /**
@@ -20,6 +20,18 @@ export function createTools(config: ToolConfig): ToolSet {
 
   return allTools;
 }
+
+/**
+ * 获取工具调用类型 - 用于类型安全的工具调用处理
+ * @param tools 工具集合
+ */
+export type ToolCallsFrom<T extends ToolSet> = AllToolCalls<T>;
+
+/**
+ * 获取工具结果类型 - 用于类型安全的工具结果处理
+ * @param tools 工具集合
+ */
+export type ToolResultsFrom<T extends ToolSet> = AllToolResults<T>;
 
 /**
  * 根据查询分析选择适合的工具
@@ -46,13 +58,37 @@ export function selectTools(config: ToolSelectorConfig): ToolSet {
       selectedTools.getWeather = allTools.getWeather;
     }
   } else if (queryAnalysis.queryType === 'travel') {
-    // 旅行相关查询优先使用地点信息工具
+    // 旅行相关查询同时使用多个工具，优先级从高到低排列
+
+    // 1. 北欧地点信息工具（最高优先级）
     if (enabledTools.includes('getPlaceInfo') && allTools.getPlaceInfoQuery) {
       selectedTools.getPlaceInfoQuery = allTools.getPlaceInfoQuery;
     }
-    // 旅行查询也常需要搜索最新信息
+
+    // 2. Google Maps工具（提高优先级，确保始终被包含）
+    if (enabledTools.includes('googleMaps') && allTools.googleMapsQuery) {
+      selectedTools.googleMapsQuery = allTools.googleMapsQuery;
+    }
+
+    // 3. 天气工具（对旅行规划很重要）
+    if (enabledTools.includes('weather') && allTools.getWeather) {
+      selectedTools.getWeather = allTools.getWeather;
+    }
+
+    // 4. Web搜索（获取最新信息）
     if (enabledTools.includes('webSearch') && allTools.webSearch) {
       selectedTools.webSearch = allTools.webSearch;
+    }
+
+    // 5. 图像生成（针对旅行内容可能需要的视觉辅助）
+    if (enabledTools.includes('generateImage') && allTools.generateImageQuery) {
+      selectedTools.generateImageQuery = allTools.generateImageQuery;
+    }
+  } else if (queryAnalysis.queryType === 'location') {
+    // 添加位置类型查询
+    // 位置相关查询优先使用Google Maps工具
+    if (enabledTools.includes('googleMaps') && allTools.googleMapsQuery) {
+      selectedTools.googleMapsQuery = allTools.googleMapsQuery;
     }
   } else if (queryAnalysis.queryType === 'visualization') {
     // 可视化相关查询优先使用图像生成工具
@@ -91,6 +127,38 @@ export function selectTools(config: ToolSelectorConfig): ToolSet {
 }
 
 /**
+ * 处理工具调用的辅助函数 - 类型安全处理
+ * @param tools 工具集合
+ * @param toolCalls 工具调用数组
+ * @param handler 处理函数
+ */
+export async function handleToolCalls<T extends ToolSet>(
+  tools: T,
+  toolCalls: Array<ToolCall<string, Record<string, unknown>>>,
+  handler: (toolName: string, args: Record<string, unknown>) => Promise<void>
+): Promise<void> {
+  for (const toolCall of toolCalls) {
+    await handler(toolCall.toolName, toolCall.args);
+  }
+}
+
+/**
+ * 处理工具结果的辅助函数 - 类型安全处理
+ * @param tools 工具集合
+ * @param toolResults 工具结果数组
+ * @param handler 处理函数
+ */
+export async function handleToolResults<T extends ToolSet>(
+  tools: T,
+  toolResults: Array<ToolResult<string, Record<string, unknown>, unknown>>,
+  handler: (toolName: string, result: unknown) => Promise<void>
+): Promise<void> {
+  for (const toolResult of toolResults) {
+    await handler(toolResult.toolName, toolResult.result);
+  }
+}
+
+/**
  * 生成系统提示，描述可用工具
  * @param tools 工具集合
  * @returns 系统提示文本
@@ -113,6 +181,13 @@ export function generateToolSystemPrompt(tools: ToolSet): string {
           return `- getPlaceInfoQuery: 获取北欧特定城市、景点、地标的详细信息，包括介绍、历史背景、游玩小贴士、交通建议等旅行相关信息`;
         } else if (tool === 'getWeather') {
           return `- getWeather: 查询指定地点和日期的天气预报信息，包括温度、降水概率等数据，适用于旅行规划`;
+        } else if (tool === 'googleMapsQuery') {
+          return `- googleMapsQuery: 使用Google Maps API查询地点位置、路线规划、周边搜索等地理信息，支持多种操作:
+            * geocode: 将地址转换为坐标
+            * reverse_geocode: 将坐标转换为地址
+            * search_places: 搜索特定区域内的地点
+            * place_details: 获取地点详情
+            * directions: 获取两点之间的路线`;
         } else {
           return `- ${tool}`;
         }
@@ -137,8 +212,15 @@ export function generateToolSystemPrompt(tools: ToolSet): string {
     
     旅行信息工具使用指南:
     - 对于北欧旅行目的地查询，优先使用getPlaceInfoQuery工具获取结构化的旅行信息
+    - 结合googleMapsQuery工具获取地理位置、路线规划和周边设施信息
+    - 使用getWeather工具获取目的地天气状况，帮助用户进行旅行规划
     - 当需要可视化展示时，可使用generateImageQuery工具生成相关图片
-    - 结合getWeather工具获取目的地天气状况，帮助用户进行旅行规划
+    
+    Google Maps工具使用指南:
+    - 当用户询问"如何到达某地"时，使用directions操作（格式："起点->终点"）
+    - 当用户询问"某地在哪里"时，使用geocode操作获取位置
+    - 当用户询问"附近有什么"时，使用search_places操作查找周边设施
+    - 坐标查询使用"纬度,经度"格式，如"60.3913,5.3221"
     
     回答要求:
     - 回答要基于工具调用获取的信息
@@ -171,6 +253,7 @@ export function generateQueryAnalysisPrompt(content: string): string {
      - comparison: 对比或比较分析
      - historical: 历史事件或过去的信息
      - travel: 旅行规划、目的地信息、旅游攻略相关查询
+     - location: 地理位置、路线规划、周边设施搜索等地图相关查询
      - visualization: 图像生成、视觉内容创建相关查询
   
   2. requiredTools: 选择解答问题所需的工具
@@ -181,11 +264,13 @@ export function generateQueryAnalysisPrompt(content: string): string {
      - wikidataGetEntity: 仅当已知具体Wikidata实体ID时使用（极少用到）
      - getPlaceInfoQuery: 适用于北欧旅行目的地信息查询，可获取城市、景点的详细介绍和旅行建议
      - generateImageQuery: 适用于需要生成图像的场景，如创建旅行地点的示意图、路线图等视觉内容
+     - googleMapsQuery: 适用于地理位置查询、路线规划、周边设施搜索等地图相关操作
             
   3. reasoning: 说明你的推理过程
 
   重要提示：
   - 对于查询人物、地点、组织等实体信息时，应优先选择smartWikidataQuery而非wikidataGetEntity
-  - 对于北欧旅行相关的查询，优先考虑使用getPlaceInfoQuery工具
+  - 对于北欧旅行相关的查询，优先考虑使用getPlaceInfoQuery工具和googleMapsQuery工具结合
+  - 当查询涉及"如何到达"、"距离多远"、"附近有什么"等地理位置问题时，使用googleMapsQuery工具
   - 当用户需要图片或视觉内容时，应选择generateImageQuery工具`;
 }
