@@ -105,9 +105,9 @@ class ClientManager {
   }
 
   // 提供一个获取Google Maps工具的快捷方法
-  public async getGoogleMapsMCPTools() {
+  public async getGoogleMapsMCPTools(schemas?: Record<string, any>) {
     const client = await this.getGoogleMapsMCPClient();
-    return await client.tools();
+    return schemas ? await client.tools({ schemas }) : await client.tools();
   }
 
   // 关闭谷歌地图客户端方法
@@ -130,5 +130,6 @@ export const wikidataClient = clientManager.wikidataClient;
 
 // MCP客户端需要异步获取，不能直接导出
 export const getGoogleMapsMCPClient = () => clientManager.getGoogleMapsMCPClient();
-export const getGoogleMapsMCPTools = () => clientManager.getGoogleMapsMCPTools();
+export const getGoogleMapsMCPTools = (schemas?: Record<string, any>) =>
+  clientManager.getGoogleMapsMCPTools(schemas);
 export const closeGoogleMapsMCPClient = () => clientManager.closeGoogleMapsMCPClient();

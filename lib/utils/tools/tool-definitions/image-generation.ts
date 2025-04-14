@@ -294,6 +294,13 @@ const imageGenerationTool: ToolDefinition = {
             prompt: images[0].prompt,
             actualPrompt: images[0].actualPrompt,
             style,
+            visualize: {
+              type: 'image',
+              data: {
+                url: images[0].url,
+                alt: prompt,
+              },
+            },
           };
         } catch (error) {
           console.error('图像生成错误:', error);

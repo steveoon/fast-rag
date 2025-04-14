@@ -27,8 +27,7 @@ export function ChatClient({ apiKey, tools, botName = 'AI Assistant' }: ChatClie
     },
     body: {
       enabledTools: tools,
-      model: 'anthropic/claude-3.7-sonnet',
-      maxSteps: 10,
+      maxSteps: 15,
     },
     onError: error => {
       console.error('Chat error:', error);
@@ -108,7 +107,7 @@ export function ChatClient({ apiKey, tools, botName = 'AI Assistant' }: ChatClie
                 {/* 使用MessageContentAdapter处理所有内容 */}
                 {Array.isArray(message.parts) ? (
                   <MessageContentAdapter
-                    key={`${message.id}-${JSON.stringify(message.parts).length}`}
+                    key={message.id}
                     content={message.parts.filter(
                       part =>
                         part.type === 'text' ||

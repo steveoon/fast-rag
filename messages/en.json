@@ -512,7 +512,8 @@
         "calculator": "Calculator",
         "textCompletion": "Text Generator",
         "getPlaceInfoQuery": "Travel Info",
-        "generateImageQuery": "Image Generator"
+        "generateImageQuery": "Image Generator",
+        "googleMapsQuery": "Google Maps"
       }
     }
   }

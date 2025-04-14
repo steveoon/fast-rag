@@ -3,25 +3,7 @@
 import { useEffect, useState, useCallback, memo } from 'react';
 import { Loader2, Check, Wrench, Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-
-// 定义状态数据的接口，与实际数据结构匹配
-interface StatusData {
-  type: string;
-  text?: string | null;
-  stepType?: string;
-  hasToolCall?: boolean;
-  tool?: string[] | []; // For stepComplete
-  status?: string; // For toolStatus
-  message?: string; // For toolStatus
-  [key: string]: unknown; // 使用 unknown 兼容其他属性
-}
-
-// 组件 Props 类型
-interface ChatBotToolStatusProps {
-  // 接受任何类型的数据，因为AI SDK返回的是JSONValue[]
-  data: unknown[] | undefined;
-  isProcessing: boolean;
-}
+import { ChatBotToolStatusProps, StatusData } from '../types';
 
 function ChatBotToolStatusComponent({ data, isProcessing }: ChatBotToolStatusProps) {
   const t = useTranslations('ChatBot.toolStatus');
@@ -150,6 +132,7 @@ function ChatBotToolStatusComponent({ data, isProcessing }: ChatBotToolStatusPro
     return null; // 其他未知状态不显示
   };
 
+  // 返回完整的状态组件
   return (
     <div className="animate-in fade-in duration-300">
       <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">

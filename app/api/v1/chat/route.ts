@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { streamText, generateObject, createDataStreamResponse } from 'ai';
 import { z } from 'zod';
-// import { openrouter } from '@/lib/utils/models-registry';
-import { registry } from '@/lib/utils/models-registry';
+import { openrouter } from '@/lib/utils/models-registry';
 import { handleError, extractApiKey, validateClient } from '@/lib/utils';
 import { CustomError } from '@/types';
 import {
@@ -136,7 +135,7 @@ export async function POST(request: Request) {
         // 步骤1: 查询分析 - 在streamText之前进行
         const userContent = messages[messages.length - 1].content;
         const { object: queryAnalysis } = await generateObject({
-          model: registry.languageModel(modelId),
+          model: openrouter(modelId),
           schema: queryAnalysisSchema,
           prompt: generateQueryAnalysisPrompt(userContent),
         });
@@ -156,7 +155,7 @@ export async function POST(request: Request) {
         // 步骤3: 生成回答
         const answer = streamText({
           system: generateToolSystemPrompt(selectedTools),
-          model: registry.languageModel(modelId),
+          model: openrouter(modelId),
           messages: messages,
           tools: selectedTools,
           toolChoice: 'auto',

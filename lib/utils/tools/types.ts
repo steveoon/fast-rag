@@ -71,3 +71,17 @@ export interface ToolSelectorConfig {
 // 为工具调用和结果定义辅助类型
 export type AllToolCalls<T extends ToolSet> = ToolCallUnion<T>;
 export type AllToolResults<T extends ToolSet> = ToolResultUnion<T>;
+
+// 工具状态类型
+export interface ToolStatus {
+  type: 'toolStatus';
+  tool: string;
+  status: 'searching' | 'processing' | 'complete' | 'error' | 'noResults' | 'formatting';
+  message: string;
+  toolCallId?: string;
+  meta?: any; // 工具元数据
+  visualize?: {
+    type: string; // 可视化类型，如 'map', 'chart', 'image' 等
+    data: any; // 可视化所需的数据
+  };
+}

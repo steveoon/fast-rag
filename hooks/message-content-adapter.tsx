@@ -4,15 +4,24 @@ import { memo } from 'react';
 import Image from 'next/image';
 import { MessageContent, MessagePart } from '@/app/chat-bot/[id]/types';
 import { CollapsibleDrawer } from '@/components/ui/collapsible-drawer';
+import dynamic from 'next/dynamic';
+import { VisualizationData } from '@/components/visualizations';
 
-interface MessageContentAdapterProps {
-  content: MessageContent;
-  showCopyButton?: boolean;
-  showOnly?: ('reasoning' | 'tool-invocation' | 'source' | 'text')[];
+// 工具调用结果类型
+interface ToolInvocationResult {
+  [key: string]: any;
+  visualize?: VisualizationData;
+  imageUrl?: string;
 }
 
+// 动态导入可视化渲染器，避免SSR问题
+const VisualizationRenderer = dynamic(
+  () => import('@/components/visualizations/VisualizationRenderer'),
+  { ssr: false }
+);
+
 // 使用代理获取图片URL
-const getProxyImageUrl = (url: string): string => {
+export const getProxyImageUrl = (url: string): string => {
   if (!url) return '';
 
   // 检测是否为阿里云OSS图片链接
@@ -20,8 +29,19 @@ const getProxyImageUrl = (url: string): string => {
     return `/api/image-proxy?url=${encodeURIComponent(url)}`;
   }
 
+  // 如果是绝对URL，使用我们自己的代理
+  if (url.startsWith('http')) {
+    return `/api/v1/proxy-image?url=${encodeURIComponent(url)}`;
+  }
+
   return url;
 };
+
+interface MessageContentAdapterProps {
+  content: MessageContent;
+  showCopyButton?: boolean;
+  showOnly?: ('reasoning' | 'tool-invocation' | 'source' | 'text')[];
+}
 
 const renderPart = (
   part: MessagePart,
@@ -63,65 +83,51 @@ const renderPart = (
         return null;
       }
 
+      // 强类型转换工具调用结果
+      const result = (toolInvocation.result || {}) as ToolInvocationResult;
+
       // 检查是否有图片结果
       const hasImageResult =
-        toolInvocation.result &&
-        typeof toolInvocation.result === 'object' &&
-        toolInvocation.result !== null &&
-        'imageUrl' in toolInvocation.result;
+        result && typeof result === 'object' && 'imageUrl' in result && result.imageUrl;
 
       // 检查是否有搜索结果 - 修正判断方法
       const hasSearchResults =
-        toolInvocation.result &&
-        Array.isArray(toolInvocation.result) &&
-        toolInvocation.result.length > 0 &&
-        toolInvocation.result[0] &&
-        typeof toolInvocation.result[0] === 'object' &&
-        'title' in toolInvocation.result[0] &&
-        'url' in toolInvocation.result[0];
+        result &&
+        Array.isArray(result) &&
+        result.length > 0 &&
+        result[0] &&
+        typeof result[0] === 'object' &&
+        'title' in result[0] &&
+        'url' in result[0];
+
+      // 检查是否有可视化数据 (来自ToolStatus)
+      const hasVisualization =
+        result &&
+        typeof result === 'object' &&
+        'visualize' in result &&
+        result.visualize &&
+        typeof result.visualize === 'object' &&
+        'type' in result.visualize;
+
+      // 检查可视化类型是否为图片类型
+      const isVisualizationImage = hasVisualization && result.visualize!.type === 'image';
 
       return (
         <div key={index} className="text-sm my-1">
-          {/* 图片结果直接显示 */}
-          {hasImageResult && (
-            <div className="rounded-md overflow-hidden my-2 w-full">
-              <div className="relative aspect-auto w-full max-w-full">
-                <Image
-                  src={getProxyImageUrl(
-                    toolInvocation.result &&
-                      typeof toolInvocation.result === 'object' &&
-                      'imageUrl' in toolInvocation.result
-                      ? (toolInvocation.result.imageUrl as string)
-                      : ''
-                  )}
-                  alt="生成的图片"
-                  style={{ objectFit: 'contain' }}
-                  width={0}
-                  height={0}
-                  sizes="100vw"
-                  className="w-full h-auto max-h-[600px] rounded-md"
-                  unoptimized={true}
-                />
-              </div>
-            </div>
-          )}
-
           {/* 搜索结果特殊处理 */}
           {hasSearchResults && (
-            <CollapsibleDrawer
-              title={`🌐 网络搜索结果 (${(toolInvocation.result as any[]).length})`}
-            >
+            <CollapsibleDrawer title={`🌐 网络搜索结果 (${(result as any[]).length})`}>
               <div className="space-y-2">
-                {(toolInvocation.result as any[]).map((result, idx) => (
+                {(result as any[]).map((item, idx) => (
                   <div key={idx} className="border-b pb-2 last:border-0 last:pb-0">
-                    <div className="font-medium">{result.title}</div>
+                    <div className="font-medium">{item.title}</div>
                     <div className="text-xs text-blue-600 dark:text-blue-400 truncate">
-                      <a href={result.url} target="_blank" rel="noopener noreferrer">
-                        {result.url}
+                      <a href={item.url} target="_blank" rel="noopener noreferrer">
+                        {item.url}
                       </a>
                     </div>
-                    {result.domain && (
-                      <div className="text-xs text-gray-500">来源: {result.domain}</div>
+                    {item.domain && (
+                      <div className="text-xs text-gray-500">来源: {item.domain}</div>
                     )}
                   </div>
                 ))}
@@ -129,21 +135,45 @@ const renderPart = (
             </CollapsibleDrawer>
           )}
 
-          {/* 其他工具调用结果放入折叠抽屉 */}
-          {!hasImageResult && (
-            <CollapsibleDrawer title={`🔧 工具调用: ${toolInvocation.toolName || '未命名工具'}`}>
-              {toolInvocation.args && (
-                <div className="mt-1">
-                  <div className="font-medium text-blue-600 dark:text-blue-400">参数:</div>
-                  <div className="text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-900 p-2 rounded my-1">
-                    <pre className="text-xs overflow-auto">
-                      {JSON.stringify(toolInvocation.args, null, 2)}
-                    </pre>
-                  </div>
-                </div>
-              )}
+          {/* 可视化数据处理 - 移到外面，确保无论是否有图片都显示 */}
+          {hasVisualization && (
+            <div className="my-3">
+              <VisualizationRenderer visualization={result.visualize!} />
+            </div>
+          )}
 
-              {toolInvocation.result !== undefined && !hasImageResult && !hasSearchResults && (
+          {/* 图片结果特殊处理 - 只在没有图片类型可视化时显示 */}
+          {hasImageResult && !isVisualizationImage && (
+            <div className="my-3 rounded-md overflow-hidden">
+              <Image
+                src={getProxyImageUrl(result.imageUrl as string)}
+                alt={(result.prompt as string) || '生成的图像'}
+                width={0}
+                height={0}
+                sizes="100vw"
+                style={{ objectFit: 'contain' }}
+                className="w-full h-auto max-h-[500px] rounded-md"
+              />
+            </div>
+          )}
+
+          {/* 其他工具调用结果放入折叠抽屉 */}
+          <CollapsibleDrawer title={`🔧 工具调用: ${toolInvocation.toolName || '未命名工具'}`}>
+            {toolInvocation.args && (
+              <div className="mt-1">
+                <div className="font-medium text-blue-600 dark:text-blue-400">参数:</div>
+                <div className="text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-900 p-2 rounded my-1">
+                  <pre className="text-xs overflow-auto">
+                    {JSON.stringify(toolInvocation.args, null, 2)}
+                  </pre>
+                </div>
+              </div>
+            )}
+
+            {toolInvocation.result !== undefined &&
+              !hasImageResult &&
+              !hasSearchResults &&
+              !hasVisualization && (
                 <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
                   <div className="font-medium text-green-600 dark:text-green-400">结果:</div>
                   <div className="text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-900 p-2 rounded my-1">
@@ -155,8 +185,7 @@ const renderPart = (
                   </div>
                 </div>
               )}
-            </CollapsibleDrawer>
-          )}
+          </CollapsibleDrawer>
         </div>
       );
     }
@@ -189,7 +218,6 @@ const renderPart = (
             sizes="100vw"
             style={{ objectFit: 'contain' }}
             className="w-full h-auto max-h-[600px] rounded-md"
-            unoptimized={true}
           />
         </div>
       );
