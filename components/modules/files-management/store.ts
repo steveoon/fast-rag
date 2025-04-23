@@ -33,11 +33,21 @@ const useFilesManagementStore = create<FilesManagementStore>((set, get) => ({
   },
   getTableData: async () => {
     set({ isLoading: true });
-    const response = await api.get<TableData[]>('/files-management/list');
-    set({
-      tableData: response.data || [],
-      isLoading: false,
-    });
+    try {
+      // 使用API获取文件列表
+      const response = await api.get<TableData[]>('/files-management/list');
+      set({
+        tableData: response.data || [],
+        isLoading: false,
+      });
+    } catch (error) {
+      console.error('Failed to fetch files:', error);
+      set({ isLoading: false });
+      toast({
+        title: t('Platform.FilesManagement.Messages.fetchError') || '获取文件列表失败',
+        variant: 'destructive',
+      });
+    }
   },
   deleteFiles: async () => {
     const { table, getTableData } = get();

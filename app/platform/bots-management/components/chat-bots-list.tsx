@@ -124,7 +124,7 @@ export default function ChatBotsList({
     if (!selectedChatbot) return;
 
     try {
-      // 检查是否有工具被过滤（通过比较原始工具ID和提交的工具ID）
+      // 检查是否有工具被过滤（通过比较原始工具ID和可用工具ID）
       let originalToolIds: string[] = [];
       if (Array.isArray(selectedChatbot.client_tools_config)) {
         originalToolIds = selectedChatbot.client_tools_config.map(t => t.client_tool_id);
@@ -137,12 +137,17 @@ export default function ChatBotsList({
         }
       }
 
-      const filteredOutCount =
-        originalToolIds.length -
-        originalToolIds.filter(id => data.clientToolIds.includes(id)).length;
+      // 收集所有可用工具ID
+      const availableToolIds = availableTools.map(tool => tool.id);
+
+      // 计算因客户端限制而被过滤掉的工具数量
+      // 只有那些在原始工具列表中，但不在当前可用工具列表中的工具才被视为"被过滤"
+      const actuallyFilteredOutTools = originalToolIds.filter(id => !availableToolIds.includes(id));
+
+      const filteredOutCount = actuallyFilteredOutTools.length;
 
       if (filteredOutCount > 0) {
-        // 显示警告信息
+        // 只有当确实有工具因客户端限制而被过滤掉时，才显示警告信息
         toast({
           title: t('toolsFilteredWarning'),
           description: t('toolsFilteredWarningDescription', { count: filteredOutCount }),
@@ -270,33 +275,30 @@ export default function ChatBotsList({
 
       {/* 创建对话框 */}
       <ChatbotDialog
-        open={dialogs.create}
-        onOpenChange={open => {
-          if (!open) closeDialog('create');
-          else openDialog('create');
-        }}
         onSubmit={handleCreateSubmit}
         isSubmitting={isUpdating}
         availableTools={availableTools}
         hasActiveClient={hasActiveClient}
+        open={!!dialogs.create}
+        onOpenChange={open => (open ? openDialog('create') : closeDialog('create'))}
       />
 
       {/* 编辑对话框 */}
       <ChatbotDialog
-        open={dialogs.edit}
-        onOpenChange={open => {
-          if (!open) {
-            closeDialog('edit');
-            selectChatbot(null);
-          } else {
-            openDialog('edit');
-          }
-        }}
         onSubmit={handleUpdateSubmit}
         isSubmitting={isUpdating}
         availableTools={availableTools}
         hasActiveClient={hasActiveClient}
         editChatbot={selectedChatbot}
+        open={!!dialogs.edit}
+        onOpenChange={open => {
+          if (open) {
+            openDialog('edit');
+          } else {
+            closeDialog('edit');
+            selectChatbot(null);
+          }
+        }}
       />
 
       {/* 机器人卡片列表 */}

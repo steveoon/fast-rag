@@ -41,6 +41,13 @@ alwaysApply: false
 │   ├── sections/        # Page section components 
 │   ├── tools/           # Tool-related components
 │   ├── modules/         # Feature modules components
+│   ├── visualizations/  # Data visualization components
+│   │   ├── store/       # State management for visualizations
+│   │   │   └── map-visualization-store.ts  # Map visualization state
+│   │   ├── index.ts     # Exports visualization components
+│   │   ├── types.d.ts   # Types for visualization components
+│   │   ├── MapVisualization.tsx      # Map visualization component
+│   │   └── VisualizationRenderer.tsx # Component to render visualizations
 │   └── *.tsx            # Individual components
 ├── lib/                 # Utilities and libraries
 │   ├── actions/         # Server Actions

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useTransition, useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -9,7 +9,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
-import { X, Bot, Info, Settings, CheckCircle } from 'lucide-react';
+import { X, Bot, Info, Settings, BookOpen } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +18,8 @@ import { Chatbot } from '@/lib/db/schema/schema';
 import { ToolInfo } from '@/lib/actions/get-client-tools-for-active-client';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import KnowledgeBaseSelector from './knowledge-base-selector';
+import { useKnowledgeBaseStore } from '../store/knowledge-base-store';
 
 // 定义客户端工具配置类型
 type ClientToolConfig = {
@@ -72,11 +74,33 @@ export default function ChatbotDialog({
   const [name, setName] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [clientToolIds, setClientToolIds] = useState<string[]>([]);
+  const [selectedKnowledgeBaseIds, setSelectedKnowledgeBaseIds] = useState<string[]>([]);
+  const [isUpdatingKnowledgeBase, startKnowledgeBaseTransition] = useTransition();
+  const [dialogInitialized, setDialogInitialized] = useState(false);
 
+  const { updateBotKnowledgeBases } = useKnowledgeBaseStore();
   const t = useTranslations('Platform.BotsManagement');
 
+  // 对话框打开/关闭处理
+  const handleDialogChange = useCallback(
+    (isOpen: boolean) => {
+      // 对话框关闭时，不要立即重置状态，这样可以避免闪烁
+      if (!isOpen && dialogInitialized) {
+        setTimeout(() => {
+          // 如果不是在编辑模式，则重置表单
+          if (!editChatbot) {
+            resetForm();
+          }
+        }, 300); // 添加短暂延迟，等待对话框动画完成
+      }
+
+      onOpenChange(isOpen);
+    },
+    [dialogInitialized, editChatbot, onOpenChange]
+  );
+
   useEffect(() => {
-    if (editChatbot) {
+    if (open && editChatbot) {
       setName(editChatbot.name);
       setDescription(editChatbot.description || '');
 
@@ -105,8 +129,13 @@ export default function ChatbotDialog({
       }
 
       setClientToolIds(filteredToolIds);
-    } else {
+      setDialogInitialized(true);
+    } else if (open && !editChatbot) {
       resetForm();
+      setDialogInitialized(true);
+    } else if (!open) {
+      // 对话框关闭时，重置初始化标志
+      setDialogInitialized(false);
     }
   }, [editChatbot, open, availableTools]);
 
@@ -114,18 +143,38 @@ export default function ChatbotDialog({
     setName('');
     setDescription('');
     setClientToolIds([]);
+    setSelectedKnowledgeBaseIds([]);
   };
 
-  const handleSubmit = () => {
+  // 处理知识库选择变更
+  const handleKnowledgeBaseSelectionChange = (documentVersionIds: string[]) => {
+    setSelectedKnowledgeBaseIds(documentVersionIds);
+  };
+
+  const handleSubmit = async () => {
+    console.log('提交表单数据...');
+
+    // 先处理基本信息和工具更新
     onSubmit({
       name,
       description,
       clientToolIds,
     });
-    if (!editChatbot) {
-      resetForm();
+
+    // 如果是编辑模式且有机器人ID，同时更新知识库
+    if (editChatbot) {
+      startKnowledgeBaseTransition(async () => {
+        try {
+          console.log(`更新机器人 ${editChatbot.id} 的知识库配置...`);
+          const result = await updateBotKnowledgeBases(editChatbot.id, selectedKnowledgeBaseIds);
+          console.log('知识库更新结果:', result);
+        } catch (error) {
+          console.error('更新知识库配置时出错:', error);
+        }
+      });
     }
-    onOpenChange(false);
+
+    handleDialogChange(false);
   };
 
   // 显示无激活客户端的警告信息
@@ -137,7 +186,7 @@ export default function ChatbotDialog({
   );
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleDialogChange}>
       <DialogContent className="max-w-3xl max-h-[85vh] p-0 overflow-hidden rounded-lg">
         <div className={headerClass}>
           <div className="flex items-start gap-3 pr-8">
@@ -249,43 +298,49 @@ export default function ChatbotDialog({
                     <Label className="text-sm mb-2 block text-gray-700 dark:text-gray-300">
                       {t('selectedTools')}
                     </Label>
-                    <div className="flex flex-wrap gap-1.5 mt-1">
+                    <div className="flex flex-wrap gap-2">
                       {clientToolIds.map(id => {
                         const tool = availableTools.find(t => t.id === id);
-                        return tool ? (
-                          <Badge
-                            key={id}
-                            variant="secondary"
-                            className="flex items-center gap-1 py-1 px-2"
-                          >
-                            <CheckCircle className="h-3 w-3 text-green-500" />
-                            {tool.name}
-                            <button
-                              type="button"
-                              className="ml-1 rounded-full outline-none focus:ring-2 focus:ring-offset-2"
-                              onClick={() => setClientToolIds(clientToolIds.filter(t => t !== id))}
-                              disabled={showNoActiveClientWarning}
-                            >
-                              <X className="h-3 w-3" />
-                            </button>
+                        return (
+                          <Badge key={id} variant="secondary" className="flex items-center gap-1">
+                            <span>{tool?.name}</span>
+                            <X
+                              className="h-3 w-3 cursor-pointer"
+                              onClick={() => {
+                                setClientToolIds(clientToolIds.filter(toolId => toolId !== id));
+                              }}
+                            />
                           </Badge>
-                        ) : null;
+                        );
                       })}
                     </div>
                   </div>
                 )}
-
-                <div className="text-xs text-gray-500 flex items-center mt-2">
-                  <Info className="h-3 w-3 mr-1" />
-                  {t('selectedToolsCount', { count: clientToolIds.length })}
-                </div>
               </div>
             </SectionCard>
+
+            {/* 知识库配置部分 */}
+            {editChatbot && dialogInitialized && (
+              <SectionCard title={t('knowledgeBase') || '知识库'} icon={BookOpen}>
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {t('selectKnowledgeBaseDesc') ||
+                      '选择Agent使用的知识库文档版本，可以选择多个文档的多个版本。'}
+                  </p>
+
+                  <KnowledgeBaseSelector
+                    botId={editChatbot.id}
+                    onSelectionChange={handleKnowledgeBaseSelectionChange}
+                    disabled={isSubmitting || isUpdatingKnowledgeBase || showNoActiveClientWarning}
+                  />
+                </div>
+              </SectionCard>
+            )}
           </div>
         </ScrollArea>
 
         <DialogFooter className="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
-          <Button variant="secondary" onClick={() => onOpenChange(false)} className="mr-2">
+          <Button variant="secondary" onClick={() => handleDialogChange(false)} className="mr-2">
             {t('cancel')}
           </Button>
           <Button
@@ -297,7 +352,7 @@ export default function ChatbotDialog({
               (isSubmitting || showNoActiveClientWarning || !name.trim()) && 'opacity-50'
             )}
           >
-            {isSubmitting ? t('submitting') : t('submit')}
+            {isSubmitting || isUpdatingKnowledgeBase ? t('submitting') : t('submit')}
           </Button>
         </DialogFooter>
       </DialogContent>

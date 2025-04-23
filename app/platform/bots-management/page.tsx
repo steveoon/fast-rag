@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
-import { ActiveClientDisplay } from '@/components/ActiveClientDisplay';
+import { ActiveClientDisplay } from '@/components/active-client-display';
 import TranslationWrapper from '@/components/auth-translations';
 import ChatBotsList from './components/chat-bots-list';
 import ClientToolsProvider from './components/client-tools-provider';

@@ -1,5 +1,5 @@
 'use client';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useState, useEffect } from 'react';
 import { Paperclip, Mic, CornerDownLeft, AlertCircle, Bot, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ChatBubble, ChatBubbleAvatar, ChatBubbleMessage } from '@/components/ui/chat-bubble';
@@ -9,16 +9,27 @@ import { useChat } from '@ai-sdk/react';
 import { useTranslations } from 'next-intl';
 import { ChatBotToolStatus } from './components/chat-bot-tool-status';
 import { MessageContentAdapter } from '@/hooks/message-content-adapter';
+import { useKnowledgeBaseStore } from '@/app/platform/bots-management/store/knowledge-base-store';
 
 interface ChatClientProps {
   apiKey: string;
   tools: string[];
   botName?: string;
+  botId?: string;
 }
 
-export function ChatClient({ apiKey, tools, botName = 'AI Assistant' }: ChatClientProps) {
+export function ChatClient({ apiKey, tools, botName = 'AI Assistant', botId }: ChatClientProps) {
   const [chatError, setChatError] = useState<string | null>(null);
+  const { assignedKnowledgeBases, fetchBotKnowledgeBases } = useKnowledgeBaseStore();
   const t = useTranslations('ChatBot.chat');
+
+  useEffect(() => {
+    if (botId) {
+      fetchBotKnowledgeBases(botId).catch(error => {
+        console.error('获取机器人知识库失败:', error);
+      });
+    }
+  }, [botId, fetchBotKnowledgeBases]);
 
   const { messages, input, handleInputChange, handleSubmit, status, data } = useChat({
     api: '/api/v1/chat',
@@ -28,6 +39,8 @@ export function ChatClient({ apiKey, tools, botName = 'AI Assistant' }: ChatClie
     body: {
       enabledTools: tools,
       maxSteps: 15,
+      docs: assignedKnowledgeBases.map(kb => kb.documentId),
+      docVersions: assignedKnowledgeBases.map(kb => kb.documentVersionId),
     },
     onError: error => {
       console.error('Chat error:', error);

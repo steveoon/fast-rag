@@ -257,6 +257,18 @@ export const chat_bot_tools = pgTable(
   }
 );
 
+// 聊天机器人知识库关联表
+export const chat_bot_knowledge_bases = pgTable('chat_bot_knowledge_bases', {
+  id: uuid('id').defaultRandom().primaryKey().notNull(),
+  chat_bot_id: uuid('chat_bot_id')
+    .notNull()
+    .references(() => chat_bots.id, { onDelete: 'cascade' }),
+  document_version_id: uuid('document_version_id')
+    .notNull()
+    .references(() => document_versions.id, { onDelete: 'cascade' }),
+  created_at: timestamp('created_at', { mode: 'string' }).defaultNow().notNull(),
+});
+
 export const clientsSchema = createInsertSchema(clients);
 export const clientsSelectSchema = createSelectSchema(clients);
 export const access_tokensSchema = createInsertSchema(access_tokens);
@@ -303,3 +315,8 @@ export const chat_bot_toolsSchema = createInsertSchema(chat_bot_tools);
 export const chat_bot_toolsSelectSchema = createSelectSchema(chat_bot_tools);
 export type ChatBotTool = z.infer<typeof chat_bot_toolsSelectSchema>;
 export type ChatBotToolInsert = z.infer<typeof chat_bot_toolsSchema>;
+
+export const chat_bot_knowledge_basesSchema = createInsertSchema(chat_bot_knowledge_bases);
+export const chat_bot_knowledge_basesSelectSchema = createSelectSchema(chat_bot_knowledge_bases);
+export type ChatBotKnowledgeBase = z.infer<typeof chat_bot_knowledge_basesSelectSchema>;
+export type ChatBotKnowledgeBaseInsert = z.infer<typeof chat_bot_knowledge_basesSchema>;

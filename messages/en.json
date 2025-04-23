@@ -465,7 +465,26 @@
       "basicInfo": "Basic Info",
       "selectTools": "Select Tools",
       "toolsFilteredWarning": "Tools Filtered Warning",
-      "toolsFilteredWarningDescription": "The following tools are not available due to client restrictions: {count}"
+      "toolsFilteredWarningDescription": "The following tools are not available due to client restrictions: {count}",
+      "knowledgeBase": "Knowledge Base",
+      "selectKnowledgeBaseDesc": "Select knowledge base document versions for the agent to use. You can select multiple versions of different documents.",
+      "KnowledgeBase": {
+        "loading": "Loading knowledge base...",
+        "loadError": "Error loading knowledge base",
+        "noDocuments": "No knowledge base documents available. Please upload documents first.",
+        "selectedVersions": "{count} document versions selected",
+        "clearAll": "Clear All",
+        "versionsCount": "{count} versions",
+        "versionNumber": "Version {number}",
+        "assigned": "Assigned",
+        "allDocuments": "All Documents",
+        "assignedDocuments": "Assigned Documents",
+        "availableDocuments": "Available Documents",
+        "keep": "Keep",
+        "remove": "Will Remove",
+        "add": "Will Add",
+        "explainerText": "Blue background indicates documents and versions already assigned to this bot. Checkboxes show your current selection."
+      }
     }
   },
   "Utils": {

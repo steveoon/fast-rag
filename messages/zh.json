@@ -465,7 +465,26 @@
       "toolsFilteredWarningDescription": "以下工具由于客户端限制无法使用：{count}",
       "createYourFirst": "创建你的第一个智能体",
       "basicInfo": "基本信息",
-      "selectTools": "选择工具"
+      "selectTools": "选择工具",
+      "knowledgeBase": "知识库",
+      "selectKnowledgeBaseDesc": "选择智能体可以使用的知识库文档版本，可以选择多个文档的不同版本",
+      "KnowledgeBase": {
+        "loading": "加载知识库...",
+        "loadError": "加载知识库时出错",
+        "noDocuments": "没有可用的知识库文档。请先上传文档。",
+        "selectedVersions": "已选择 {count} 个文档版本",
+        "clearAll": "清除所有",
+        "versionsCount": "{count} 个版本",
+        "versionNumber": "版本 {number}",
+        "assigned": "已分配",
+        "allDocuments": "所有文档",
+        "assignedDocuments": "已分配文档",
+        "availableDocuments": "可分配文档",
+        "keep": "保留",
+        "remove": "将移除",
+        "add": "将添加",
+        "explainerText": "蓝色背景表示已分配给当前机器人的文档和版本，勾选状态表示选择的文档版本"
+      }
     }
   },
   "Utils": {

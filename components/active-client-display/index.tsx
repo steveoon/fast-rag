@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useMemo, useCallback } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { type ClientInfo, getActiveClientInfo } from '@/lib/actions/get-active-client';
 import { StatusBadge, type StatusType } from '@/components/tools/tool-detail/status-badge';
 import { useTranslations } from 'next-intl';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { RefreshCcw } from 'lucide-react';
+import { useClientStore } from './client-store';
 
 // Define a static mapping outside the component for better performance
 const STATUS_MAP: Record<string, StatusType> = {
@@ -18,31 +18,12 @@ const STATUS_MAP: Record<string, StatusType> = {
 
 export function ActiveClientDisplay() {
   const t = useTranslations('Platform.ActiveClientDisplay');
-  const [clientInfo, setClientInfo] = useState<ClientInfo | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-
-  // Memoized fetch function to avoid unnecessary re-creations
-  const fetchClientInfo = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await getActiveClientInfo();
-      setClientInfo(data);
-      setError(null);
-      setLastUpdated(new Date());
-    } catch (err) {
-      console.error('Error fetching client info:', err);
-      setError(err instanceof Error ? err : new Error('Unknown error'));
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const { clientInfo, loading, error, lastUpdated, fetchClientInfo } = useClientStore();
 
   // Polling: fetch data on mount and then every 30 seconds
   useEffect(() => {
     fetchClientInfo();
-    const intervalId = setInterval(fetchClientInfo, 30000);
+    const intervalId = setInterval(() => fetchClientInfo(), 30000);
     return () => clearInterval(intervalId);
   }, [fetchClientInfo]);
 
@@ -109,17 +90,6 @@ export function ActiveClientDisplay() {
           </div>
         </TooltipTrigger>
         <TooltipContent side="bottom" className="p-4 space-y-2 max-w-xs bg-card">
-          {/* Refresh button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleRefresh}
-            className="absolute top-1 right-1 p-1 text-xs text-muted-foreground hover:text-foreground rounded-full hover:bg-muted"
-            asChild
-          >
-            <RefreshCcw className="w-4 h-4" />
-          </Button>
-
           <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
             <span className="text-xs font-semibold text-muted-foreground">{t('id')}:</span>
             <span className="text-xs truncate">{clientInfo.id}</span>
@@ -133,8 +103,17 @@ export function ActiveClientDisplay() {
             </div>
           </div>
 
-          <div className="text-xs text-muted-foreground mt-2 pt-2 border-t">
+          <div className="text-xs text-muted-foreground mt-2 pt-2 border-t flex items-center justify-between">
             {t('lastUpdated')}: {lastUpdated ? lastUpdated.toLocaleTimeString() : ''}
+            {/* Refresh button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleRefresh}
+              className="text-xs text-muted-foreground hover:text-foreground rounded-full hover:bg-muted"
+            >
+              <RefreshCcw className="w-3 h-3" />
+            </Button>
           </div>
         </TooltipContent>
       </Tooltip>

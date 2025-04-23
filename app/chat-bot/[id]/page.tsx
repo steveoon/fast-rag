@@ -96,7 +96,7 @@ export default async function ChatBotPage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-slate-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-950 p-2 sm:p-4 md:p-6">
         <AuroraBackground />
         <div className="w-full max-w-4xl h-[90vh] mx-auto bg-white/90 dark:bg-gray-900/90 rounded-xl shadow-xl backdrop-blur-sm z-10 overflow-hidden">
-          <ChatClient apiKey={apiKey} tools={toolNames} botName={chatBot.name} />
+          <ChatClient apiKey={apiKey} tools={toolNames} botName={chatBot.name} botId={botId} />
         </div>
       </div>
     );

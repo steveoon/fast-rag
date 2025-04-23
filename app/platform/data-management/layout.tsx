@@ -1,5 +1,5 @@
 import TranslationWrapper from '@/components/auth-translations';
-import { ActiveClientDisplay } from '@/components/ActiveClientDisplay';
+import { ActiveClientDisplay } from '@/components/active-client-display';
 
 export default function DataManagementLayout({ children }: { children: React.ReactNode }) {
   return (

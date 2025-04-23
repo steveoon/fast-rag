@@ -36,6 +36,13 @@
       "when": 1743327326756,
       "tag": "0004_wooden_iron_man",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1745394868563,
+      "tag": "0005_heavy_maginty",
+      "breakpoints": true
     }
   ]
 }

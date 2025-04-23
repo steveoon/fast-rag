@@ -464,7 +464,26 @@
       "toolsFilteredWarningDescription": "以下のツールはクライアントの制限により使用できません: {count}",
       "createYourFirst": "最初のエージェントを作成しましょう",
       "basicInfo": "基本情報",
-      "selectTools": "ツールを選択"
+      "selectTools": "ツールを選択",
+      "knowledgeBase": "知識ベース",
+      "selectKnowledgeBaseDesc": "エージェントが使用する知識ベースのドキュメントバージョンを選択します。複数のドキュメントの異なるバージョンを選択できます。",
+      "KnowledgeBase": {
+        "loading": "知識ベースを読み込み中...",
+        "loadError": "知識ベースの読み込み中にエラーが発生しました",
+        "noDocuments": "利用可能な知識ベースドキュメントがありません。まずドキュメントをアップロードしてください。",
+        "selectedVersions": "{count} 個のドキュメントバージョンが選択されています",
+        "clearAll": "すべてクリア",
+        "versionsCount": "{count} バージョン",
+        "versionNumber": "バージョン {number}",
+        "assigned": "割り当て済み",
+        "allDocuments": "すべてのドキュメント",
+        "assignedDocuments": "割り当て済みドキュメント",
+        "availableDocuments": "利用可能なドキュメント",
+        "keep": "保持",
+        "remove": "削除予定",
+        "add": "追加予定",
+        "explainerText": "青い背景は現在のボットに割り当てられているドキュメントとバージョンを示します。チェックボックスは現在の選択を示します。"
+      }
     }
   },
   "Utils": {
