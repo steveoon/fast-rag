@@ -6,6 +6,7 @@ import { wikidataEntityTool, smartWikidataQueryTool } from './wikidata';
 import imageGenerationTool from './image-generation';
 import placeInfoTool from './place-info';
 import googleMapsTool from './google-maps';
+import multiDimensionalSearchTool from './multi-dimensional-search';
 
 /**
  * 可用的工具定义列表
@@ -19,6 +20,7 @@ export const toolDefinitions: ToolDefinition[] = [
   imageGenerationTool,
   placeInfoTool,
   googleMapsTool,
+  multiDimensionalSearchTool,
 ];
 
 /**
@@ -40,4 +42,5 @@ export {
   imageGenerationTool,
   placeInfoTool,
   googleMapsTool,
+  multiDimensionalSearchTool,
 };

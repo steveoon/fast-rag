@@ -33,6 +33,9 @@ export const queryAnalysisSchema = z.object({
     'travel', // 旅行相关查询
     'location', // 位置相关查询
     'visualization', // 图像生成相关查询
+    'academic', // 学术论文、研究内容查询
+    'github', // GitHub仓库、代码和开发者查询
+    'webContent', // 网页内容爬取查询
   ]),
   requiredTools: z.array(z.enum(ANALYSIS_TOOLS)),
   reasoning: z.string(),

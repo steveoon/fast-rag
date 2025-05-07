@@ -72,6 +72,9 @@ export function selectTools(config: ToolSelectorConfig): ToolSet {
     ],
     location: ['googleMapsQuery'],
     visualization: ['generateImageQuery'],
+    academic: ['multiDimensionalSearch', 'webSearch'],
+    github: ['multiDimensionalSearch', 'webSearch'],
+    webContent: ['multiDimensionalSearch', 'webSearch'],
   };
 
   // Apply default tools based on query type
@@ -159,6 +162,10 @@ const toolDescriptionMap: Record<string, string> = {
     * search_places: 搜索特定区域内的地点
     * place_details: 获取地点详情
     * directions: 获取两点之间的路线`,
+  multiDimensionalSearch: `多维搜索工具，支持三种高级搜索模式:
+    * research_paper_search: 搜索学术论文和研究资料，可查找最新的学术成果和专业知识
+    * github_search: 搜索GitHub仓库、代码和开发者，了解开源项目和技术实现
+    * crawling: 爬取指定网页内容，可同时处理多个URL，获取完整网页信息和结构`,
 };
 
 /**
@@ -192,6 +199,14 @@ export function generateToolSystemPrompt(tools: ToolSet): string {
     - 在搜索结果中寻找多个来源的共识，识别可靠的信息
     - 检查搜索结果的发布日期，优先参考最新的信息
     - 当结果包含数字、统计数据或具体观点时，始终标明信息来源
+    
+    多维搜索工具使用指南:
+    - 当用户询问学术论文或研究内容时，使用operation=research_paper_search
+    - 当用户需要了解GitHub上的开源项目、代码或开发者时，使用operation=github_search
+    - 当用户提供明确的网页链接并需要获取其内容时，使用operation=crawling
+    - 爬取网页时，可以提供多个URL（用逗号分隔），如"https://example.com,https://example.org"
+    - 对于学术内容，应综合多篇论文的观点，避免仅依赖单一来源
+    - 引用GitHub内容时，应提供仓库链接、作者和许可证信息
     
     旅行信息工具使用指南:
     - 对于北欧旅行目的地查询，优先使用getPlaceInfoQuery工具获取结构化的旅行信息
@@ -238,6 +253,9 @@ export function generateQueryAnalysisPrompt(content: string): string {
      - travel: 旅行规划、目的地信息、旅游攻略相关查询
      - location: 地理位置、路线规划、周边设施搜索等地图相关查询
      - visualization: 图像生成、视觉内容创建相关查询
+     - academic: 学术论文、研究资料、专业学术内容查询
+     - social: 社交媒体内容、观点讨论、Twitter/X平台信息查询
+     - webContent: 特定网页内容提取、多个网址内容分析查询
   
   2. requiredTools: 选择解答问题所需的工具
      - queryKnowledgeBase: 适用于内部文档和专有知识
@@ -248,6 +266,7 @@ export function generateQueryAnalysisPrompt(content: string): string {
      - getPlaceInfoQuery: 适用于北欧旅行目的地信息查询，可获取城市、景点的详细介绍和旅行建议
      - generateImageQuery: 适用于需要生成图像的场景，如创建旅行地点的示意图、路线图等视觉内容
      - googleMapsQuery: 适用于地理位置查询、路线规划、周边设施搜索等地图相关操作
+     - multiDimensionalSearch: 适用于学术内容查询、Twitter/X平台内容搜索或网页内容爬取
             
   3. reasoning: 说明你的推理过程
 
@@ -255,5 +274,8 @@ export function generateQueryAnalysisPrompt(content: string): string {
   - 对于查询人物、地点、组织等实体信息时，应优先选择smartWikidataQuery而非wikidataGetEntity
   - 对于北欧旅行相关的查询，优先考虑使用getPlaceInfoQuery工具和googleMapsQuery工具结合
   - 当查询涉及"如何到达"、"距离多远"、"附近有什么"等地理位置问题时，使用googleMapsQuery工具
-  - 当用户需要图片或视觉内容时，应选择generateImageQuery工具`;
+  - 当用户需要图片或视觉内容时，应选择generateImageQuery工具
+  - 当用户提问涉及学术论文、研究内容时，应优先选择multiDimensionalSearch工具
+  - 当用户需要了解GitHub上的开源项目、代码或开发者时，应选择multiDimensionalSearch工具
+  - 当用户提供具体网址并需要获取其内容时，应选择multiDimensionalSearch工具`;
 }

@@ -198,14 +198,15 @@ const PREDEFINED_TOOLS: {
   {
     name: 'googleMaps',
     display_name: 'Google 地图',
-    description: '使用Google Maps API查询地点、路线、地址坐标等信息',
+    description: '使用Google Maps API查询地点、路线、地址坐标等信息，务必使用英文',
     icon: 'map',
     implementation_key: 'googleMapsQuery',
     parameters: [
       {
         name: 'query',
         display_name: '查询内容',
-        description: '地图查询内容，例如"北京天安门附近的餐厅"',
+        description:
+          '地图查询内容，例如"北京天安门附近的餐厅"，如果是路线查询，请使用"起点->终点"的格式',
         type: 'string' as ToolParameterType,
         is_required: true,
         default_value: null,
@@ -213,10 +214,44 @@ const PREDEFINED_TOOLS: {
       {
         name: 'operation',
         display_name: '操作类型',
-        description: '地图操作类型',
+        description:
+          '地图操作类型，可选值：geocode(地理编码)、reverse_geocode(反向地理编码)、search_places(搜索地点)、place_details(地点详情)、directions(路线规划)',
         type: 'string' as ToolParameterType,
         is_required: true,
         default_value: 'search_places',
+      },
+    ],
+  },
+  {
+    name: 'multiDimensionalSearch',
+    display_name: '多维搜索',
+    description: '执行学术论文搜索、GitHub仓库搜索或网页内容爬取',
+    icon: 'compass',
+    implementation_key: 'multiDimensionalSearch',
+    parameters: [
+      {
+        name: 'operation',
+        display_name: '操作类型',
+        description: '搜索操作类型：学术论文搜索、GitHub仓库搜索或网页爬取',
+        type: 'string' as ToolParameterType,
+        is_required: true,
+        default_value: null,
+      },
+      {
+        name: 'query',
+        display_name: '查询内容',
+        description: '搜索查询或URL，如果是crawling操作则可以是逗号分隔的多个URL',
+        type: 'string' as ToolParameterType,
+        is_required: true,
+        default_value: null,
+      },
+      {
+        name: 'numResults',
+        display_name: '结果数量',
+        description: '返回结果数量（仅适用于搜索操作）',
+        type: 'number' as ToolParameterType,
+        is_required: false,
+        default_value: 5,
       },
     ],
   },

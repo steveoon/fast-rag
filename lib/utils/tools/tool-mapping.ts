@@ -7,6 +7,7 @@ const TOOL_NAME_MAPPING: Record<AnalysisToolType, EnabledToolType> = {
   generateImageQuery: 'generateImage',
   getPlaceInfoQuery: 'getPlaceInfo',
   googleMapsQuery: 'googleMaps',
+  multiDimensionalSearch: 'multiDimensionalSearch',
 };
 
 // 定义工具类型
@@ -19,6 +20,7 @@ export const ENABLED_TOOLS = [
   'generateImage',
   'getPlaceInfo',
   'googleMaps',
+  'multiDimensionalSearch',
 ] as const;
 export type EnabledToolType = (typeof ENABLED_TOOLS)[number];
 
@@ -32,6 +34,7 @@ export const ANALYSIS_TOOLS = [
   'generateImageQuery',
   'getPlaceInfoQuery',
   'googleMapsQuery',
+  'multiDimensionalSearch',
 ] as const;
 export type AnalysisToolType = (typeof ANALYSIS_TOOLS)[number];
 

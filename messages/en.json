@@ -532,7 +532,8 @@
         "textCompletion": "Text Generator",
         "getPlaceInfoQuery": "Travel Info",
         "generateImageQuery": "Image Generator",
-        "googleMapsQuery": "Google Maps"
+        "googleMapsQuery": "Google Maps",
+        "multiDimensionalSearch": "Multi-Dimensional Search"
       }
     }
   }

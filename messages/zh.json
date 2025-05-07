@@ -532,7 +532,8 @@
         "textCompletion": "文本生成",
         "getPlaceInfoQuery": "旅行信息查询",
         "generateImageQuery": "图像生成",
-        "googleMapsQuery": "谷歌地图查询"
+        "googleMapsQuery": "谷歌地图查询",
+        "multiDimensionalSearch": "多维搜索"
       }
     }
   }

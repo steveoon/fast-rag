@@ -18,6 +18,7 @@ class ClientManager {
   private _exaClient: ExaClient | null = null;
   private _wikidataClient: WikidataClient | null = null;
   private _googleMapsMCPClient: any | null = null; // 使用any暂时避免类型问题
+  private _exaMCPClient: any | null = null; // ExaMCP客户端
 
   private constructor() {
     // 私有构造函数，防止外部直接实例化
@@ -37,6 +38,18 @@ class ClientManager {
         console.log('Google Maps MCP客户端已关闭');
       } catch (error) {
         console.error('关闭Google Maps MCP客户端出错:', error);
+      }
+    }
+
+    if (this._exaMCPClient) {
+      try {
+        if (this._exaMCPClient.close) {
+          await this._exaMCPClient.close();
+        }
+        this._exaMCPClient = null;
+        console.log('Exa MCP客户端已关闭');
+      } catch (error) {
+        console.error('关闭Exa MCP客户端出错:', error);
       }
     }
   }
@@ -118,6 +131,61 @@ class ClientManager {
       console.log('Google Maps MCP客户端已手动关闭');
     }
   }
+
+  // 获取Exa MCP客户端
+  public async getExaMCPClient() {
+    if (!this._exaMCPClient) {
+      const apiKey = process.env.EXA_API_KEY;
+      if (!apiKey) {
+        throw new Error('EXA_API_KEY未设置');
+      }
+      console.log('EXA_API_KEY:', '...' + apiKey.substring(apiKey.length - 6));
+
+      const transport = new Experimental_StdioMCPTransport({
+        command: 'npx',
+        args: [
+          '-y',
+          'exa-mcp-server',
+          '--tools=web_search_exa,research_paper_search,company_research,crawling,competitor_finder,linkedin_search,wikipedia_search_exa,github_search',
+        ],
+        env: { EXA_API_KEY: apiKey },
+      });
+
+      this._exaMCPClient = await experimental_createMCPClient({
+        transport,
+      });
+
+      console.log('Exa MCP客户端已创建');
+    }
+
+    return this._exaMCPClient;
+  }
+
+  // 获取Exa MCP工具
+  public async getExaMCPTools() {
+    const client = await this.getExaMCPClient();
+
+    try {
+      // 直接获取所有工具，而不是尝试通过getTool获取单个工具
+      const tools = await client.tools();
+      console.log(`已获取Exa MCP工具列表: ${Object.keys(tools).join(', ')}`);
+      return tools;
+    } catch (error) {
+      console.error('获取Exa MCP工具失败:', error);
+      return {};
+    }
+  }
+
+  // 关闭Exa MCP客户端
+  public async closeExaMCPClient() {
+    if (this._exaMCPClient) {
+      if (this._exaMCPClient.close) {
+        await this._exaMCPClient.close();
+      }
+      this._exaMCPClient = null;
+      console.log('Exa MCP客户端已手动关闭');
+    }
+  }
 }
 
 // 导出单例实例
@@ -133,3 +201,8 @@ export const getGoogleMapsMCPClient = () => clientManager.getGoogleMapsMCPClient
 export const getGoogleMapsMCPTools = (schemas?: Record<string, any>) =>
   clientManager.getGoogleMapsMCPTools(schemas);
 export const closeGoogleMapsMCPClient = () => clientManager.closeGoogleMapsMCPClient();
+
+// Exa MCP客户端相关函数导出
+export const getExaMCPClient = () => clientManager.getExaMCPClient();
+export const getExaMCPTools = () => clientManager.getExaMCPTools();
+export const closeExaMCPClient = () => clientManager.closeExaMCPClient();
