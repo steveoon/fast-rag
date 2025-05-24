@@ -533,7 +533,8 @@
         "getPlaceInfoQuery": "Travel Info",
         "generateImageQuery": "Image Generator",
         "googleMapsQuery": "Google Maps",
-        "multiDimensionalSearch": "Multi-Dimensional Search"
+        "multiDimensionalSearch": "Multi-Dimensional Search",
+        "xiaohongshuSearch": "Xiaohongshu Search"
       }
     }
   }

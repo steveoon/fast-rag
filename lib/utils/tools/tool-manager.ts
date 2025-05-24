@@ -69,12 +69,14 @@ export function selectTools(config: ToolSelectorConfig): ToolSet {
       'getWeather',
       'webSearch',
       'generateImageQuery',
+      'xiaohongshuSearch',
     ],
     location: ['googleMapsQuery'],
     visualization: ['generateImageQuery'],
     academic: ['multiDimensionalSearch', 'webSearch'],
     github: ['multiDimensionalSearch', 'webSearch'],
     webContent: ['multiDimensionalSearch', 'webSearch'],
+    social: ['xiaohongshuSearch', 'webSearch'],
   };
 
   // Apply default tools based on query type
@@ -166,6 +168,8 @@ const toolDescriptionMap: Record<string, string> = {
     * research_paper_search: 搜索学术论文和研究资料，可查找最新的学术成果和专业知识
     * github_search: 搜索GitHub仓库、代码和开发者，了解开源项目和技术实现
     * crawling: 爬取指定网页内容，可同时处理多个URL，获取完整网页信息和结构`,
+  xiaohongshuSearch:
+    '在小红书平台搜索相关内容，获取笔记、视频等信息。适用于查找旅游、美食、时尚、生活方式等领域的用户分享内容和体验',
 };
 
 /**
@@ -213,6 +217,13 @@ export function generateToolSystemPrompt(tools: ToolSet): string {
     - 结合googleMapsQuery工具获取地理位置、路线规划和周边设施信息
     - 使用getWeather工具获取目的地天气状况，帮助用户进行旅行规划
     - 当需要可视化展示时，可使用generateImageQuery工具生成相关图片
+
+    小红书搜索工具使用指南:
+    - 当用户需要了解旅游、美食、时尚、生活方式等领域的用户分享内容时使用
+    - 当用户明确提到"小红书"或需要查找真实用户体验和推荐时优先选择
+    - 对于旅行攻略、景点推荐、美食探店等需要参考他人实际体验的查询特别有用
+    - 返回结果包含笔记标题、作者、点赞数等信息，可帮助判断内容质量
+    - 引用小红书内容时，应提供原笔记链接，例如："根据小红书用户分享[1]，..."
     
     Google Maps工具使用指南:
     - 当用户询问"如何到达某地"时，使用directions操作（格式："起点->终点"）
@@ -267,6 +278,7 @@ export function generateQueryAnalysisPrompt(content: string): string {
      - generateImageQuery: 适用于需要生成图像的场景，如创建旅行地点的示意图、路线图等视觉内容
      - googleMapsQuery: 适用于地理位置查询、路线规划、周边设施搜索等地图相关操作
      - multiDimensionalSearch: 适用于学术内容查询、Twitter/X平台内容搜索或网页内容爬取
+     - xiaohongshuSearch: 适用于获取小红书平台上的用户分享内容，包括旅游攻略、美食推荐、时尚和生活方式等
             
   3. reasoning: 说明你的推理过程
 
@@ -277,5 +289,6 @@ export function generateQueryAnalysisPrompt(content: string): string {
   - 当用户需要图片或视觉内容时，应选择generateImageQuery工具
   - 当用户提问涉及学术论文、研究内容时，应优先选择multiDimensionalSearch工具
   - 当用户需要了解GitHub上的开源项目、代码或开发者时，应选择multiDimensionalSearch工具
-  - 当用户提供具体网址并需要获取其内容时，应选择multiDimensionalSearch工具`;
+  - 当用户提供具体网址并需要获取其内容时，应选择multiDimensionalSearch工具
+  - 当用户明确提到"小红书"或需要了解旅游、美食、时尚等方面的真实用户体验时，应选择xiaohongshuSearch工具`;
 }

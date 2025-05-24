@@ -532,7 +532,8 @@
         "getPlaceInfoQuery": "旅行情報",
         "generateImageQuery": "画像生成",
         "googleMapsQuery": "Google Maps",
-        "multiDimensionalSearch": "多維検索"
+        "multiDimensionalSearch": "多維検索",
+        "xiaohongshuSearch": "小红书検索"
       }
     }
   }

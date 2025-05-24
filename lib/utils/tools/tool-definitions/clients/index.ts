@@ -6,6 +6,7 @@ import { ExaClient } from '@agentic/exa';
 import { EventEmitter } from 'events';
 import { experimental_createMCPClient } from 'ai';
 import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
+import { CozeAPI } from '@coze/api';
 
 // 增加最大监听器数量，避免警告
 EventEmitter.defaultMaxListeners = 20;
@@ -19,6 +20,7 @@ class ClientManager {
   private _wikidataClient: WikidataClient | null = null;
   private _googleMapsMCPClient: any | null = null; // 使用any暂时避免类型问题
   private _exaMCPClient: any | null = null; // ExaMCP客户端
+  private _cozeClient: CozeAPI | null = null; // Coze API客户端
 
   private constructor() {
     // 私有构造函数，防止外部直接实例化
@@ -91,6 +93,21 @@ class ClientManager {
       this._wikidataClient = new WikidataClient();
     }
     return this._wikidataClient;
+  }
+
+  public get cozeClient(): CozeAPI {
+    if (!this._cozeClient) {
+      const apiKey = process.env.COZE_API_KEY;
+      if (!apiKey) {
+        console.warn('COZE_API_KEY未设置，使用空字符串');
+      }
+      this._cozeClient = new CozeAPI({
+        token: apiKey || '',
+        baseURL: 'https://api.coze.cn',
+      });
+      console.log('Coze API客户端已创建');
+    }
+    return this._cozeClient;
   }
 
   public async getGoogleMapsMCPClient() {
@@ -195,6 +212,7 @@ export const weatherClient = clientManager.weatherClient;
 export const wikipediaClient = clientManager.wikipediaClient;
 export const exaClient = clientManager.exaClient;
 export const wikidataClient = clientManager.wikidataClient;
+export const cozeClient = clientManager.cozeClient;
 
 // MCP客户端需要异步获取，不能直接导出
 export const getGoogleMapsMCPClient = () => clientManager.getGoogleMapsMCPClient();

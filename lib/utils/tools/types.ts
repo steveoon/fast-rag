@@ -36,6 +36,7 @@ export const queryAnalysisSchema = z.object({
     'academic', // 学术论文、研究内容查询
     'github', // GitHub仓库、代码和开发者查询
     'webContent', // 网页内容爬取查询
+    'social', // 社交媒体内容查询
   ]),
   requiredTools: z.array(z.enum(ANALYSIS_TOOLS)),
   reasoning: z.string(),

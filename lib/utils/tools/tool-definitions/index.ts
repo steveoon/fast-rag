@@ -7,6 +7,7 @@ import imageGenerationTool from './image-generation';
 import placeInfoTool from './place-info';
 import googleMapsTool from './google-maps';
 import multiDimensionalSearchTool from './multi-dimensional-search';
+import xiaohongshuTool from './xiaohongshu';
 
 /**
  * 可用的工具定义列表
@@ -21,6 +22,7 @@ export const toolDefinitions: ToolDefinition[] = [
   placeInfoTool,
   googleMapsTool,
   multiDimensionalSearchTool,
+  xiaohongshuTool,
 ];
 
 /**
@@ -43,4 +45,5 @@ export {
   placeInfoTool,
   googleMapsTool,
   multiDimensionalSearchTool,
+  xiaohongshuTool,
 };

@@ -255,6 +255,23 @@ const PREDEFINED_TOOLS: {
       },
     ],
   },
+  {
+    name: 'xiaohongshu',
+    display_name: '小红书搜索',
+    description: '在小红书平台搜索相关内容，获取笔记、视频等信息',
+    icon: 'heart',
+    implementation_key: 'xiaohongshuSearch',
+    parameters: [
+      {
+        name: 'query',
+        display_name: '搜索关键词',
+        description: '搜索关键词',
+        type: 'string' as ToolParameterType,
+        is_required: true,
+        default_value: null,
+      },
+    ],
+  },
 ];
 
 const migrateTools = async () => {

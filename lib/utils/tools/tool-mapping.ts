@@ -8,6 +8,7 @@ const TOOL_NAME_MAPPING: Record<AnalysisToolType, EnabledToolType> = {
   getPlaceInfoQuery: 'getPlaceInfo',
   googleMapsQuery: 'googleMaps',
   multiDimensionalSearch: 'multiDimensionalSearch',
+  xiaohongshuSearch: 'xiaohongshu',
 };
 
 // 定义工具类型
@@ -21,6 +22,7 @@ export const ENABLED_TOOLS = [
   'getPlaceInfo',
   'googleMaps',
   'multiDimensionalSearch',
+  'xiaohongshu',
 ] as const;
 export type EnabledToolType = (typeof ENABLED_TOOLS)[number];
 
@@ -35,6 +37,7 @@ export const ANALYSIS_TOOLS = [
   'getPlaceInfoQuery',
   'googleMapsQuery',
   'multiDimensionalSearch',
+  'xiaohongshuSearch',
 ] as const;
 export type AnalysisToolType = (typeof ANALYSIS_TOOLS)[number];
 
