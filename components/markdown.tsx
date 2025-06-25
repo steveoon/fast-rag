@@ -1,5 +1,7 @@
 import { FC, memo } from 'react';
 import ReactMarkdown, { Options, Components } from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import Link from 'next/link';
 import { CodeBlock } from './ui/codeblockForMarkdown';
 import { cn } from '@/lib/utils';
 
@@ -10,19 +12,34 @@ export const markdownComponents: Components = {
     </p>
   ),
   h1: ({ children, ...props }) => (
-    <h1 className="mb-4 mt-6 text-xl font-bold" {...props}>
+    <h1 className="mb-4 mt-6 text-2xl font-bold" {...props}>
       {children}
     </h1>
   ),
   h2: ({ children, ...props }) => (
-    <h2 className="mb-3 mt-5 text-lg font-semibold" {...props}>
+    <h2 className="mb-3 mt-5 text-xl font-semibold" {...props}>
       {children}
     </h2>
   ),
   h3: ({ children, ...props }) => (
-    <h3 className="mb-2 mt-4 text-base font-semibold" {...props}>
+    <h3 className="mb-2 mt-4 text-lg font-semibold" {...props}>
       {children}
     </h3>
+  ),
+  h4: ({ children, ...props }) => (
+    <h4 className="mb-2 mt-4 text-base font-semibold" {...props}>
+      {children}
+    </h4>
+  ),
+  h5: ({ children, ...props }) => (
+    <h5 className="mb-2 mt-4 text-sm font-semibold" {...props}>
+      {children}
+    </h5>
+  ),
+  h6: ({ children, ...props }) => (
+    <h6 className="mb-2 mt-4 text-xs font-semibold" {...props}>
+      {children}
+    </h6>
   ),
   ul: ({ children, ...props }) => (
     <ul className="mb-4 list-disc pl-6" {...props}>
@@ -35,7 +52,7 @@ export const markdownComponents: Components = {
     </ol>
   ),
   li: ({ children, ...props }) => (
-    <li className="mb-1 pl-1" {...props}>
+    <li className="mb-1 pl-1 py-1" {...props}>
       {children}
     </li>
   ),
@@ -47,16 +64,43 @@ export const markdownComponents: Components = {
       {children}
     </blockquote>
   ),
-  a: ({ children, href, ...props }) => (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline underline-offset-2"
-      {...props}
-    >
+  a: ({ children, href, ...props }) => {
+    // 检查是否为内部链接
+    const isInternalLink = href?.startsWith('/') || href?.startsWith('#');
+
+    if (isInternalLink) {
+      return (
+        <Link
+          href={href || '#'}
+          className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline underline-offset-2"
+          {...props}
+        >
+          {children}
+        </Link>
+      );
+    }
+
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline underline-offset-2"
+        {...props}
+      >
+        {children}
+      </a>
+    );
+  },
+  strong: ({ children, ...props }) => (
+    <span className="font-semibold" {...props}>
       {children}
-    </a>
+    </span>
+  ),
+  pre: ({ children, ...props }) => (
+    <pre className="overflow-x-auto" {...props}>
+      {children}
+    </pre>
   ),
   code: props => {
     const { children, className, ...rest } = props;
@@ -116,7 +160,25 @@ export const markdownComponents: Components = {
   ),
 };
 
-export const MemoizedReactMarkdown: FC<Options> = memo(
-  ReactMarkdown,
+const remarkPlugins = [remarkGfm];
+
+interface MemoizedReactMarkdownProps extends Options {
+  additionalRemarkPlugins?: Options['remarkPlugins'];
+  additionalRehypePlugins?: Options['rehypePlugins'];
+}
+
+export const MemoizedReactMarkdown: FC<MemoizedReactMarkdownProps> = memo(
+  ({ children, additionalRemarkPlugins = [], additionalRehypePlugins = [], ...props }) => (
+    <ReactMarkdown
+      remarkPlugins={[...remarkPlugins, ...(additionalRemarkPlugins || [])]}
+      rehypePlugins={additionalRehypePlugins}
+      components={markdownComponents}
+      {...props}
+    >
+      {children}
+    </ReactMarkdown>
+  ),
   (prevProps, nextProps) => prevProps.children === nextProps.children
 );
+
+MemoizedReactMarkdown.displayName = 'MemoizedReactMarkdown';

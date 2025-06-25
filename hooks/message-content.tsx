@@ -1,5 +1,4 @@
-import { MemoizedReactMarkdown, markdownComponents } from '@/components/markdown';
-import remarkGfm from 'remark-gfm';
+import { MemoizedReactMarkdown } from '@/components/markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
@@ -39,9 +38,8 @@ function MessageContentComponent({ content, showCopyButton = false }: MessageCon
       >
         <MemoizedReactMarkdown
           key={content}
-          remarkPlugins={[remarkGfm, remarkMath]}
-          rehypePlugins={[rehypeKatex]}
-          components={markdownComponents}
+          additionalRemarkPlugins={[remarkMath]}
+          additionalRehypePlugins={[rehypeKatex]}
         >
           {content}
         </MemoizedReactMarkdown>
