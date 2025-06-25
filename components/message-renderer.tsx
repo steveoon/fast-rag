@@ -6,7 +6,7 @@ import { MessageContent as MessageContentComponent } from '@/hooks/message-conte
 import { CollapsibleDrawer } from '@/components/ui/collapsible-drawer';
 import dynamic from 'next/dynamic';
 import { VisualizationData } from '@/components/visualizations';
-import { getProxyImageUrl } from '@/lib/utils/image-proxy';
+import { getProxyImageUrl } from '@/hooks/message-content-adapter';
 import type { Message } from '@ai-sdk/react';
 
 // 工具调用结果类型
