@@ -27,6 +27,12 @@ export async function queryEmbeddings(args: {
 }) {
   const { question, clientId, docs, docVersions, similarityThreshold = 0.5 } = args;
 
+  // 如果没有指定文档或文档版本，直接返回空数组
+  if ((docs && docs.length === 0) || (docVersions && docVersions.length === 0)) {
+    console.log('queryEmbeddings: 没有指定文档或文档版本，返回空结果');
+    return [];
+  }
+
   const questionEmbedding = await embedding([question]);
   const similarity = sql<number>`1 - (${cosineDistance(embeddings.embedding, questionEmbedding[0])})`;
 

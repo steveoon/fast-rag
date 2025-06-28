@@ -44,6 +44,12 @@ export function ChatClient({ apiKey, tools, botName = 'AI Assistant', botId }: C
     },
     onError: error => {
       console.error('Chat error:', error);
+      if (error instanceof Error) {
+        console.error('Error name:', error.name);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+        console.error('Error details:', error);
+      }
       setChatError(t('serviceUnavailable'));
     },
   });
