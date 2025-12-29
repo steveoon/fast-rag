@@ -1,0 +1,1 @@
+ALTER TABLE "chat_bots" ADD COLUMN "example_questions" jsonb;

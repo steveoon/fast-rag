@@ -17,7 +17,8 @@ export function ChatBubble({ variant = 'received', className, children }: ChatBu
   return (
     <div
       className={cn(
-        'flex items-start gap-2 mb-4',
+        'flex items-end gap-3 mb-4',
+        'animate-in fade-in-0 slide-in-from-bottom-2 duration-300',
         variant === 'sent' && 'flex-row-reverse',
         className
       )}
@@ -43,15 +44,32 @@ export function ChatBubbleMessage({
   return (
     <div
       className={cn(
-        'rounded-lg p-3',
-        variant === 'sent'
-          ? 'bg-primary text-primary-foreground ml-auto'
-          : 'bg-muted mr-auto max-w-[calc(100%-10rem)]',
+        'rounded-2xl px-4 py-3 text-sm leading-relaxed',
+        'transition-all duration-200 ease-out',
+        variant === 'sent' && [
+          'ml-auto max-w-[85%]',
+          'bg-gradient-to-br from-blue-500 to-blue-600',
+          'text-white',
+          'shadow-md shadow-blue-500/20',
+          'dark:from-blue-600 dark:to-blue-700',
+          'dark:shadow-blue-600/30',
+        ],
+        variant === 'received' && [
+          'mr-auto max-w-[85%]',
+          'bg-white/90 backdrop-blur-sm',
+          'text-gray-800',
+          'shadow-sm',
+          'border border-gray-100',
+          'dark:bg-gray-800/90',
+          'dark:text-gray-200',
+          'dark:border-gray-700/50',
+          'dark:shadow-none',
+        ],
         className
       )}
     >
       {isLoading ? (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1.5 px-1 py-0.5">
           <MessageLoading />
         </div>
       ) : (
@@ -64,14 +82,41 @@ export function ChatBubbleMessage({
 interface ChatBubbleAvatarProps {
   src?: string;
   fallback?: string;
+  icon?: React.ReactNode;
+  variant?: 'user' | 'assistant';
   className?: string;
 }
 
-export function ChatBubbleAvatar({ src, fallback = 'AI', className }: ChatBubbleAvatarProps) {
+export function ChatBubbleAvatar({
+  src,
+  fallback = 'AI',
+  icon,
+  variant = 'assistant',
+  className,
+}: ChatBubbleAvatarProps) {
   return (
-    <Avatar className={cn('h-8 w-8', className)}>
-      {src && <AvatarImage src={src} />}
-      <AvatarFallback>{fallback}</AvatarFallback>
+    <Avatar
+      className={cn(
+        'h-9 w-9 shrink-0 ring-2 ring-offset-2 ring-offset-background',
+        variant === 'user' && [
+          'bg-gradient-to-br from-blue-500 to-blue-600',
+          'ring-blue-200 dark:ring-blue-800',
+        ],
+        variant === 'assistant' && [
+          'bg-gradient-to-br from-gray-100 to-gray-200',
+          'ring-gray-200 dark:ring-gray-700',
+          'dark:from-gray-700 dark:to-gray-800',
+        ],
+        className
+      )}
+    >
+      {src ? (
+        <AvatarImage src={src} />
+      ) : icon ? (
+        <AvatarFallback className="bg-transparent">{icon}</AvatarFallback>
+      ) : (
+        <AvatarFallback>{fallback}</AvatarFallback>
+      )}
     </Avatar>
   );
 }

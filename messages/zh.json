@@ -465,6 +465,8 @@
       "toolsFilteredWarningDescription": "以下工具由于客户端限制无法使用：{count}",
       "createYourFirst": "创建你的第一个智能体",
       "basicInfo": "基本信息",
+      "modelSelection": "AI 模型",
+      "modelSelectionDesc": "选择智能体使用的 AI 模型，不同模型有不同的能力和成本。",
       "selectTools": "选择工具",
       "knowledgeBase": "知识库",
       "selectKnowledgeBaseDesc": "选择智能体可以使用的知识库文档版本，可以选择多个文档的不同版本",
@@ -484,7 +486,10 @@
         "remove": "将移除",
         "add": "将添加",
         "explainerText": "蓝色背景表示已分配给当前机器人的文档和版本，勾选状态表示选择的文档版本"
-      }
+      },
+      "exampleQuestions": "示例问题",
+      "exampleQuestionsDesc": "自定义欢迎页面显示的建议问题（可选）",
+      "exampleQuestionPlaceholder": "示例问题 {number}"
     }
   },
   "Utils": {
@@ -498,6 +503,12 @@
     }
   },
   "ChatBot": {
+    "welcome": {
+      "subtitle": "我可以帮助你回答问题、分析内容、编写代码等",
+      "suggestion1": "帮我写一段代码",
+      "suggestion2": "解释一个概念",
+      "suggestion3": "分析这段文本"
+    },
     "notFound": "找不到机器人ID",
     "notActive": "该聊天机器人当前未启用",
     "adminDisabled": "管理员暂时关闭了此聊天助手的访问权限。",
@@ -513,7 +524,8 @@
       "voiceInput": "语音输入",
       "serviceUnavailable": "聊天服务暂时不可用，请稍后再试",
       "fileUploadDeveloping": "文件上传功能正在开发中...",
-      "voiceInputDeveloping": "语音输入功能正在开发中..."
+      "voiceInputDeveloping": "语音输入功能正在开发中...",
+      "loadingKnowledgeBase": "正在加载知识库..."
     },
     "toolStatus": {
       "processStarting": "正在启动...",

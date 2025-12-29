@@ -3,6 +3,7 @@ import { getActiveKeyFromBotId } from '@/lib/actions/get-active-key-from-bot-id'
 import { ChatClient } from './chat-client';
 import { getBotTools } from '@/lib/actions/get-bot-tools';
 import { getChatBotById } from '@/lib/actions/get-user-chat-bots';
+import { getModelById } from '@/lib/actions/get-ai-models';
 import { AuroraBackground } from '@/components/aurora-background';
 import { getTranslations } from 'next-intl/server';
 
@@ -77,6 +78,13 @@ export default async function ChatBotPage() {
 
     const tools = await getBotTools(botId);
 
+    // 获取模型显示名称
+    let modelDisplayName: string | undefined;
+    if (chatBot.model_id) {
+      const model = await getModelById(chatBot.model_id);
+      modelDisplayName = model?.display_name || chatBot.model_id;
+    }
+
     if (!tools || tools.length === 0) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-slate-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-950">
@@ -96,7 +104,15 @@ export default async function ChatBotPage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-slate-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-950 p-2 sm:p-4 md:p-6">
         <AuroraBackground />
         <div className="w-full max-w-4xl h-[90vh] mx-auto bg-white/90 dark:bg-gray-900/90 rounded-xl shadow-xl backdrop-blur-sm z-10 overflow-hidden">
-          <ChatClient apiKey={apiKey} tools={toolNames} botName={chatBot.name} botId={botId} />
+          <ChatClient
+            apiKey={apiKey}
+            tools={toolNames}
+            botName={chatBot.name}
+            botId={botId}
+            modelId={chatBot.model_id || undefined}
+            modelDisplayName={modelDisplayName}
+            exampleQuestions={chatBot.example_questions as string[] | undefined}
+          />
         </div>
       </div>
     );

@@ -1,45 +1,35 @@
-function MessageLoading() {
+'use client';
+
+import { cn } from '@/lib/utils';
+
+interface MessageLoadingProps {
+  className?: string;
+  variant?: 'dots' | 'skeleton';
+}
+
+function MessageLoading({ className, variant = 'dots' }: MessageLoadingProps) {
+  if (variant === 'skeleton') {
+    return (
+      <div className={cn('flex flex-col gap-2 py-1', className)}>
+        <div className="h-3 bg-gray-300/50 dark:bg-gray-600/50 rounded-full w-48 animate-pulse" />
+        <div className="h-3 bg-gray-300/50 dark:bg-gray-600/50 rounded-full w-32 animate-pulse" />
+      </div>
+    );
+  }
+
   return (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-      className="text-foreground"
-    >
-      <circle cx="4" cy="12" r="2" fill="currentColor">
-        <animate
-          id="spinner_qFRN"
-          begin="0;spinner_OcgL.end+0.25s"
-          attributeName="cy"
-          calcMode="spline"
-          dur="0.6s"
-          values="12;6;12"
-          keySplines=".33,.66,.66,1;.33,0,.66,.33"
+    <div className={cn('flex items-center gap-1.5', className)}>
+      {[0, 1, 2].map(i => (
+        <div
+          key={i}
+          className={cn('w-2 h-2 rounded-full', 'bg-gray-400 dark:bg-gray-500', 'animate-bounce')}
+          style={{
+            animationDelay: `${i * 0.15}s`,
+            animationDuration: '0.6s',
+          }}
         />
-      </circle>
-      <circle cx="12" cy="12" r="2" fill="currentColor">
-        <animate
-          begin="spinner_qFRN.begin+0.1s"
-          attributeName="cy"
-          calcMode="spline"
-          dur="0.6s"
-          values="12;6;12"
-          keySplines=".33,.66,.66,1;.33,0,.66,.33"
-        />
-      </circle>
-      <circle cx="20" cy="12" r="2" fill="currentColor">
-        <animate
-          id="spinner_OcgL"
-          begin="spinner_qFRN.begin+0.2s"
-          attributeName="cy"
-          calcMode="spline"
-          dur="0.6s"
-          values="12;6;12"
-          keySplines=".33,.66,.66,1;.33,0,.66,.33"
-        />
-      </circle>
-    </svg>
+      ))}
+    </div>
   );
 }
 

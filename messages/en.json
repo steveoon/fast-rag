@@ -463,6 +463,8 @@
       "noAvailableToolsNoActiveClient": "Please select an active client first, then select tools",
       "createYourFirst": "Create your first agent",
       "basicInfo": "Basic Info",
+      "modelSelection": "AI Model",
+      "modelSelectionDesc": "Select the AI model for the agent. Different models have different capabilities and costs.",
       "selectTools": "Select Tools",
       "toolsFilteredWarning": "Tools Filtered Warning",
       "toolsFilteredWarningDescription": "The following tools are not available due to client restrictions: {count}",
@@ -484,7 +486,10 @@
         "remove": "Will Remove",
         "add": "Will Add",
         "explainerText": "Blue background indicates documents and versions already assigned to this bot. Checkboxes show your current selection."
-      }
+      },
+      "exampleQuestions": "Example Questions",
+      "exampleQuestionsDesc": "Customize suggested questions on the welcome page (optional)",
+      "exampleQuestionPlaceholder": "Example question {number}"
     }
   },
   "Utils": {
@@ -498,6 +503,12 @@
     }
   },
   "ChatBot": {
+    "welcome": {
+      "subtitle": "I can help you answer questions, analyze content, write code, and more",
+      "suggestion1": "Help me write some code",
+      "suggestion2": "Explain a concept",
+      "suggestion3": "Analyze this text"
+    },
     "notFound": "Bot ID not found",
     "notActive": "This chat bot is currently not enabled",
     "adminDisabled": "The administrator has temporarily disabled access to this chat assistant.",
@@ -513,7 +524,8 @@
       "voiceInput": "Voice input",
       "serviceUnavailable": "Chat service is temporarily unavailable, please try again later",
       "fileUploadDeveloping": "File upload feature is under development...",
-      "voiceInputDeveloping": "Voice input feature is under development..."
+      "voiceInputDeveloping": "Voice input feature is under development...",
+      "loadingKnowledgeBase": "Loading knowledge base..."
     },
     "toolStatus": {
       "processStarting": "Starting...",

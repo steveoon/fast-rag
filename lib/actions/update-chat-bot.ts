@@ -11,12 +11,16 @@ export async function updateChatBot({
   description,
   clientToolIds,
   userId,
+  modelId,
+  exampleQuestions,
 }: {
   id: string;
   name: string;
   description: string;
   clientToolIds: string[];
   userId: string;
+  modelId?: string;
+  exampleQuestions?: string[];
 }) {
   // 验证 name 格式
   const nameRegex = /^[a-zA-Z0-9\u4e00-\u9fa5_-]+$/;
@@ -64,12 +68,17 @@ export async function updateChatBot({
     }
   }
 
+  // 过滤有效的示例问题（非空字符串）
+  const validExampleQuestions = exampleQuestions?.filter(q => q?.trim()) || [];
+
   // 更新聊天机器人
   const [updatedChatbot] = await db
     .update(chat_bots)
     .set({
       name,
       description,
+      model_id: modelId,
+      example_questions: validExampleQuestions.length > 0 ? validExampleQuestions : null,
       updated_at: new Date().toISOString(),
     })
     .where(eq(chat_bots.id, id))

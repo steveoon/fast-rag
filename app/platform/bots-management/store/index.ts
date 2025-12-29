@@ -26,6 +26,8 @@ interface ChatBotCreateData {
   name: string;
   description: string;
   clientToolIds: string[];
+  modelId?: string;
+  exampleQuestions?: string[];
 }
 
 interface ChatBotUpdateData extends ChatBotCreateData {
@@ -82,6 +84,8 @@ export const useChatBotsStore = create<ChatBotsState>((set, get) => ({
         name: data.name,
         description: data.description,
         clientToolIds: data.clientToolIds,
+        modelId: data.modelId,
+        exampleQuestions: data.exampleQuestions,
         userId,
       });
 
@@ -104,6 +108,8 @@ export const useChatBotsStore = create<ChatBotsState>((set, get) => ({
         name: data.name,
         description: data.description,
         clientToolIds: data.clientToolIds,
+        modelId: data.modelId,
+        exampleQuestions: data.exampleQuestions,
         userId,
       });
 

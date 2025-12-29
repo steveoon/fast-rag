@@ -9,7 +9,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
-import { X, Bot, Info, Settings, BookOpen } from 'lucide-react';
+import { X, Bot, Info, Settings, BookOpen, Cpu, MessageSquare } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +20,7 @@ import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import KnowledgeBaseSelector from './knowledge-base-selector';
 import { useKnowledgeBaseStore } from '../store/knowledge-base-store';
+import ModelSelector from './model-selector';
 
 // 定义客户端工具配置类型
 type ClientToolConfig = {
@@ -35,7 +36,13 @@ type ExtendedChatbot = Chatbot & {
 };
 
 interface ChatbotDialogProps {
-  onSubmit: (data: { name: string; description: string; clientToolIds: string[] }) => void;
+  onSubmit: (data: {
+    name: string;
+    description: string;
+    clientToolIds: string[];
+    modelId?: string;
+    exampleQuestions?: string[];
+  }) => void;
   isSubmitting: boolean;
   availableTools: ToolInfo[];
   hasActiveClient: boolean;
@@ -74,6 +81,8 @@ export default function ChatbotDialog({
   const [name, setName] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [clientToolIds, setClientToolIds] = useState<string[]>([]);
+  const [modelId, setModelId] = useState<string>('anthropic/claude-haiku-4-5');
+  const [exampleQuestions, setExampleQuestions] = useState<string[]>(['', '', '']);
   const [selectedKnowledgeBaseIds, setSelectedKnowledgeBaseIds] = useState<string[]>([]);
   const [isUpdatingKnowledgeBase, startKnowledgeBaseTransition] = useTransition();
   const [dialogInitialized, setDialogInitialized] = useState(false);
@@ -103,6 +112,17 @@ export default function ChatbotDialog({
     if (open && editChatbot) {
       setName(editChatbot.name);
       setDescription(editChatbot.description || '');
+      setModelId(editChatbot.model_id || 'anthropic/claude-haiku-4-5');
+
+      // 处理示例问题
+      const questions = editChatbot.example_questions as string[] | null;
+      if (questions && Array.isArray(questions)) {
+        // 确保有3个元素，不足的用空字符串填充
+        const paddedQuestions = [...questions, '', '', ''].slice(0, 3);
+        setExampleQuestions(paddedQuestions);
+      } else {
+        setExampleQuestions(['', '', '']);
+      }
 
       // 处理工具配置
       let initialToolIds: string[] = [];
@@ -143,7 +163,16 @@ export default function ChatbotDialog({
     setName('');
     setDescription('');
     setClientToolIds([]);
+    setModelId('anthropic/claude-haiku-4-5');
+    setExampleQuestions(['', '', '']);
     setSelectedKnowledgeBaseIds([]);
+  };
+
+  // 更新示例问题
+  const updateExampleQuestion = (index: number, value: string) => {
+    const newQuestions = [...exampleQuestions];
+    newQuestions[index] = value;
+    setExampleQuestions(newQuestions);
   };
 
   // 处理知识库选择变更
@@ -159,6 +188,8 @@ export default function ChatbotDialog({
       name,
       description,
       clientToolIds,
+      modelId,
+      exampleQuestions,
     });
 
     // 如果是编辑模式且有机器人ID，同时更新知识库
@@ -246,6 +277,20 @@ export default function ChatbotDialog({
               </div>
             </SectionCard>
 
+            <SectionCard title={t('modelSelection') || 'AI 模型'} icon={Cpu}>
+              <div className="space-y-3">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {t('modelSelectionDesc') ||
+                    '选择智能体使用的 AI 模型，不同模型有不同的能力和成本。'}
+                </p>
+                <ModelSelector
+                  value={modelId}
+                  onChange={setModelId}
+                  disabled={showNoActiveClientWarning}
+                />
+              </div>
+            </SectionCard>
+
             <SectionCard title={t('tools')} icon={Settings}>
               <div className="space-y-3">
                 <div className="border rounded-md overflow-hidden">
@@ -316,6 +361,27 @@ export default function ChatbotDialog({
                     </div>
                   </div>
                 )}
+              </div>
+            </SectionCard>
+
+            {/* 示例问题配置 */}
+            <SectionCard title={t('exampleQuestions') || '示例问题'} icon={MessageSquare}>
+              <div className="space-y-3">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {t('exampleQuestionsDesc') || '自定义欢迎页面显示的建议问题（可选）'}
+                </p>
+                {[0, 1, 2].map(index => (
+                  <Input
+                    key={index}
+                    placeholder={
+                      t('exampleQuestionPlaceholder', { number: index + 1 }) ||
+                      `示例问题 ${index + 1}`
+                    }
+                    value={exampleQuestions[index] || ''}
+                    onChange={e => updateExampleQuestion(index, e.target.value)}
+                    disabled={showNoActiveClientWarning}
+                  />
+                ))}
               </div>
             </SectionCard>
 

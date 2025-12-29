@@ -464,6 +464,8 @@
       "toolsFilteredWarningDescription": "以下のツールはクライアントの制限により使用できません: {count}",
       "createYourFirst": "最初のエージェントを作成しましょう",
       "basicInfo": "基本情報",
+      "modelSelection": "AI モデル",
+      "modelSelectionDesc": "エージェントが使用するAIモデルを選択します。モデルによって能力とコストが異なります。",
       "selectTools": "ツールを選択",
       "knowledgeBase": "知識ベース",
       "selectKnowledgeBaseDesc": "エージェントが使用する知識ベースのドキュメントバージョンを選択します。複数のドキュメントの異なるバージョンを選択できます。",
@@ -483,7 +485,10 @@
         "remove": "削除予定",
         "add": "追加予定",
         "explainerText": "青い背景は現在のボットに割り当てられているドキュメントとバージョンを示します。チェックボックスは現在の選択を示します。"
-      }
+      },
+      "exampleQuestions": "サンプル質問",
+      "exampleQuestionsDesc": "ウェルカムページに表示する質問をカスタマイズ（任意）",
+      "exampleQuestionPlaceholder": "サンプル質問 {number}"
     }
   },
   "Utils": {
@@ -497,6 +502,12 @@
     }
   },
   "ChatBot": {
+    "welcome": {
+      "subtitle": "質問への回答、コンテンツの分析、コードの作成などをお手伝いします",
+      "suggestion1": "コードを書いてください",
+      "suggestion2": "概念を説明してください",
+      "suggestion3": "このテキストを分析してください"
+    },
     "notFound": "ボットIDが見つかりません",
     "notActive": "このチャットボットは現在有効になっていません",
     "adminDisabled": "管理者がこのチャットアシスタントへのアクセスを一時的に無効にしています。",
@@ -512,7 +523,8 @@
       "voiceInput": "音声入力",
       "serviceUnavailable": "チャットサービスは一時的に利用できません、後でもう一度お試しください",
       "fileUploadDeveloping": "ファイルアップロード機能は開発中です...",
-      "voiceInputDeveloping": "音声入力機能は開発中です..."
+      "voiceInputDeveloping": "音声入力機能は開発中です...",
+      "loadingKnowledgeBase": "ナレッジベースを読み込んでいます..."
     },
     "toolStatus": {
       "processStarting": "起動中...",

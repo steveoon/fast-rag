@@ -43,6 +43,20 @@
       "when": 1745394868563,
       "tag": "0005_heavy_maginty",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1766996122515,
+      "tag": "0006_thin_bloodscream",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1767006836428,
+      "tag": "0007_brave_stature",
+      "breakpoints": true
     }
   ]
 }

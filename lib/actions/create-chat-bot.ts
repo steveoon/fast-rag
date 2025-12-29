@@ -12,11 +12,15 @@ export async function createChatBot({
   description,
   clientToolIds,
   userId,
+  modelId,
+  exampleQuestions,
 }: {
   name: string;
   description: string;
   clientToolIds: string[];
   userId: string;
+  modelId?: string;
+  exampleQuestions?: string[];
 }) {
   // 验证 name 格式
   const nameRegex = /^[a-zA-Z0-9\u4e00-\u9fa5_-]+$/;
@@ -58,6 +62,9 @@ export async function createChatBot({
   const chatbotId = randomUUID();
   const chatbotUrl = `/chat-bot/${chatbotId}`;
 
+  // 过滤有效的示例问题（非空字符串）
+  const validExampleQuestions = exampleQuestions?.filter(q => q?.trim()) || [];
+
   // 创建聊天机器人
   const [newChatbot] = await db
     .insert(chat_bots)
@@ -66,8 +73,10 @@ export async function createChatBot({
       name,
       description,
       client_id: activeClientId,
+      model_id: modelId || 'anthropic/claude-haiku-4-5',
       status: 'disabled', // 默认为停用状态
       url: chatbotUrl,
+      example_questions: validExampleQuestions.length > 0 ? validExampleQuestions : null,
     })
     .returning();
 

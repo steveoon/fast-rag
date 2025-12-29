@@ -14,7 +14,7 @@ import {
   boolean,
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 export const access_token_status = pgEnum('access_token_status', ['active', 'inactive']);
 export const client_status = pgEnum('client_status', ['disabled', 'active', 'pending']);
@@ -120,6 +120,28 @@ export const embeddings = pgTable(
 );
 
 export const tool_status = pgEnum('tool_status', ['active', 'deprecated', 'disabled']);
+
+// AI 模型表 - 存储可用的 AI 模型字典
+export const ai_models = pgTable(
+  'ai_models',
+  {
+    id: uuid('id').defaultRandom().primaryKey().notNull(),
+    model_id: varchar('model_id', { length: 255 }).notNull(), // e.g. 'anthropic/claude-haiku-4-5'
+    display_name: varchar('display_name', { length: 255 }).notNull(), // e.g. 'Claude Haiku 4.5'
+    provider: varchar('provider', { length: 50 }).notNull(), // e.g. 'anthropic', 'openai', 'google'
+    description: text('description'),
+    categories: text('categories').array(), // ['chat', 'general']
+    is_active: boolean('is_active').default(true).notNull(),
+    sort_order: integer('sort_order').default(0).notNull(),
+    created_at: timestamp('created_at', { mode: 'string' }).defaultNow().notNull(),
+    updated_at: timestamp('updated_at', { mode: 'string' }).defaultNow().notNull(),
+  },
+  table => {
+    return {
+      ai_models_model_id_unique: unique('ai_models_model_id_unique').on(table.model_id),
+    };
+  }
+);
 export const tool_parameter_type = pgEnum('tool_parameter_type', [
   'string',
   'number',
@@ -216,8 +238,10 @@ export const chat_bots = pgTable(
     client_id: uuid('client_id')
       .notNull()
       .references(() => clients.id, { onDelete: 'cascade' }),
+    model_id: varchar('model_id', { length: 255 }).default('anthropic/claude-haiku-4-5'),
     status: chatbot_status('status').default('disabled').notNull(),
     url: varchar('url', { length: 1024 }).notNull(),
+    example_questions: jsonb('example_questions').$type<string[]>(),
     created_at: timestamp('created_at', { mode: 'string' }).defaultNow().notNull(),
     updated_at: timestamp('updated_at', { mode: 'string' }).defaultNow().notNull(),
   },
@@ -320,3 +344,8 @@ export const chat_bot_knowledge_basesSchema = createInsertSchema(chat_bot_knowle
 export const chat_bot_knowledge_basesSelectSchema = createSelectSchema(chat_bot_knowledge_bases);
 export type ChatBotKnowledgeBase = z.infer<typeof chat_bot_knowledge_basesSelectSchema>;
 export type ChatBotKnowledgeBaseInsert = z.infer<typeof chat_bot_knowledge_basesSchema>;
+
+export const ai_modelsSchema = createInsertSchema(ai_models);
+export const ai_modelsSelectSchema = createSelectSchema(ai_models);
+export type AiModel = z.infer<typeof ai_modelsSelectSchema>;
+export type AiModelInsert = z.infer<typeof ai_modelsSchema>;
