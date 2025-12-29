@@ -15,7 +15,7 @@ const weatherTool: ToolDefinition = {
   createTool: (_: ToolConfig) => {
     return tool({
       description: '获取特定城市的天气信息，城市名称必须转换为英文',
-      parameters: z.object({
+      inputSchema: z.object({
         city: z.string().describe('城市名称，必须转换为英文'),
       }),
       execute: async ({ city }) => {

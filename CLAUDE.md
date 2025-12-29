@@ -8,185 +8,210 @@ Fast-RAG is an AI Chatbot and RAG (Retrieval Augmented Generation) Service Platf
 
 ## Key Commands
 
-### Development
-
 ```bash
-# Start development server with Turbopack on port 3001
-pnpm dev
+# Development
+pnpm dev                    # Start dev server with Turbopack on port 3001
+pnpm build                  # Build for production
+pnpm lint                   # Lint code
 
-# Run tests
-pnpm test
+# Testing (Vitest)
+pnpm test                   # Run all tests
+pnpm test path/to/file      # Run specific test file
+pnpm test --watch           # Watch mode
 
-# Lint code
-pnpm lint
-
-# Build for production
-pnpm build
-
-# Start production server
-pnpm start
+# Database (Drizzle ORM)
+pnpm db:generate            # Generate migrations from schema changes
+pnpm db:migrate             # Apply migrations to database
+pnpm db:studio              # Open Drizzle Studio GUI
+pnpm db:push                # Push schema directly (dev only)
 ```
 
-### Database Management
+## Tech Stack
 
-```bash
-# Generate database migrations
-pnpm db:generate
-
-# Apply database migrations
-pnpm db:migrate
-
-# Open database GUI
-pnpm db:studio
-```
-
-### Testing
-
-```bash
-# Run all tests
-pnpm test
-
-# Run tests in watch mode
-pnpm test --watch
-
-# Run a specific test file
-pnpm test path/to/test.test.ts
-```
-
-## Architecture Overview
-
-### Tech Stack
-
-- **Framework**: Next.js 15 with App Router
+- **Framework**: Next.js 15 (App Router), React 19
 - **Language**: TypeScript (strict mode)
 - **UI**: Shadcn UI, Radix UI, Tailwind CSS
-- **State Management**: Zustand
-- **Database**: Supabase (PostgreSQL) with Drizzle ORM
-- **AI SDKs**: Vercel AI SDK, Agentic SDK
-- **Authentication**: Supabase Auth
-- **Caching**: Redis for API keys
-- **Testing**: Vitest with React Testing Library
+- **State**: Zustand for client state
+- **Database**: Supabase (PostgreSQL) with Drizzle ORM, pgvector for embeddings
+- **AI**: Vercel AI SDK v6, Agentic SDK (OpenAI, Anthropic, Google, Ollama)
+- **Auth**: Supabase Auth
+- **Caching**: Redis (Upstash) for API key validation
+- **i18n**: next-intl (en, ja, zh)
 
-### Core Architecture Patterns
+## Data Model Hierarchy
 
-1. **Server-First Approach**
-
-   - Prioritize React Server Components (RSC) over client components
-   - Use Server Actions for data mutations
-   - Database queries only in server components/actions
-   - Client components marked with "use client" only when necessary
-
-2. **API Design**
-
-   - RESTful API endpoints under `/app/api/v1/`
-   - OpenAPI documentation at `/api-docs`
-   - Consistent error handling with standardized responses
-   - API key authentication via Redis-cached validation
-
-3. **Data Flow**
-
-   - Server Actions in `/lib/actions/` for data operations
-   - Zustand stores for client-side state management
-   - Use `lib/request` utility for API calls with automatic auth
-   - SSE (Server-Sent Events) for real-time streaming
-
-4. **File Organization**
-   ```
-   /app/               # Next.js pages and API routes
-   /components/        # Reusable UI components
-   /lib/               # Core business logic
-     /actions/         # Server actions
-     /db/             # Database schemas and migrations
-     /utils/          # Utilities and helpers
-       /tools/        # AI tool definitions
-   /hooks/            # Custom React hooks
-   /types/            # TypeScript type definitions
-   ```
-
-### Key Development Principles
-
-1. **TypeScript Best Practices**
-
-   - Avoid `any` type
-   - Define proper interfaces for all data structures
-   - Use type inference where possible
-   - Leverage TypeScript strict mode
-
-2. **Component Guidelines**
-
-   - Functional components only
-   - Custom hooks for complex logic
-   - Modular, single-responsibility components
-   - Proper error boundaries for error handling
-
-3. **Database Access**
-
-   - All database queries through Drizzle ORM
-   - Database access only in server components/actions
-   - Use transactions for related operations
-   - Proper error handling and rollback
-
-4. **AI Integration**
-   - Tool definitions in `/lib/utils/tools/`
-   - Support for multiple AI providers (OpenAI, Anthropic, Google, Ollama)
-   - Configurable tools per chatbot
-   - Streaming responses with proper error handling
-
-### Common Development Tasks
-
-1. **Adding a New API Endpoint**
-
-   - Create route handler in `/app/api/v1/[resource]/route.ts`
-   - Implement authentication middleware
-   - Add proper error handling
-   - Update OpenAPI documentation
-
-2. **Creating a New Tool**
-
-   - Define tool in `/lib/utils/tools/`
-   - Add to tool registry
-   - Create UI component if needed
-   - Update tool management interface
-
-3. **Adding Database Tables**
-
-   - Define schema in `/lib/db/schema/`
-   - Generate migration: `pnpm db:generate`
-   - Apply migration: `pnpm db:migrate`
-   - Create corresponding server actions
-
-4. **Implementing New Features**
-   - Start with server components when possible
-   - Add server actions for data mutations
-   - Create Zustand store for client state if needed
-   - Implement proper loading and error states
-
-### Environment Setup
-
-Required environment variables:
-
-```bash
-DATABASE_URL=               # PostgreSQL connection string
-SERVER_SECRET_KEY=          # Server secret for security
-NEXT_PUBLIC_SUPABASE_URL=   # Supabase project URL
-NEXT_PUBLIC_SUPABASE_ANON_KEY= # Supabase anonymous key
-GOOGLE_MAP_API_KEY=         # For Google Maps tool (optional)
-REDIS_URL=                  # Redis connection for caching
+```
+User (Supabase Auth)
+  └── Client (tenant/organization)
+        ├── AccessToken (API keys for client)
+        ├── Document → DocumentVersion → Embedding (RAG content)
+        ├── ClientTool (tools enabled for client)
+        └── ChatBot (AI agents)
+              ├── ChatBotTool (tools enabled for bot)
+              └── ChatBotKnowledgeBase (linked document versions)
 ```
 
-### Testing Guidelines
+Key relationships in `lib/db/schema/schema.ts`:
 
-- Write tests for critical business logic
-- Use Vitest for unit tests
-- Test server actions separately
-- Mock external API calls
-- Ensure proper cleanup in tests
+- Users own Clients (multi-tenant)
+- Clients own Documents, ChatBots, and configure available Tools
+- ChatBots reference specific ClientTools and DocumentVersions for RAG
 
-### Important Notes
+## Architecture Patterns
 
-- The project uses Husky for git hooks
-- Follow conventional commits (enforced by commitlint)
-- Code formatting with Prettier (run automatically on commit)
-- ESLint for code quality
-- Support for i18n (English, Japanese, Chinese)
-- Dark/light theme support throughout
+### Server-First Approach
+
+- Prioritize React Server Components (RSC) over client components
+- Use Server Actions in `/lib/actions/` for data mutations
+- Database queries only in server components/actions
+- Mark client components with `"use client"` only when necessary
+- Use the `use` hook for data fetching in client components
+
+### API Request Pattern
+
+Use `lib/request` for client-side API calls - it auto-handles API key auth:
+
+```typescript
+import api from '@/lib/request';
+
+// Auto-adds Authorization header from active API key
+const data = await api.get<DataType>('/endpoint');
+await api.post('/items', payload);
+
+// SSE for streaming (file uploads with progress)
+api.sse({
+  url: '/files-management/upload',
+  data: formData,
+  onData: data => {
+    if (data.percent) updateProgress(data.percent);
+    if (data.completed) handleComplete(data.files);
+  },
+});
+```
+
+### Error Handling
+
+Use `lib/utils/error/handle-error.ts` for consistent error handling:
+
+- Handles AI SDK errors (NoSuchToolError, InvalidArgumentError, ToolCallRepairError)
+- Handles CustomError, ZodError, and generic Error types
+- Returns standardized ErrorResponse with message and code
+
+```typescript
+import { handleError } from '@/lib/utils/error/handle-error';
+import { CustomError } from '@/types';
+
+// Throw custom errors
+throw new CustomError('Something failed', 'ERROR_CODE', { details });
+
+// In catch blocks
+catch (error) {
+  const { message, code } = handleError(error);
+  return NextResponse.json({ error: message }, { status: 500 });
+}
+```
+
+### AI Tools System
+
+Tool definitions in `/lib/utils/tools/tool-definitions/`. Each tool exports:
+
+```typescript
+// Example: lib/utils/tools/tool-definitions/my-tool.ts
+import { tool } from 'ai';
+import { z } from 'zod';
+import { ToolDefinition, ToolConfig, EnabledToolType } from '../types';
+
+const myToolDefinition: ToolDefinition = {
+  toolName: 'myTool',
+  isEnabled: (enabledTools: EnabledToolType[]) => enabledTools.includes('myTool'),
+  createTool: (config: ToolConfig) =>
+    tool({
+      description: 'Tool description for the AI',
+      parameters: z.object({
+        query: z.string().describe('Search query'),
+      }),
+      execute: async ({ query }) => {
+        // Implementation
+        return result;
+      },
+    }),
+};
+
+export default myToolDefinition;
+```
+
+Register new tools in `lib/utils/tools/tool-definitions/index.ts` and add the tool name to `EnabledToolType` in `types.ts`.
+
+The `tool-manager.ts` provides:
+
+- `createTools(config)` - Creates all enabled tools for a chatbot
+- `selectTools(config)` - Smart tool selection based on query analysis
+- `generateToolSystemPrompt(tools)` - Generates system prompt with tool descriptions
+
+### File Organization
+
+```
+/app/api/v1/              # Versioned REST API endpoints
+/app/platform/            # Dashboard pages (bots, clients, tools, data management)
+/app/chat-bot/[id]/       # Public chatbot interface
+/lib/actions/             # Server Actions for data mutations
+/lib/db/schema/           # Drizzle ORM schema definitions
+/lib/utils/tools/         # AI tool system (tool-definitions/, tool-manager.ts)
+/lib/request/             # API client with auto-auth
+/lib/api-key/             # API key validation (with Redis caching)
+/components/ui/           # Shadcn UI components
+```
+
+### Zustand Store Pattern
+
+```typescript
+import { create } from 'zustand';
+import api from '@/lib/request';
+
+interface MyStore {
+  data: DataType[];
+  isLoading: boolean;
+  fetchData: () => Promise<void>;
+}
+
+const useMyStore = create<MyStore>((set, get) => ({
+  data: [],
+  isLoading: false,
+  fetchData: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get<DataType[]>('/items');
+      set({ data: response.data, isLoading: false });
+    } catch {
+      set({ isLoading: false });
+    }
+  },
+}));
+```
+
+## Environment Variables
+
+Required variables defined in `lib/env.mjs`:
+
+```bash
+DATABASE_URL=              # PostgreSQL connection string
+SERVER_SECRET_KEY=         # Server secret for signing
+NEXT_PUBLIC_SUPABASE_URL=  # Supabase project URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY=  # Supabase anon key
+```
+
+Optional (for specific tools):
+
+```bash
+REDIS_URL=                 # Redis for API key caching
+GOOGLE_MAP_API_KEY=        # For Google Maps tool
+EXA_API_KEY=               # For web search tool
+```
+
+## Conventions
+
+- Husky + commitlint enforces conventional commits
+- Use `lowercase-with-dashes` for directories
+- Use PascalCase for components, camelCase for functions
+- Avoid `any` type - use proper interfaces from `drizzle-zod` schemas
+- API routes return consistent `{ data, message, status }` or `{ error }` format

@@ -21,7 +21,7 @@ const safeNanoid = customAlphabet(
   21
 );
 
-async function uploadFileToStorage({
+export async function uploadFileToStorage({
   file,
   apiKey,
   onProgress,

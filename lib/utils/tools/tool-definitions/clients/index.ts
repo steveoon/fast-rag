@@ -4,8 +4,8 @@ import { WikipediaClient } from '@agentic/wikipedia';
 import { WikidataClient } from '@agentic/wikidata';
 import { ExaClient } from '@agentic/exa';
 import { EventEmitter } from 'events';
-import { experimental_createMCPClient } from 'ai';
-import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
+import { createMCPClient } from '@ai-sdk/mcp';
+import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { CozeAPI } from '@coze/api';
 
 // 增加最大监听器数量，避免警告
@@ -118,13 +118,13 @@ class ClientManager {
       }
       console.log('GOOGLE_MAP_API_KEY:', '...' + apiKey.substring(apiKey.length - 6));
 
-      const transport = new Experimental_StdioMCPTransport({
+      const transport = new StdioClientTransport({
         command: 'npx',
         args: ['-y', '@modelcontextprotocol/server-google-maps'],
         env: { GOOGLE_MAPS_API_KEY: apiKey },
       });
 
-      this._googleMapsMCPClient = await experimental_createMCPClient({
+      this._googleMapsMCPClient = await createMCPClient({
         transport,
       });
 
@@ -158,7 +158,7 @@ class ClientManager {
       }
       console.log('EXA_API_KEY:', '...' + apiKey.substring(apiKey.length - 6));
 
-      const transport = new Experimental_StdioMCPTransport({
+      const transport = new StdioClientTransport({
         command: 'npx',
         args: [
           '-y',
@@ -168,7 +168,7 @@ class ClientManager {
         env: { EXA_API_KEY: apiKey },
       });
 
-      this._exaMCPClient = await experimental_createMCPClient({
+      this._exaMCPClient = await createMCPClient({
         transport,
       });
 

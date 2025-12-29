@@ -243,7 +243,7 @@ const imageGenerationTool: ToolDefinition = {
   createTool: (config: ToolConfig) => {
     return tool({
       description: '根据描述生成图像，支持不同风格（卡通、真实、插画）',
-      parameters: z.object({
+      inputSchema: z.object({
         prompt: z.string().describe('详细的图像描述'),
         style: z
           .enum(['cartoon', 'realistic', 'illustration'])
@@ -259,12 +259,18 @@ const imageGenerationTool: ToolDefinition = {
       execute: async ({ prompt, style, size, negativePrompt }, { toolCallId, abortSignal }) => {
         try {
           if (config.dataStream) {
-            config.dataStream.writeData({
-              type: 'toolStatus',
-              tool: 'generateImageQuery',
-              status: 'generating',
-              message: `正在生成图像: "${prompt}" (${style}风格)`,
-              toolCallId,
+            config.dataStream.write?.({
+              type: 'data',
+
+              value: [
+                {
+                  type: 'toolStatus',
+                  tool: 'generateImageQuery',
+                  status: 'generating',
+                  message: `正在生成图像: "${prompt}" (${style}风格)`,
+                  toolCallId,
+                },
+              ],
             });
           }
 
@@ -279,12 +285,18 @@ const imageGenerationTool: ToolDefinition = {
           });
 
           if (config.dataStream) {
-            config.dataStream.writeData({
-              type: 'toolStatus',
-              tool: 'generateImageQuery',
-              status: 'complete',
-              message: '图像生成成功',
-              toolCallId,
+            config.dataStream.write?.({
+              type: 'data',
+
+              value: [
+                {
+                  type: 'toolStatus',
+                  tool: 'generateImageQuery',
+                  status: 'complete',
+                  message: '图像生成成功',
+                  toolCallId,
+                },
+              ],
             });
           }
 
@@ -305,12 +317,18 @@ const imageGenerationTool: ToolDefinition = {
         } catch (error) {
           console.error('图像生成错误:', error);
           if (config.dataStream) {
-            config.dataStream.writeData({
-              type: 'toolStatus',
-              tool: 'generateImageQuery',
-              status: 'error',
-              message: `图像生成失败: ${(error as Error).message}`,
-              toolCallId,
+            config.dataStream.write?.({
+              type: 'data',
+
+              value: [
+                {
+                  type: 'toolStatus',
+                  tool: 'generateImageQuery',
+                  status: 'error',
+                  message: `图像生成失败: ${(error as Error).message}`,
+                  toolCallId,
+                },
+              ],
             });
           }
           throw error;

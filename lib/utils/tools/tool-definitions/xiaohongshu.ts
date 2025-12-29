@@ -37,17 +37,23 @@ const xiaohongshuTool: ToolDefinition = {
   createTool: (config: ToolConfig) => {
     return tool({
       description: '在小红书平台搜索相关内容，获取笔记、视频等信息',
-      parameters: z.object({
+      inputSchema: z.object({
         query: z.string().describe('搜索关键词'),
       }),
       execute: async ({ query }) => {
         try {
           if (config.dataStream) {
-            config.dataStream.writeData({
-              type: 'toolStatus',
-              tool: 'xiaohongshuSearch',
-              status: 'searching',
-              message: `正在小红书搜索: "${query}"`,
+            config.dataStream.write?.({
+              type: 'data',
+
+              value: [
+                {
+                  type: 'toolStatus',
+                  tool: 'xiaohongshuSearch',
+                  status: 'searching',
+                  message: `正在小红书搜索: "${query}"`,
+                },
+              ],
             });
           }
 
@@ -74,11 +80,17 @@ const xiaohongshuTool: ToolDefinition = {
 
           if (!data || !data.output || !data.output.items || data.output.items.length === 0) {
             if (config.dataStream) {
-              config.dataStream.writeData({
-                type: 'toolStatus',
-                tool: 'xiaohongshuSearch',
-                status: 'noResults',
-                message: '未找到相关小红书内容',
+              config.dataStream.write?.({
+                type: 'data',
+
+                value: [
+                  {
+                    type: 'toolStatus',
+                    tool: 'xiaohongshuSearch',
+                    status: 'noResults',
+                    message: '未找到相关小红书内容',
+                  },
+                ],
               });
             }
             return { results: [], message: '未找到相关小红书内容' };
@@ -104,18 +116,24 @@ const xiaohongshuTool: ToolDefinition = {
           });
 
           if (config.dataStream) {
-            config.dataStream.writeData({
-              type: 'toolStatus',
-              tool: 'xiaohongshuSearch',
-              status: 'complete',
-              message: `已获取 ${processedResults.length} 个小红书笔记`,
-              meta: {
-                resultCount: processedResults.length,
-                sources: processedResults.map(r => ({
-                  title: r.title,
-                  url: `https://www.xiaohongshu.com/explore/${r.noteId}`,
-                })),
-              },
+            config.dataStream.write?.({
+              type: 'data',
+
+              value: [
+                {
+                  type: 'toolStatus',
+                  tool: 'xiaohongshuSearch',
+                  status: 'complete',
+                  message: `已获取 ${processedResults.length} 个小红书笔记`,
+                  meta: {
+                    resultCount: processedResults.length,
+                    sources: processedResults.map(r => ({
+                      title: r.title,
+                      url: `https://www.xiaohongshu.com/explore/${r.noteId}`,
+                    })),
+                  },
+                },
+              ],
             });
           }
 
@@ -128,11 +146,17 @@ const xiaohongshuTool: ToolDefinition = {
         } catch (error) {
           console.error('小红书搜索错误:', error);
           if (config.dataStream) {
-            config.dataStream.writeData({
-              type: 'toolStatus',
-              tool: 'xiaohongshuSearch',
-              status: 'error',
-              message: `搜索失败: ${(error as Error).message}`,
+            config.dataStream.write?.({
+              type: 'data',
+
+              value: [
+                {
+                  type: 'toolStatus',
+                  tool: 'xiaohongshuSearch',
+                  status: 'error',
+                  message: `搜索失败: ${(error as Error).message}`,
+                },
+              ],
             });
           }
           return {

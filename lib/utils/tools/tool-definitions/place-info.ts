@@ -51,19 +51,25 @@ const placeInfoTool: ToolDefinition = {
     return tool({
       description:
         '获取北欧特定城市、景点、地标的详细信息，包括介绍、历史背景、游玩小贴士、交通建议等',
-      parameters: z.object({
+      inputSchema: z.object({
         placeName: z.string().describe('需要查询信息的地点名称（如 "松恩峡湾", "特罗姆瑟"）'),
         language: z.string().optional().default('zh').describe('期望返回信息的语言，默认中文'),
       }),
       execute: async ({ placeName }, { toolCallId, abortSignal }) => {
         try {
           if (config.dataStream) {
-            config.dataStream.writeData({
-              type: 'toolStatus',
-              tool: 'getPlaceInfoQuery',
-              status: 'searching',
-              message: `正在收集"${placeName}"的各方面信息...`,
-              toolCallId,
+            config.dataStream.write?.({
+              type: 'data',
+
+              value: [
+                {
+                  type: 'toolStatus',
+                  tool: 'getPlaceInfoQuery',
+                  status: 'searching',
+                  message: `正在收集"${placeName}"的各方面信息...`,
+                  toolCallId,
+                },
+              ],
             });
           }
 
@@ -203,12 +209,18 @@ const placeInfoTool: ToolDefinition = {
           }
 
           if (config.dataStream) {
-            config.dataStream.writeData({
-              type: 'toolStatus',
-              tool: 'getPlaceInfoQuery',
-              status: 'processing',
-              message: `已收集信息，正在整理"${placeName}"的详细攻略内容...`,
-              toolCallId,
+            config.dataStream.write?.({
+              type: 'data',
+
+              value: [
+                {
+                  type: 'toolStatus',
+                  tool: 'getPlaceInfoQuery',
+                  status: 'processing',
+                  message: `已收集信息，正在整理"${placeName}"的详细攻略内容...`,
+                  toolCallId,
+                },
+              ],
             });
           }
 
@@ -333,12 +345,18 @@ const placeInfoTool: ToolDefinition = {
           }
 
           if (config.dataStream) {
-            config.dataStream.writeData({
-              type: 'toolStatus',
-              tool: 'getPlaceInfoQuery',
-              status: 'complete',
-              message: `已完成"${placeName}"旅游信息的整理`,
-              toolCallId,
+            config.dataStream.write?.({
+              type: 'data',
+
+              value: [
+                {
+                  type: 'toolStatus',
+                  tool: 'getPlaceInfoQuery',
+                  status: 'complete',
+                  message: `已完成"${placeName}"旅游信息的整理`,
+                  toolCallId,
+                },
+              ],
             });
           }
 
@@ -347,12 +365,18 @@ const placeInfoTool: ToolDefinition = {
         } catch (error) {
           console.error('获取地点信息失败:', error);
           if (config.dataStream) {
-            config.dataStream.writeData({
-              type: 'toolStatus',
-              tool: 'getPlaceInfoQuery',
-              status: 'error',
-              message: `获取"${placeName}"信息失败: ${(error as Error).message}`,
-              toolCallId,
+            config.dataStream.write?.({
+              type: 'data',
+
+              value: [
+                {
+                  type: 'toolStatus',
+                  tool: 'getPlaceInfoQuery',
+                  status: 'error',
+                  message: `获取"${placeName}"信息失败: ${(error as Error).message}`,
+                  toolCallId,
+                },
+              ],
             });
           }
           throw error;

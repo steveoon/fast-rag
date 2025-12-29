@@ -90,7 +90,7 @@ const googleMapsTool: ToolDefinition = {
   createTool: (config: ToolConfig) => {
     return tool({
       description: '使用Google Maps API查询地点、路线、地址坐标等信息，务必使用英文',
-      parameters: z.object({
+      inputSchema: z.object({
         query: z
           .string()
           .describe(
@@ -253,7 +253,7 @@ async function formatPlacesSearchResult(
     // console.log('格式化地点搜索结果:', result);
 
     // 使用generateObject将结果转换为标准化格式
-    const { object } = await generateObject<PlacesSearchVisualization>({
+    const { object } = await generateObject({
       model: registry.languageModel('google/gemini-2.0-flash-exp'),
       schema: z.object({
         operation: z.string(),
@@ -316,7 +316,7 @@ async function formatGeocodeResult(
     console.log('格式化地理编码结果:', result);
 
     // 使用generateObject将结果转换为标准化格式
-    const { object } = await generateObject<GeocodeVisualization>({
+    const { object } = await generateObject({
       model: registry.languageModel('google/gemini-2.0-flash-exp'),
       schema: z.object({
         operation: z.string(),
@@ -373,7 +373,7 @@ async function formatDirectionsResult(
     console.log('格式化路线结果:', result);
 
     // 使用原有的generateObject将结果转换为标准化格式
-    const { object } = await generateObject<MapDataForVisualization>({
+    const { object } = await generateObject({
       model: registry.languageModel('google/gemini-2.0-flash-exp'),
       schema: z.object({
         operation: z.string(),

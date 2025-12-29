@@ -19,7 +19,7 @@ export const wikidataEntityTool: ToolDefinition = {
   createTool: (config: ToolConfig) => {
     return tool({
       description: '从Wikidata获取结构化的实体数据，包含属性、关系等信息',
-      parameters: z.object({
+      inputSchema: z.object({
         id: z.string().describe('Wikidata实体ID，通常以Q开头，如Q42表示道格拉斯·亚当斯'),
         languages: z
           .array(z.string())
@@ -30,11 +30,17 @@ export const wikidataEntityTool: ToolDefinition = {
       execute: async ({ id, languages }) => {
         try {
           if (config.dataStream) {
-            config.dataStream.writeData({
-              type: 'toolStatus',
-              tool: 'wikidataGetEntity',
-              status: 'retrieving',
-              message: `正在获取Wikidata实体(${id})...`,
+            config.dataStream.write?.({
+              type: 'data',
+
+              value: [
+                {
+                  type: 'toolStatus',
+                  tool: 'wikidataGetEntity',
+                  status: 'retrieving',
+                  message: `正在获取Wikidata实体(${id})...`,
+                },
+              ],
             });
           }
 
@@ -44,11 +50,17 @@ export const wikidataEntityTool: ToolDefinition = {
           );
 
           if (config.dataStream) {
-            config.dataStream.writeData({
-              type: 'toolStatus',
-              tool: 'wikidataGetEntity',
-              status: 'complete',
-              message: `已获取Wikidata实体: ${entity.labels?.zh || entity.labels?.en || id}`,
+            config.dataStream.write?.({
+              type: 'data',
+
+              value: [
+                {
+                  type: 'toolStatus',
+                  tool: 'wikidataGetEntity',
+                  status: 'complete',
+                  message: `已获取Wikidata实体: ${entity.labels?.zh || entity.labels?.en || id}`,
+                },
+              ],
             });
           }
 
@@ -62,11 +74,17 @@ export const wikidataEntityTool: ToolDefinition = {
         } catch (error) {
           console.error('Wikidata实体获取错误:', error);
           if (config.dataStream) {
-            config.dataStream.writeData({
-              type: 'toolStatus',
-              tool: 'wikidataGetEntity',
-              status: 'error',
-              message: `获取实体失败: ${(error as Error).message}`,
+            config.dataStream.write?.({
+              type: 'data',
+
+              value: [
+                {
+                  type: 'toolStatus',
+                  tool: 'wikidataGetEntity',
+                  status: 'error',
+                  message: `获取实体失败: ${(error as Error).message}`,
+                },
+              ],
             });
           }
           return {
@@ -90,7 +108,7 @@ export const smartWikidataQueryTool: ToolDefinition = {
   createTool: (config: ToolConfig) => {
     return tool({
       description: '智能查询Wikidata实体，可以通过名称或描述查找并获取实体数据，无需事先知道实体ID',
-      parameters: z.object({
+      inputSchema: z.object({
         query: z.string().describe('要查询的实体名称或描述，如"苏东坡"、"阿尔伯特·爱因斯坦"等'),
         languages: z
           .array(z.string())
@@ -101,11 +119,17 @@ export const smartWikidataQueryTool: ToolDefinition = {
       execute: async ({ query, languages }) => {
         try {
           if (config.dataStream) {
-            config.dataStream.writeData({
-              type: 'toolStatus',
-              tool: 'smartWikidataQuery',
-              status: 'searching',
-              message: `正在查找"${query}"的Wikidata ID...`,
+            config.dataStream.write?.({
+              type: 'data',
+
+              value: [
+                {
+                  type: 'toolStatus',
+                  tool: 'smartWikidataQuery',
+                  status: 'searching',
+                  message: `正在查找"${query}"的Wikidata ID...`,
+                },
+              ],
             });
           }
 
@@ -126,7 +150,7 @@ export const smartWikidataQueryTool: ToolDefinition = {
             try {
               // 使用generateObject获取英文翻译
               const { object: translation } = await generateObject({
-                model: registry.languageModel('google/gemini-2.0-flash-exp'), // 使用较小模型节省tokens
+                model: registry.languageModel('google/gemini-2.0-flash-exp'),
                 schema: z.object({
                   englishName: z.string().describe('实体的英文名称或翻译'),
                   confidence: z.number().min(0).max(10).describe('翻译准确度的信心值(0-10)'),
@@ -214,11 +238,17 @@ export const smartWikidataQueryTool: ToolDefinition = {
 
           if (!entityId) {
             if (config.dataStream) {
-              config.dataStream.writeData({
-                type: 'toolStatus',
-                tool: 'smartWikidataQuery',
-                status: 'error',
-                message: `无法找到"${query}"的Wikidata ID`,
+              config.dataStream.write?.({
+                type: 'data',
+
+                value: [
+                  {
+                    type: 'toolStatus',
+                    tool: 'smartWikidataQuery',
+                    status: 'error',
+                    message: `无法找到"${query}"的Wikidata ID`,
+                  },
+                ],
               });
             }
             return {
@@ -230,11 +260,17 @@ export const smartWikidataQueryTool: ToolDefinition = {
 
           // 获取实体数据
           if (config.dataStream) {
-            config.dataStream.writeData({
-              type: 'toolStatus',
-              tool: 'smartWikidataQuery',
-              status: 'retrieving',
-              message: `找到ID(${entityId})，正在获取Wikidata实体数据...`,
+            config.dataStream.write?.({
+              type: 'data',
+
+              value: [
+                {
+                  type: 'toolStatus',
+                  tool: 'smartWikidataQuery',
+                  status: 'retrieving',
+                  message: `找到ID(${entityId})，正在获取Wikidata实体数据...`,
+                },
+              ],
             });
           }
 
@@ -246,11 +282,17 @@ export const smartWikidataQueryTool: ToolDefinition = {
           const formattedProps = formatWikidataProperties(entity);
 
           if (config.dataStream) {
-            config.dataStream.writeData({
-              type: 'toolStatus',
-              tool: 'smartWikidataQuery',
-              status: 'complete',
-              message: `已获取"${query}"(${entityId})的Wikidata数据`,
+            config.dataStream.write?.({
+              type: 'data',
+
+              value: [
+                {
+                  type: 'toolStatus',
+                  tool: 'smartWikidataQuery',
+                  status: 'complete',
+                  message: `已获取"${query}"(${entityId})的Wikidata数据`,
+                },
+              ],
             });
           }
 
@@ -264,11 +306,17 @@ export const smartWikidataQueryTool: ToolDefinition = {
         } catch (error) {
           console.error('智能Wikidata查询错误:', error);
           if (config.dataStream) {
-            config.dataStream.writeData({
-              type: 'toolStatus',
-              tool: 'smartWikidataQuery',
-              status: 'error',
-              message: `查询失败: ${(error as Error).message}`,
+            config.dataStream.write?.({
+              type: 'data',
+
+              value: [
+                {
+                  type: 'toolStatus',
+                  tool: 'smartWikidataQuery',
+                  status: 'error',
+                  message: `查询失败: ${(error as Error).message}`,
+                },
+              ],
             });
           }
           return {

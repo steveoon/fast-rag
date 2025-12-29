@@ -7,7 +7,7 @@ import { CollapsibleDrawer } from '@/components/ui/collapsible-drawer';
 import dynamic from 'next/dynamic';
 import { VisualizationData } from '@/components/visualizations';
 import { getProxyImageUrl } from '@/hooks/message-content-adapter';
-import type { Message } from '@ai-sdk/react';
+import type { UIMessage } from 'ai';
 
 // 工具调用结果类型
 interface ToolInvocationResult {
@@ -31,7 +31,7 @@ const VisualizationRenderer = dynamic(
 );
 
 interface MessageRendererProps {
-  message: Message;
+  message: UIMessage;
   showCopyButton?: boolean;
   isLatestMessage?: boolean;
   status?: 'ready' | 'error' | 'submitted' | 'streaming';
@@ -66,7 +66,7 @@ const renderPart = (
         >
           <div className="font-medium text-blue-700 dark:text-blue-300">🧠 推理过程</div>
           <div className="mt-1 text-gray-700 dark:text-gray-300">
-            <MessageContentComponent content={part.reasoning} showCopyButton={false} />
+            <MessageContentComponent content={part.reasoningText} showCopyButton={false} />
           </div>
         </div>
       );
@@ -202,11 +202,15 @@ const renderPart = (
         </div>
       );
     }
-    case 'file':
+    case 'file': {
+      // AI SDK v6: FilePart uses url, mediaType, data directly on the part
+      const fileUrl =
+        part.url ||
+        (part.data ? `data:${part.mediaType || part.mimeType};base64,${part.data}` : '');
       return (
         <div key={index} className="rounded-md overflow-hidden my-2 w-full">
           <Image
-            src={`data:${part.mimeType};base64,${part.data}`}
+            src={fileUrl}
             alt="媒体文件"
             width={0}
             height={0}
@@ -216,6 +220,7 @@ const renderPart = (
           />
         </div>
       );
+    }
     default:
       return null;
   }
@@ -226,11 +231,7 @@ function MessageRendererComponent({
   showCopyButton = false,
   showOnly = [],
 }: MessageRendererProps) {
-  // 处理字符串内容
-  if (typeof message.content === 'string') {
-    return <MessageContentComponent content={message.content} showCopyButton={showCopyButton} />;
-  }
-
+  // AI SDK v6: UIMessage uses parts array, not content property
   // 处理 parts 数组
   if (message.parts && Array.isArray(message.parts)) {
     return (
@@ -240,12 +241,19 @@ function MessageRendererComponent({
     );
   }
 
-  // 兼容旧版本：如果有 content 但不是字符串，尝试处理
-  if (message.content && Array.isArray(message.content)) {
+  // 兼容旧版本：如果有 content 属性，尝试处理
+  const legacyMessage = message as unknown as { content?: string | unknown[] };
+  if (typeof legacyMessage.content === 'string') {
+    return (
+      <MessageContentComponent content={legacyMessage.content} showCopyButton={showCopyButton} />
+    );
+  }
+
+  if (legacyMessage.content && Array.isArray(legacyMessage.content)) {
     return (
       <div className="flex flex-col gap-3">
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-        {(message.content as any[]).map((part, index) =>
+        {(legacyMessage.content as any[]).map((part, index) =>
           renderPart(part, index, showCopyButton, showOnly)
         )}
       </div>
@@ -257,13 +265,13 @@ function MessageRendererComponent({
 }
 
 export const MessageRenderer = memo(MessageRendererComponent, (prevProps, nextProps) => {
-  // 比较消息内容
-  if (prevProps.message.content !== nextProps.message.content) {
+  // 比较 parts 数组 (AI SDK v6 uses parts, not content)
+  if (prevProps.message.parts !== nextProps.message.parts) {
     return false;
   }
 
-  // 比较 parts 数组
-  if (prevProps.message.parts !== nextProps.message.parts) {
+  // 比较消息ID
+  if (prevProps.message.id !== nextProps.message.id) {
     return false;
   }
 

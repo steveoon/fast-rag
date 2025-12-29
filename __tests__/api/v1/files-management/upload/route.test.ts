@@ -37,7 +37,15 @@ describe('POST /api/v1/files-management/upload', () => {
     } as unknown as Request;
 
     vi.mocked(extractApiKey).mockReturnValue('test-api-key');
-    vi.mocked(uploadFileToStorage).mockResolvedValue('https://example.com/uploaded-file.pdf');
+    vi.mocked(uploadFileToStorage).mockResolvedValue({
+      name: 'test.pdf',
+      type: 'pdf',
+      size: 100,
+      lastModified: Date.now(),
+      extension: 'pdf',
+      docName: 'test',
+      uploadURL: 'https://example.com/uploaded-file.pdf',
+    });
 
     const response = await POST(mockRequest);
     const responseData = await response.json();

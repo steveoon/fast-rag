@@ -1,9 +1,4 @@
-import {
-  NoSuchToolError,
-  InvalidToolArgumentsError,
-  ToolExecutionError,
-  ToolCallRepairError,
-} from 'ai';
+import { NoSuchToolError, InvalidArgumentError, ToolCallRepairError } from 'ai';
 import { logger } from '../logger';
 import { type ErrorResponse, CustomError } from '@/types';
 import { ZodError } from 'zod';
@@ -20,17 +15,11 @@ export function formatAiSdkError(error: unknown): {
       errorType: 'NoSuchToolError',
       code: 'TOOL_NOT_FOUND',
     };
-  } else if (InvalidToolArgumentsError.isInstance(error)) {
+  } else if (InvalidArgumentError.isInstance(error)) {
     return {
       message: '助手使用了无效的工具参数',
-      errorType: 'InvalidToolArgumentsError',
+      errorType: 'InvalidArgumentError',
       code: 'INVALID_TOOL_ARGS',
-    };
-  } else if (ToolExecutionError.isInstance(error)) {
-    return {
-      message: '工具执行过程中发生错误',
-      errorType: 'ToolExecutionError',
-      code: 'TOOL_EXECUTION_ERROR',
     };
   } else if (ToolCallRepairError.isInstance(error)) {
     return {
@@ -40,7 +29,7 @@ export function formatAiSdkError(error: unknown): {
     };
   }
 
-  // 默认错误信息
+  // 默认错误信息 (ToolExecutionError removed in AI SDK v6)
   return {
     message: '工具调用过程中发生未知错误',
     errorType: 'UnknownToolError',
@@ -52,8 +41,7 @@ export function handleError(error: unknown): ErrorResponse {
   // 先检查AI SDK特定错误
   if (
     NoSuchToolError.isInstance(error) ||
-    InvalidToolArgumentsError.isInstance(error) ||
-    ToolExecutionError.isInstance(error) ||
+    InvalidArgumentError.isInstance(error) ||
     ToolCallRepairError.isInstance(error)
   ) {
     const { message, errorType, code } = formatAiSdkError(error);

@@ -15,7 +15,7 @@ const webSearchTool: ToolDefinition = {
   createTool: (config: ToolConfig) => {
     return tool({
       description: '在互联网上搜索相关信息，获取最新、最相关的内容',
-      parameters: z.object({
+      inputSchema: z.object({
         query: z.string().describe('搜索查询'),
         numResults: z.number().optional().default(5).describe('返回结果数量，建议3-7个'),
         useNeural: z
@@ -59,11 +59,17 @@ const webSearchTool: ToolDefinition = {
 
           if (!searchResults.results || searchResults.results.length === 0) {
             if (config.dataStream) {
-              config.dataStream.writeData({
-                type: 'toolStatus',
-                tool: 'webSearch',
-                status: 'noResults',
-                message: '未找到相关结果',
+              config.dataStream.write?.({
+                type: 'data',
+
+                value: [
+                  {
+                    type: 'toolStatus',
+                    tool: 'webSearch',
+                    status: 'noResults',
+                    message: '未找到相关结果',
+                  },
+                ],
               });
             }
             return { results: [], message: '未找到相关信息' };
@@ -73,11 +79,17 @@ const webSearchTool: ToolDefinition = {
           const resultIds = relevantResults.map((result: exa.SearchResult) => result.id);
 
           if (config.dataStream) {
-            config.dataStream.writeData({
-              type: 'toolStatus',
-              tool: 'webSearch',
-              status: 'retrieving',
-              message: `找到 ${relevantResults.length} 个相关结果，正在获取详细内容...`,
+            config.dataStream.write?.({
+              type: 'data',
+
+              value: [
+                {
+                  type: 'toolStatus',
+                  tool: 'webSearch',
+                  status: 'retrieving',
+                  message: `找到 ${relevantResults.length} 个相关结果，正在获取详细内容...`,
+                },
+              ],
             });
           }
 
@@ -114,15 +126,21 @@ const webSearchTool: ToolDefinition = {
           });
 
           if (config.dataStream) {
-            config.dataStream.writeData({
-              type: 'toolStatus',
-              tool: 'webSearch',
-              status: 'complete',
-              message: `已获取 ${processedResults.length} 个网页内容`,
-              meta: {
-                resultCount: processedResults.length,
-                sources: processedResults.map(r => ({ title: r.title, url: r.url })),
-              },
+            config.dataStream.write?.({
+              type: 'data',
+
+              value: [
+                {
+                  type: 'toolStatus',
+                  tool: 'webSearch',
+                  status: 'complete',
+                  message: `已获取 ${processedResults.length} 个网页内容`,
+                  meta: {
+                    resultCount: processedResults.length,
+                    sources: processedResults.map(r => ({ title: r.title, url: r.url })),
+                  },
+                },
+              ],
             });
           }
 
@@ -134,11 +152,17 @@ const webSearchTool: ToolDefinition = {
         } catch (error) {
           console.error('网络搜索错误:', error);
           if (config.dataStream) {
-            config.dataStream.writeData({
-              type: 'toolStatus',
-              tool: 'webSearch',
-              status: 'error',
-              message: `搜索失败: ${(error as Error).message}`,
+            config.dataStream.write?.({
+              type: 'data',
+
+              value: [
+                {
+                  type: 'toolStatus',
+                  tool: 'webSearch',
+                  status: 'error',
+                  message: `搜索失败: ${(error as Error).message}`,
+                },
+              ],
             });
           }
           return {

@@ -14,7 +14,7 @@ const knowledgeBaseTool: ToolDefinition = {
   createTool: (config: ToolConfig) => {
     return tool({
       description: `从知识库中检索与用户问题相关的信息。当用户询问特定领域知识或需要参考内部文档时使用。`,
-      parameters: z.object({
+      inputSchema: z.object({
         query: z.string().describe('用户的问题或查询内容'),
       }),
       execute: async ({ query }) => {

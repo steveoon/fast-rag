@@ -1,6 +1,13 @@
-import { ToolSet, ToolCall, ToolResult } from 'ai';
+import { ToolSet } from 'ai';
 import { toolDefinitions } from './tool-definitions';
-import { ToolConfig, ToolSelectorConfig, AllToolCalls, AllToolResults } from './types';
+import {
+  ToolConfig,
+  ToolSelectorConfig,
+  AllToolCalls,
+  AllToolResults,
+  ToolCall,
+  ToolResult,
+} from './types';
 import { mapToolNameToEnabledTool, AnalysisToolType, EnabledToolType } from './tool-mapping';
 
 /**
@@ -121,10 +128,10 @@ export function selectTools(config: ToolSelectorConfig): ToolSet {
 export async function handleToolCalls<T extends ToolSet>(
   tools: T,
   toolCalls: Array<ToolCall<string, Record<string, unknown>>>,
-  handler: (toolName: string, args: Record<string, unknown>) => Promise<void>
+  handler: (toolName: string, input: Record<string, unknown>) => Promise<void>
 ): Promise<void> {
   for (const toolCall of toolCalls) {
-    await handler(toolCall.toolName, toolCall.args);
+    await handler(toolCall.toolName, toolCall.input);
   }
 }
 
@@ -137,10 +144,10 @@ export async function handleToolCalls<T extends ToolSet>(
 export async function handleToolResults<T extends ToolSet>(
   tools: T,
   toolResults: Array<ToolResult<string, Record<string, unknown>, unknown>>,
-  handler: (toolName: string, result: unknown) => Promise<void>
+  handler: (toolName: string, output: unknown) => Promise<void>
 ): Promise<void> {
   for (const toolResult of toolResults) {
-    await handler(toolResult.toolName, toolResult.result);
+    await handler(toolResult.toolName, toolResult.output);
   }
 }
 
@@ -248,10 +255,11 @@ export function generateToolSystemPrompt(tools: ToolSet): string {
  * @returns 提示文本
  */
 export function generateQueryAnalysisPrompt(content: string): string {
-  return `分析以下用户查询：
-  ${content}
-  
-  确定查询类型和需要使用的工具:
+  return `分析以下用户查询，返回分析结果。
+
+用户查询：${content}
+
+确定查询类型和需要使用的工具:
   1. queryType: 选择最匹配的查询类型
      - factual: 寻找事实信息
      - opinion: 寻求观点或评价
@@ -280,7 +288,7 @@ export function generateQueryAnalysisPrompt(content: string): string {
      - multiDimensionalSearch: 适用于学术内容查询、Twitter/X平台内容搜索或网页内容爬取
      - xiaohongshuSearch: 适用于获取小红书平台上的用户分享内容，包括旅游攻略、美食推荐、时尚和生活方式等
             
-  3. reasoning: 说明你的推理过程
+  3. reasoningText: 说明你的推理过程
 
   重要提示：
   - 对于查询人物、地点、组织等实体信息时，应优先选择smartWikidataQuery而非wikidataGetEntity
@@ -290,5 +298,7 @@ export function generateQueryAnalysisPrompt(content: string): string {
   - 当用户提问涉及学术论文、研究内容时，应优先选择multiDimensionalSearch工具
   - 当用户需要了解GitHub上的开源项目、代码或开发者时，应选择multiDimensionalSearch工具
   - 当用户提供具体网址并需要获取其内容时，应选择multiDimensionalSearch工具
-  - 当用户明确提到"小红书"或需要了解旅游、美食、时尚等方面的真实用户体验时，应选择xiaohongshuSearch工具`;
+  - 当用户明确提到"小红书"或需要了解旅游、美食、时尚等方面的真实用户体验时，应选择xiaohongshuSearch工具
+
+输出要求：只返回纯 JSON 对象，不要使用 markdown 代码块，不要添加任何额外的解释文字。`;
 }

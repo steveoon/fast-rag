@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Tool, ToolSet, ToolCall, ToolResult, ToolCallUnion, ToolResultUnion } from 'ai';
+import { Tool, ToolSet } from 'ai';
 import { z } from 'zod';
 import { ANALYSIS_TOOLS } from './tool-mapping';
 
@@ -7,8 +7,39 @@ import { ANALYSIS_TOOLS } from './tool-mapping';
 import type { EnabledToolType, AnalysisToolType } from './tool-mapping';
 export type { EnabledToolType, AnalysisToolType };
 
-// 导出AI SDK的类型工具
-export type { ToolCall, ToolResult, ToolCallUnion, ToolResultUnion };
+// 定义工具调用类型 (AI SDK v6 使用 input 而不是 args)
+export interface ToolCall<TName extends string = string, TInput = Record<string, unknown>> {
+  toolName: TName;
+  input: TInput;
+  toolCallId?: string;
+}
+
+// 定义工具结果类型 (AI SDK v6 使用 input/output 而不是 args/result)
+export interface ToolResult<
+  TName extends string = string,
+  TInput = Record<string, unknown>,
+  TOutput = unknown,
+> {
+  type: 'tool-result';
+  toolName: TName;
+  toolCallId: string;
+  input: TInput;
+  output: TOutput;
+  providerExecuted?: boolean;
+  dynamic?: boolean;
+  preliminary?: boolean;
+}
+
+// 工具调用和结果的联合类型辅助
+export type ToolCallUnion<T extends ToolSet> = {
+  [K in keyof T]: T[K] extends Tool<infer TInput, any> ? ToolCall<K & string, TInput> : never;
+}[keyof T];
+
+export type ToolResultUnion<T extends ToolSet> = {
+  [K in keyof T]: T[K] extends Tool<infer TInput, infer TOutput>
+    ? ToolResult<K & string, TInput, TOutput>
+    : never;
+}[keyof T];
 
 // JSON值类型
 type JSONValue = string | number | boolean | null | { [key: string]: JSONValue } | JSONValue[];
@@ -17,6 +48,8 @@ type JSONValue = string | number | boolean | null | { [key: string]: JSONValue }
 export interface DataStream {
   writeData: (value: JSONValue) => void;
   writeMessageAnnotation: (value: JSONValue) => void;
+  // 向后兼容的 write 方法
+  write?: (data: { type: string; value: JSONValue[] }) => void;
 }
 
 // 查询分析Schema
@@ -39,7 +72,7 @@ export const queryAnalysisSchema = z.object({
     'social', // 社交媒体内容查询
   ]),
   requiredTools: z.array(z.enum(ANALYSIS_TOOLS)),
-  reasoning: z.string(),
+  reasoningText: z.string(),
 });
 
 // 查询分析结果类型

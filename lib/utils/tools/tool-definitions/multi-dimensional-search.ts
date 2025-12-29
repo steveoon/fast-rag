@@ -1,4 +1,4 @@
-import { tool, JSONValue } from 'ai';
+import { tool } from 'ai';
 import { z } from 'zod';
 import { ToolDefinition, ToolConfig } from '../types';
 import { registry } from '../../models-registry';
@@ -85,7 +85,7 @@ const multiDimensionalSearchTool: ToolDefinition = {
   createTool: (config: ToolConfig) => {
     return tool({
       description: '多维搜索工具：执行学术论文搜索、GitHub仓库搜索或网页内容爬取',
-      parameters: z.object({
+      inputSchema: z.object({
         operation: z
           .enum(OPERATIONS)
           .describe('搜索操作类型：学术论文搜索、GitHub仓库搜索或网页爬取'),
@@ -105,7 +105,10 @@ const multiDimensionalSearchTool: ToolDefinition = {
               ...(meta ? { meta } : {}),
             };
             // 确保数据结构兼容JSONValue
-            config.dataStream.writeData(JSON.parse(JSON.stringify(statusData)) as JSONValue);
+            config.dataStream.write?.({
+              type: 'data',
+              value: [JSON.parse(JSON.stringify(statusData))],
+            });
           }
         };
 
@@ -222,7 +225,7 @@ async function formatResearchPaperResult(
   query: string
 ): Promise<ResearchPaperVisualization> {
   try {
-    const { object } = await generateObject<ResearchPaperVisualization>({
+    const { object } = await generateObject({
       model: registry.languageModel('google/gemini-2.0-flash-exp'),
       schema: z.object({
         operation: z.string(),
@@ -281,7 +284,7 @@ async function formatGitHubSearchResult(
   query: string
 ): Promise<GitHubSearchVisualization> {
   try {
-    const { object } = await generateObject<GitHubSearchVisualization>({
+    const { object } = await generateObject({
       model: registry.languageModel('google/gemini-2.0-flash-exp'),
       schema: z.object({
         operation: z.string(),
@@ -340,7 +343,7 @@ async function formatCrawlingResult(
   urls: string[]
 ): Promise<CrawlingVisualization> {
   try {
-    const { object } = await generateObject<CrawlingVisualization>({
+    const { object } = await generateObject({
       model: registry.languageModel('google/gemini-2.0-flash-exp'),
       schema: z.object({
         operation: z.string(),
