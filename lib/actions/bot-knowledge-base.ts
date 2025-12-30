@@ -115,6 +115,55 @@ export async function getBotAssignedKnowledgeBases(botId: string) {
 }
 
 /**
+ * 公开获取机器人的知识库（不需要用户认证）
+ * 用于公开的 chat-bot 页面，通过 botId 直接查询
+ * @param botId 机器人ID
+ */
+export async function getBotKnowledgeBasesPublic(botId: string) {
+  if (!botId) {
+    return [];
+  }
+
+  try {
+    // 验证机器人存在
+    const bot = await db.query.chat_bots.findFirst({
+      where: eq(chat_bots.id, botId),
+    });
+
+    if (!bot) {
+      console.warn(`公开知识库查询: 未找到机器人 ${botId}`);
+      return [];
+    }
+
+    // 获取机器人关联的所有知识库文档版本
+    const knowledgeBases = await db.query.chat_bot_knowledge_bases.findMany({
+      where: eq(chat_bot_knowledge_bases.chat_bot_id, botId),
+      with: {
+        document_version: {
+          with: {
+            document: true,
+          },
+        },
+      },
+    });
+
+    // 格式化返回数据
+    return knowledgeBases.map(kb => ({
+      id: kb.id,
+      documentVersionId: kb.document_version_id,
+      documentId: kb.document_version.document_id,
+      documentName: kb.document_version.document.name,
+      documentType: kb.document_version.document.type,
+      versionNumber: kb.document_version.version,
+      versionName: kb.document_version.name,
+    }));
+  } catch (error) {
+    console.error('公开获取机器人知识库失败:', error);
+    return [];
+  }
+}
+
+/**
  * 更新机器人关联的知识库版本
  * @param data 包含botId和documentVersionIds的对象
  */

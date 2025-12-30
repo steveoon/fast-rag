@@ -47,7 +47,8 @@ export function ChatBubbleMessage({
         'rounded-2xl px-4 py-3 text-sm leading-relaxed',
         'transition-all duration-200 ease-out',
         variant === 'sent' && [
-          'ml-auto max-w-[85%]',
+          // 移动端没有头像，消息可以更宽
+          'ml-auto max-w-[92%] sm:max-w-[85%]',
           'bg-gradient-to-br from-blue-500 to-blue-600',
           'text-white',
           'shadow-md shadow-blue-500/20',
@@ -55,7 +56,8 @@ export function ChatBubbleMessage({
           'dark:shadow-blue-600/30',
         ],
         variant === 'received' && [
-          'mr-auto max-w-[85%]',
+          // 移动端没有头像，消息可以更宽
+          'mr-auto max-w-[92%] sm:max-w-[85%]',
           'bg-white/90 backdrop-blur-sm',
           'text-gray-800',
           'shadow-sm',
@@ -97,6 +99,8 @@ export function ChatBubbleAvatar({
   return (
     <Avatar
       className={cn(
+        // 移动端隐藏头像，节省空间
+        'hidden sm:flex',
         'h-9 w-9 shrink-0 ring-2 ring-offset-2 ring-offset-background',
         variant === 'user' && [
           'bg-gradient-to-br from-blue-500 to-blue-600',

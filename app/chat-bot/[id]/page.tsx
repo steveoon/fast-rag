@@ -4,6 +4,7 @@ import { ChatClient } from './chat-client';
 import { getBotTools } from '@/lib/actions/get-bot-tools';
 import { getChatBotById } from '@/lib/actions/get-user-chat-bots';
 import { getModelById } from '@/lib/actions/get-ai-models';
+import { getBotKnowledgeBasesPublic } from '@/lib/actions/bot-knowledge-base';
 import { AuroraBackground } from '@/components/aurora-background';
 import { getTranslations } from 'next-intl/server';
 
@@ -78,6 +79,9 @@ export default async function ChatBotPage() {
 
     const tools = await getBotTools(botId);
 
+    // 服务端获取知识库（不需要用户认证）
+    const knowledgeBases = await getBotKnowledgeBasesPublic(botId);
+
     // 获取模型显示名称
     let modelDisplayName: string | undefined;
     if (chatBot.model_id) {
@@ -112,6 +116,7 @@ export default async function ChatBotPage() {
             modelId={chatBot.model_id || undefined}
             modelDisplayName={modelDisplayName}
             exampleQuestions={chatBot.example_questions as string[] | undefined}
+            initialKnowledgeBases={knowledgeBases}
           />
         </div>
       </div>

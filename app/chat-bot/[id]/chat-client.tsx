@@ -34,6 +34,7 @@ interface ChatClientProps {
   modelId?: string;
   modelDisplayName?: string;
   exampleQuestions?: string[];
+  initialKnowledgeBases?: AssignedKnowledgeBase[];
 }
 
 // 内部聊天组件，接收已加载的知识库数据
@@ -344,12 +345,23 @@ export function ChatClient({
   modelId,
   modelDisplayName,
   exampleQuestions,
+  initialKnowledgeBases,
 }: ChatClientProps) {
-  const [knowledgeBaseReady, setKnowledgeBaseReady] = useState(false);
+  const [knowledgeBaseReady, setKnowledgeBaseReady] = useState(!!initialKnowledgeBases);
   const { assignedKnowledgeBases, fetchBotKnowledgeBases } = useKnowledgeBaseStore();
   const t = useTranslations('ChatBot.chat');
 
+  // 如果服务端已提供知识库数据，直接使用；否则从客户端获取（仅用于后台管理页面）
+  const effectiveKnowledgeBases = initialKnowledgeBases ?? assignedKnowledgeBases;
+
   useEffect(() => {
+    // 如果已有服务端提供的知识库数据，跳过客户端获取
+    if (initialKnowledgeBases) {
+      setKnowledgeBaseReady(true);
+      return;
+    }
+
+    // 回退逻辑：当没有服务端数据时尝试客户端获取（需要用户认证，可能失败）
     if (botId) {
       setKnowledgeBaseReady(false);
       fetchBotKnowledgeBases(botId)
@@ -363,13 +375,13 @@ export function ChatClient({
     } else {
       setKnowledgeBaseReady(true);
     }
-  }, [botId, fetchBotKnowledgeBases]);
+  }, [botId, fetchBotKnowledgeBases, initialKnowledgeBases]);
 
   // 生成用于强制重新创建 ChatCore 的 key
   const chatKey = useMemo(() => {
-    const docs = assignedKnowledgeBases.map(kb => kb.documentId);
+    const docs = effectiveKnowledgeBases.map(kb => kb.documentId);
     return `chat-${botId}-${docs.join(',')}-${knowledgeBaseReady}`;
-  }, [botId, assignedKnowledgeBases, knowledgeBaseReady]);
+  }, [botId, effectiveKnowledgeBases, knowledgeBaseReady]);
 
   // 知识库加载中显示加载状态
   if (!knowledgeBaseReady) {
@@ -404,7 +416,7 @@ export function ChatClient({
       modelId={modelId}
       modelDisplayName={modelDisplayName}
       exampleQuestions={exampleQuestions}
-      assignedKnowledgeBases={assignedKnowledgeBases}
+      assignedKnowledgeBases={effectiveKnowledgeBases}
     />
   );
 }
