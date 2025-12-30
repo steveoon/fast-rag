@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { MessageLoading } from '@/components/ui/message-loading';
+import { CopyButton } from '@/components/ui/copy-button';
 
 interface ChatBubbleProps {
   variant?: 'sent' | 'received';
@@ -33,6 +34,7 @@ interface ChatBubbleMessageProps {
   isLoading?: boolean;
   className?: string;
   children?: React.ReactNode;
+  copyContent?: string;
 }
 
 export function ChatBubbleMessage({
@@ -40,10 +42,12 @@ export function ChatBubbleMessage({
   isLoading,
   className,
   children,
+  copyContent,
 }: ChatBubbleMessageProps) {
   return (
     <div
       className={cn(
+        'relative group',
         'rounded-2xl px-4 py-3 text-sm leading-relaxed',
         'transition-all duration-200 ease-out',
         variant === 'sent' && [
@@ -76,6 +80,22 @@ export function ChatBubbleMessage({
         </div>
       ) : (
         children
+      )}
+
+      {/* 复制按钮 - 悬停时显示 */}
+      {copyContent && !isLoading && (
+        <CopyButton
+          value={copyContent}
+          className={cn(
+            'absolute opacity-0 group-hover:opacity-100',
+            // 根据消息类型调整位置
+            variant === 'sent' && '-left-9 top-1',
+            variant === 'received' && '-right-9 top-1',
+            // 覆盖默认样式，使其更适合聊天气泡
+            'text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300',
+            'hover:bg-gray-200/60 dark:hover:bg-gray-700/60'
+          )}
+        />
       )}
     </div>
   );

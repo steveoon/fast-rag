@@ -150,7 +150,20 @@ class ClientManager {
   }
 
   // 获取Exa MCP客户端
-  public async getExaMCPClient() {
+  public async getExaMCPClient(forceReconnect = false) {
+    // 如果强制重连，先清理旧客户端
+    if (forceReconnect && this._exaMCPClient) {
+      console.log('强制重连：清理旧的Exa MCP客户端...');
+      try {
+        if (this._exaMCPClient.close) {
+          await this._exaMCPClient.close();
+        }
+      } catch {
+        // 忽略关闭错误
+      }
+      this._exaMCPClient = null;
+    }
+
     if (!this._exaMCPClient) {
       const apiKey = process.env.EXA_API_KEY;
       if (!apiKey) {
@@ -163,7 +176,10 @@ class ClientManager {
         args: [
           '-y',
           'exa-mcp-server',
-          '--tools=web_search_exa,research_paper_search,company_research,crawling,competitor_finder,linkedin_search,wikipedia_search_exa,github_search',
+          // 更新为最新的工具列表 (2024/2025)
+          // get_code_context_exa: 搜索 GitHub、文档、StackOverflow
+          // deep_researcher_start/check: 深度研究功能
+          '--tools=web_search_exa,get_code_context_exa,company_research,crawling,linkedin_search,deep_researcher_start,deep_researcher_check',
         ],
         env: { EXA_API_KEY: apiKey },
       });
@@ -180,15 +196,40 @@ class ClientManager {
 
   // 获取Exa MCP工具
   public async getExaMCPTools() {
-    const client = await this.getExaMCPClient();
+    const attemptGetTools = async (isRetry = false) => {
+      const client = await this.getExaMCPClient(isRetry);
+
+      try {
+        // 直接获取所有工具，而不是尝试通过getTool获取单个工具
+        const tools = await client.tools();
+        console.log(`已获取Exa MCP工具列表: ${Object.keys(tools).join(', ')}`);
+        return tools;
+      } catch (error) {
+        const errorMessage = (error as Error).message || '';
+        // 检测连接关闭错误
+        if (errorMessage.includes('Connection closed') || errorMessage.includes('closed')) {
+          // 清理失效的客户端引用
+          this._exaMCPClient = null;
+          throw error; // 重新抛出以便重试
+        }
+        console.error('获取Exa MCP工具失败:', error);
+        return {};
+      }
+    };
 
     try {
-      // 直接获取所有工具，而不是尝试通过getTool获取单个工具
-      const tools = await client.tools();
-      console.log(`已获取Exa MCP工具列表: ${Object.keys(tools).join(', ')}`);
-      return tools;
+      return await attemptGetTools(false);
     } catch (error) {
-      console.error('获取Exa MCP工具失败:', error);
+      const errorMessage = (error as Error).message || '';
+      if (errorMessage.includes('Connection closed') || errorMessage.includes('closed')) {
+        console.log('检测到连接关闭，尝试重新连接...');
+        try {
+          return await attemptGetTools(true);
+        } catch (retryError) {
+          console.error('重连后仍然失败:', retryError);
+          return {};
+        }
+      }
       return {};
     }
   }

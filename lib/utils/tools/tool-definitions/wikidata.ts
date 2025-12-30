@@ -150,7 +150,7 @@ export const smartWikidataQueryTool: ToolDefinition = {
             try {
               // 使用generateObject获取英文翻译
               const { object: translation } = await generateObject({
-                model: registry.languageModel('google/gemini-2.0-flash-exp'),
+                model: registry.languageModel('google/gemini-3-flash-preview'),
                 schema: z.object({
                   englishName: z.string().describe('实体的英文名称或翻译'),
                   confidence: z.number().min(0).max(10).describe('翻译准确度的信心值(0-10)'),

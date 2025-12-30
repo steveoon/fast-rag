@@ -5,7 +5,7 @@ import {
   GeocodeVisualization,
   PlacesSearchVisualization,
 } from '@/lib/utils/tools/tool-definitions/google-maps';
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 
 // 类型定义部分
 type MarkerType = {
@@ -711,18 +711,24 @@ export function useMapInstance(instanceId?: string) {
   const storeApi = useMapStore();
 
   // 使用useRef保存生成的实例ID，在组件生命周期内保持稳定
-  const generatedIdRef = useRef<string>('');
-
-  // 仅在首次渲染时创建ID
-  if (!instanceId && !generatedIdRef.current) {
-    generatedIdRef.current = storeApi.createInstance();
-  }
+  // 同步生成ID（不触发setState），但实际注册到store在effect中完成
+  const generatedIdRef = useRef<string>(instanceId || nanoid());
 
   // 使用传入的ID或已生成的ID
   const id = instanceId || generatedIdRef.current;
 
-  // 获取实例数据
-  const instance = storeApi.getInstance(id);
+  // 在effect中注册实例到store，避免在渲染阶段调用setState
+  useEffect(() => {
+    // 确保实例已在store中注册
+    const { instances } = useMapStore.getState();
+    if (!instances[id]) {
+      storeApi.createInstance(id);
+    }
+  }, [id, storeApi]);
+
+  // 从store获取实例数据，如果不存在则返回默认状态
+  const instances = useMapStore(state => state.instances);
+  const instance = instances[id] || createDefaultInstanceState();
 
   return {
     instanceId: id,

@@ -16,14 +16,23 @@ const knowledgeBaseTool: ToolDefinition = {
       description: `从知识库中检索与用户问题相关的信息。当用户询问特定领域知识或需要参考内部文档时使用。`,
       inputSchema: z.object({
         query: z.string().describe('用户的问题或查询内容'),
+        similarityThreshold: z
+          .number()
+          .min(0)
+          .max(1)
+          .describe(
+            '相似度阈值(0-1)，只返回相似度高于此值的结果。短查询或模糊问题建议使用较低值(0.2-0.35)，精确专业术语查询可使用较高值(0.4-0.6)。'
+          ),
       }),
-      execute: async ({ query }) => {
+      execute: async ({ query, similarityThreshold }) => {
+        const threshold = similarityThreshold;
+
         console.log('查询知识库:', query);
         console.log('知识库配置:', {
           clientId: config.clientId,
           docs: config.docs,
           docVersions: config.docVersions,
-          similarityThreshold: config.similarityThreshold,
+          similarityThreshold: threshold,
         });
 
         try {
@@ -32,16 +41,18 @@ const knowledgeBaseTool: ToolDefinition = {
             clientId: config.clientId,
             docs: config.docs,
             docVersions: config.docVersions,
-            similarityThreshold: config.similarityThreshold,
+            similarityThreshold: threshold,
           });
 
           console.log(`知识库查询返回 ${queryRes.length} 条结果`);
 
-          // 如果没有结果，返回一个提示信息
+          // 如果没有结果，返回详细信息供 LLM 分析
           if (queryRes.length === 0) {
             return {
               results: [],
-              message: '没有找到相关的知识库内容。请确保已经上传并向量化了相关文档。',
+              query,
+              similarityThreshold: threshold,
+              message: `未找到相似度高于 ${threshold} 的结果。可能原因：1) 查询"${query}"与知识库内容语义差异较大；2) 相似度阈值设置过高。建议：尝试降低阈值或改写查询。`,
             };
           }
 

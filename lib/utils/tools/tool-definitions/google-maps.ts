@@ -1,9 +1,9 @@
-import { generateObject, tool } from 'ai';
+import { tool } from 'ai';
 import { z } from 'zod';
 import { getGoogleMapsMCPTools } from './clients';
 import { ToolDefinition, ToolConfig, ToolStatus } from '../types';
 import { mapToolNameToEnabledTool } from '../tool-mapping';
-import { registry } from '../../models-registry';
+import { createMapsFormatterAgent } from '../../agents';
 
 // 路线数据可视化类型
 export type MapDataForVisualization = {
@@ -81,6 +81,114 @@ const googleMapsSchemas = {
     }),
   },
 };
+
+// ==================== 格式化 Output Schemas ====================
+
+// 地点搜索结果 Schema
+const placesSearchSchema = z.object({
+  operation: z.string().describe('操作类型'),
+  query: z.string().describe('查询内容'),
+  places: z
+    .array(
+      z.object({
+        name: z.string().describe('地点名称'),
+        place_id: z.string().describe('地点ID'),
+        formatted_address: z.string().describe('格式化地址'),
+        location: z
+          .object({
+            lat: z.number().describe('纬度数值'),
+            lng: z.number().describe('经度数值'),
+          })
+          .describe('地理坐标'),
+        rating: z.number().optional().describe('评分数值'),
+        types: z.array(z.string()).optional().describe('地点类型列表'),
+      })
+    )
+    .describe('地点列表'),
+});
+
+// 地理编码结果 Schema
+const geocodeSchema = z.object({
+  operation: z.string().describe('操作类型'),
+  query: z.string().describe('查询内容'),
+  locations: z
+    .array(
+      z.object({
+        place_id: z.string().describe('地点ID'),
+        formatted_address: z.string().describe('格式化地址'),
+        location: z
+          .object({
+            lat: z.number().describe('纬度数值'),
+            lng: z.number().describe('经度数值'),
+          })
+          .describe('地理坐标'),
+      })
+    )
+    .describe('位置列表'),
+});
+
+// 路线结果 Schema
+const directionsSchema = z.object({
+  operation: z.string().describe('操作类型'),
+  query: z.string().describe('查询内容'),
+  routes: z
+    .array(
+      z.object({
+        summary: z.string().describe('路线摘要'),
+        legs: z
+          .array(
+            z.object({
+              start_location: z
+                .object({
+                  lat: z.number().describe('纬度'),
+                  lng: z.number().describe('经度'),
+                })
+                .describe('起点坐标'),
+              end_location: z
+                .object({
+                  lat: z.number().describe('纬度'),
+                  lng: z.number().describe('经度'),
+                })
+                .describe('终点坐标'),
+              distance: z
+                .object({
+                  text: z.string().describe('距离文本'),
+                  value: z.number().describe('距离数值（米）'),
+                })
+                .describe('距离信息'),
+              duration: z
+                .object({
+                  text: z.string().describe('时间文本'),
+                  value: z.number().describe('时间数值（秒）'),
+                })
+                .describe('时间信息'),
+              steps: z
+                .array(
+                  z.object({
+                    html_instructions: z.string().describe('路线指示'),
+                    distance: z
+                      .object({
+                        text: z.string().describe('距离文本'),
+                        value: z.number().describe('距离数值（米）'),
+                      })
+                      .describe('步骤距离'),
+                    duration: z
+                      .object({
+                        text: z.string().describe('时间文本'),
+                        value: z.number().describe('时间数值（秒）'),
+                      })
+                      .describe('步骤时间'),
+                    travel_mode: z.string().optional().describe('交通方式'),
+                  })
+                )
+                .describe('导航步骤列表'),
+            })
+          )
+          .describe('路段列表'),
+      })
+    )
+    .describe('路线列表'),
+});
 
 const googleMapsTool: ToolDefinition = {
   toolName: 'googleMapsQuery',
@@ -198,7 +306,7 @@ const googleMapsTool: ToolDefinition = {
               visualizeData = await formatGeocodeResult(result, operation, query);
               break;
             case 'directions':
-              visualizeData = await formatDirectionsResult(result, operation, query);
+              visualizeData = await formatDirectionsResult(result, operation, query, mapsTools);
               break;
             default:
               // 默认情况，直接返回原始结果
@@ -250,59 +358,20 @@ async function formatPlacesSearchResult(
   query: string
 ): Promise<PlacesSearchVisualization> {
   try {
-    // console.log('格式化地点搜索结果:', result);
+    const { output } = await createMapsFormatterAgent(placesSearchSchema).generate({
+      prompt: `以下是Google Maps API的响应:
+${JSON.stringify(result)}
 
-    // 使用generateObject将结果转换为标准化格式
-    const { object } = await generateObject({
-      model: registry.languageModel('google/gemini-2.0-flash-exp'),
-      schema: z.object({
-        operation: z.string(),
-        query: z.string(),
-        places: z.array(
-          z.object({
-            name: z.string(),
-            place_id: z.string(),
-            formatted_address: z.string(),
-            location: z.object({ lat: z.number(), lng: z.number() }),
-            rating: z.number().optional(),
-            types: z.array(z.string()).optional(),
-          })
-        ),
-      }),
-      prompt: `
-        你是一个帮助格式化Google Maps地点搜索API响应的助手。
-        以下是Google Maps API的响应:
-        ${JSON.stringify(result)}
-        
-        请将响应格式化为以下结构的JSON:
-        {
-          "operation": "${operation}",
-          "query": "${query}",
-          "places": [
-            {
-              "name": "地点名称",
-              "place_id": "地点ID",
-              "formatted_address": "格式化地址",
-              "location": { "lat": 纬度数值, "lng": 经度数值 },
-              "rating": 评分数值(可选),
-              "types": ["地点类型1", "地点类型2"](可选)
-            }
-          ]
-        }
-        
-        注意：请确保所有字段都正确转换，特别是坐标要使用数值类型。
-      `,
+操作类型: ${operation}
+查询内容: ${query}
+
+请格式化`,
     });
 
-    return object;
+    return output;
   } catch (error) {
     console.error('格式化地点搜索结果失败:', error);
-    // 返回一个基本的格式
-    return {
-      operation,
-      query,
-      places: [],
-    };
+    return { operation, query, places: [] };
   }
 }
 
@@ -315,136 +384,134 @@ async function formatGeocodeResult(
   try {
     console.log('格式化地理编码结果:', result);
 
-    // 使用generateObject将结果转换为标准化格式
-    const { object } = await generateObject({
-      model: registry.languageModel('google/gemini-2.0-flash-exp'),
-      schema: z.object({
-        operation: z.string(),
-        query: z.string(),
-        locations: z.array(
-          z.object({
-            place_id: z.string(),
-            formatted_address: z.string(),
-            location: z.object({ lat: z.number(), lng: z.number() }),
-          })
-        ),
-      }),
-      prompt: `
-        你是一个帮助格式化Google Maps地理编码API响应的助手。
-        以下是Google Maps API的响应:
-        ${JSON.stringify(result)}
-        
-        请将响应格式化为以下结构的JSON:
-        {
-          "operation": "${operation}",
-          "query": "${query}",
-          "locations": [
-            {
-              "place_id": "地点ID",
-              "formatted_address": "格式化地址",
-              "location": { "lat": 纬度数值, "lng": 经度数值 }
-            }
-          ]
-        }
-        
-        注意：请确保所有字段都正确转换，特别是坐标要使用数值类型。
-      `,
+    const { output } = await createMapsFormatterAgent(geocodeSchema).generate({
+      prompt: `以下是Google Maps API的响应:
+${JSON.stringify(result)}
+
+操作类型: ${operation}
+查询内容: ${query}
+
+请格式化`,
     });
 
-    return object;
+    return output;
   } catch (error) {
     console.error('格式化地理编码结果失败:', error);
-    // 返回一个基本的格式
-    return {
-      operation,
-      query,
-      locations: [],
-    };
+    return { operation, query, locations: [] };
   }
+}
+
+// 辅助函数：通过 geocode 获取坐标
+async function geocodeLocation(
+  address: string,
+  mapsTools: Record<
+    string,
+    {
+      execute: (
+        args: Record<string, unknown>,
+        options: Record<string, unknown>
+      ) => Promise<unknown>;
+    }
+  >
+): Promise<{ lat: number; lng: number } | null> {
+  try {
+    if (!mapsTools.maps_geocode) return null;
+
+    const result = await mapsTools.maps_geocode.execute(
+      { address },
+      { toolCallId: 'geocode-for-directions', messages: [] }
+    );
+
+    const data = result as { content?: Array<{ text?: string }> };
+    if (data.content?.[0]?.text) {
+      const parsed = JSON.parse(data.content[0].text);
+      // MCP geocode 返回的结构通常是 { location: { lat, lng } } 或 { results: [{ geometry: { location: {...} } }] }
+      if (parsed.location) {
+        return parsed.location;
+      }
+      if (parsed.results?.[0]?.geometry?.location) {
+        return parsed.results[0].geometry.location;
+      }
+      // 尝试直接获取 lat/lng
+      if (typeof parsed.lat === 'number' && typeof parsed.lng === 'number') {
+        return { lat: parsed.lat, lng: parsed.lng };
+      }
+    }
+  } catch (error) {
+    console.error('Geocode 获取坐标失败:', error);
+  }
+  return null;
 }
 
 // 辅助函数：格式化路线结果
 async function formatDirectionsResult(
   result: unknown,
   operation: string,
-  query: string
+  query: string,
+  mapsTools?: Record<
+    string,
+    {
+      execute: (
+        args: Record<string, unknown>,
+        options: Record<string, unknown>
+      ) => Promise<unknown>;
+    }
+  >
 ): Promise<MapDataForVisualization> {
   try {
     console.log('格式化路线结果:', result);
 
-    // 使用原有的generateObject将结果转换为标准化格式
-    const { object } = await generateObject({
-      model: registry.languageModel('google/gemini-2.0-flash-exp'),
-      schema: z.object({
-        operation: z.string(),
-        query: z.string(),
-        routes: z.array(
-          z.object({
-            summary: z.string(),
-            legs: z.array(
-              z.object({
-                start_location: z.object({ lat: z.number(), lng: z.number() }),
-                end_location: z.object({ lat: z.number(), lng: z.number() }),
-                distance: z.object({ text: z.string(), value: z.number() }),
-                duration: z.object({ text: z.string(), value: z.number() }),
-                steps: z.array(
-                  z.object({
-                    html_instructions: z.string(),
-                    distance: z.object({ text: z.string(), value: z.number() }),
-                    duration: z.object({ text: z.string(), value: z.number() }),
-                    travel_mode: z.string().optional(),
-                  })
-                ),
-              })
-            ),
-          })
-        ),
-      }),
-      prompt: `
-        你是一个帮助格式化Google Maps路线API响应的助手。
-        以下是Google Maps API的响应:
-        ${JSON.stringify(result)}
-        
-        请将响应格式化为以下结构的JSON:
-        {
-          "operation": "${operation}",
-          "query": "${query}",
-          "routes": [
-            {
-              "summary": "路线摘要",
-              "legs": [
-                {
-                  "start_location": { "lat": 数值, "lng": 数值 },
-                  "end_location": { "lat": 数值, "lng": 数值 },
-                  "distance": { "text": "距离文本", "value": 数值 },
-                  "duration": { "text": "时间文本", "value": 数值 },
-                  "steps": [
-                    {
-                      "html_instructions": "路线指示",
-                      "distance": { "text": "距离文本", "value": 数值 },
-                      "duration": { "text": "时间文本", "value": 数值 },
-                      "travel_mode": "交通方式"
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-        
-        注意：请确保所有字段都正确转换，特别是坐标要使用数值类型。
-      `,
+    const { output } = await createMapsFormatterAgent(directionsSchema).generate({
+      prompt: `以下是Google Maps API的响应:
+${JSON.stringify(result)}
+
+操作类型: ${operation}
+查询内容: ${query}
+
+请格式化为指定的JSON结构。
+
+**注意**：MCP返回的数据可能没有legs数组，请将routes[0]下的distance、duration、steps等直接映射到legs[0]中。
+如果原始数据没有start_location和end_location，请设置为 { lat: 0, lng: 0 }，后续会通过geocode补充。`,
     });
 
-    return object;
+    // 验证坐标是否有效，如果为0则使用geocode获取
+    if (output.routes?.[0]?.legs?.[0] && mapsTools) {
+      const firstLeg = output.routes[0].legs[0];
+      const hasInvalidCoords =
+        (firstLeg.start_location.lat === 0 && firstLeg.start_location.lng === 0) ||
+        (firstLeg.end_location.lat === 0 && firstLeg.end_location.lng === 0);
+
+      if (hasInvalidCoords) {
+        console.warn('检测到无效坐标(0,0)，尝试通过geocode获取...');
+        // 从query中解析起点和终点 (格式: "起点->终点")
+        const [origin, destination] = query.split('->').map(s => s.trim());
+
+        if (origin && destination) {
+          const [startCoords, endCoords] = await Promise.all([
+            geocodeLocation(origin, mapsTools),
+            geocodeLocation(destination, mapsTools),
+          ]);
+
+          if (startCoords) {
+            console.log('通过geocode获取起点坐标:', startCoords);
+            firstLeg.start_location = startCoords;
+          }
+          if (endCoords) {
+            console.log('通过geocode获取终点坐标:', endCoords);
+            firstLeg.end_location = endCoords;
+          }
+
+          if (!startCoords || !endCoords) {
+            console.error('部分坐标获取失败', { origin, destination, startCoords, endCoords });
+          }
+        }
+      }
+    }
+
+    return output;
   } catch (error) {
     console.error('格式化路线结果失败:', error);
-    // 返回一个基本的格式
-    return {
-      operation,
-      query,
-      routes: [],
-    };
+    return { operation, query, routes: [] };
   }
 }
 

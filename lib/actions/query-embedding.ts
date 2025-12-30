@@ -16,6 +16,7 @@ import { embedding } from './doc-process/embedding';
  * @param {string} args.clientId - 客户的唯一标识符
  * @param {string[]} [args.docs] - 可选的文档ID数组，用于限制查询范围
  * @param {string[]} [args.docVersions] - 可选的文档版本ID数组，用于限制查询范围
+ * @param {number} args.similarityThreshold - 相似度阈值(0-1)，只返回相似度高于此值的结果
  * @returns {Promise<string[]>} 返回一个 Promise，解析为与问题最相似的文档内容数组（最多4个）
  */
 export async function queryEmbeddings(args: {
@@ -23,9 +24,9 @@ export async function queryEmbeddings(args: {
   clientId: string;
   docs?: string[];
   docVersions?: string[];
-  similarityThreshold?: number;
+  similarityThreshold: number;
 }) {
-  const { question, clientId, docs, docVersions, similarityThreshold = 0.5 } = args;
+  const { question, clientId, docs, docVersions, similarityThreshold } = args;
 
   // 如果没有指定文档或文档版本，直接返回空数组
   if ((docs && docs.length === 0) || (docVersions && docVersions.length === 0)) {

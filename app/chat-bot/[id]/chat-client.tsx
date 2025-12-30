@@ -25,6 +25,19 @@ import {
   type AssignedKnowledgeBase,
 } from '@/app/platform/bots-management/store/knowledge-base-store';
 import { cn } from '@/lib/utils';
+import type { UIMessage } from '@ai-sdk/react';
+
+// 从消息 parts 中提取纯文本内容用于复制
+function extractTextFromMessage(message: UIMessage): string {
+  if (!message.parts || message.parts.length === 0) {
+    return '';
+  }
+
+  return message.parts
+    .filter((part): part is { type: 'text'; text: string } => part.type === 'text')
+    .map(part => part.text)
+    .join('\n');
+}
 
 interface ChatClientProps {
   apiKey: string;
@@ -195,11 +208,14 @@ function ChatCore({
                   )
                 }
               />
-              <ChatBubbleMessage variant={message.role === 'user' ? 'sent' : 'received'}>
+              <ChatBubbleMessage
+                variant={message.role === 'user' ? 'sent' : 'received'}
+                copyContent={extractTextFromMessage(message)}
+              >
                 <MessageContentAdapter
                   key={message.id}
                   content={message.parts ?? []}
-                  showCopyButton={message.role !== 'user'}
+                  showCopyButton={false}
                   showOnly={['text', 'reasoning', 'tool', 'source']}
                   messageId={message.id}
                 />

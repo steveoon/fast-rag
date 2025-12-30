@@ -185,10 +185,20 @@ const toolDescriptionMap: Record<string, string> = {
  * @returns 系统提示文本
  */
 export function generateToolSystemPrompt(tools: ToolSet): string {
+  const toolNames = Object.keys(tools);
+
+  // 如果没有工具可用，返回简化的提示
+  if (toolNames.length === 0) {
+    return `你是一个智能助手。当前没有可用的工具来获取外部信息。
+
+请基于你的知识直接回答用户的问题。如果问题需要实时信息、最新数据或外部数据源，
+请诚实告知用户当前无法访问相关工具来获取这些信息，并尽可能基于已有知识提供帮助。`;
+  }
+
   return `你是一个智能助手，能够根据用户的问题自主决定使用哪些工具来获取信息。
 
     可用工具:
-    ${Object.keys(tools)
+    ${toolNames
       .map(toolName => {
         const description = toolDescriptionMap[toolName] || toolName;
         return `- ${toolName}: ${description}`;
