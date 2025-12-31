@@ -11,14 +11,15 @@ interface ChatWelcomeProps {
   onSuggestionClick?: (suggestion: string) => void;
 }
 
+// 图标数组移到组件外部，避免每次渲染时重新创建
+const icons = [Sparkles, MessageSquare, Zap];
+
 export function ChatWelcome({
   botName = 'AI Assistant',
   exampleQuestions,
   onSuggestionClick,
 }: ChatWelcomeProps) {
   const t = useTranslations('ChatBot.welcome');
-
-  const icons = [Sparkles, MessageSquare, Zap];
 
   // 使用自定义问题或默认翻译
   const suggestions = useMemo(() => {
