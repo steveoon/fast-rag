@@ -1,29 +1,17 @@
-import PDFParser from 'pdf2json';
+import { extractText, getDocumentProxy } from 'unpdf';
 
-interface PDFData {
-  Pages: Array<{
-    Texts: Array<{
-      R: Array<{ T: string }>;
-    }>;
-  }>;
-}
+/**
+ * 使用 unpdf 解析 PDF 文件
+ *
+ * 注意：使用 mergePages: false 然后手动合并页面
+ * 因为 mergePages: true 会丢失所有换行符，导致分块逻辑失效
+ */
+export default async function readPdf(content: Buffer): Promise<string> {
+  const pdf = await getDocumentProxy(new Uint8Array(content));
+  const { text } = await extractText(pdf, { mergePages: false });
 
-export default function readPdf(content: Buffer): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const pdfParser = new PDFParser();
-
-    pdfParser.on('pdfParser_dataError', (errData: unknown) => reject(errData));
-    pdfParser.on('pdfParser_dataReady', (pdfData: unknown) => {
-      let text = '';
-      for (const page of (pdfData as PDFData).Pages) {
-        for (const textItem of page.Texts) {
-          text += decodeURIComponent(textItem.R[0].T) + ' ';
-        }
-        text += '\n\n'; // 添加页面分隔符
-      }
-      resolve(text.trim());
-    });
-
-    pdfParser.parseBuffer(content);
-  });
+  // text 是 string[]，每个元素是一页的内容
+  // 用双换行符连接页面，保证分块逻辑可以正确识别段落边界
+  const pages = text as string[];
+  return pages.join('\n\n');
 }

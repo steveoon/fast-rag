@@ -48,11 +48,7 @@ export const access_tokens = pgTable(
     created_at: timestamp('created_at', { mode: 'string' }).defaultNow().notNull(),
     expires_at: timestamp('expires_at', { mode: 'string' }),
   },
-  table => {
-    return {
-      access_tokens_token_unique: unique('access_tokens_token_unique').on(table.token),
-    };
-  }
+  table => [unique('access_tokens_token_unique').on(table.token)]
 );
 
 export const users = pgSchema('auth').table('users', {
@@ -72,12 +68,10 @@ export const clients = pgTable(
     created_at: timestamp('created_at', { mode: 'string' }).defaultNow().notNull(),
     updated_at: timestamp('updated_at', { mode: 'string' }).defaultNow().notNull(),
   },
-  table => {
-    return {
-      clients_api_key_unique: unique('clients_api_key_unique').on(table.api_key),
-      clients_name_user_unique: unique('clients_name_user_unique').on(table.name, table.user_id),
-    };
-  }
+  table => [
+    unique('clients_api_key_unique').on(table.api_key),
+    unique('clients_name_user_unique').on(table.name, table.user_id),
+  ]
 );
 
 export const document_versions = pgTable('document_versions', {
@@ -114,9 +108,7 @@ export const embeddings = pgTable(
     embedding: vector('embedding', { dimensions: 1536 }).notNull(),
     created_at: timestamp('created_at', { mode: 'string' }).defaultNow().notNull(),
   },
-  table => ({
-    embeddingIndex: index('embeddingIndex').using('hnsw', table.embedding.op('vector_cosine_ops')),
-  })
+  table => [index('embeddingIndex').using('hnsw', table.embedding.op('vector_cosine_ops'))]
 );
 
 export const tool_status = pgEnum('tool_status', ['active', 'deprecated', 'disabled']);
@@ -136,11 +128,7 @@ export const ai_models = pgTable(
     created_at: timestamp('created_at', { mode: 'string' }).defaultNow().notNull(),
     updated_at: timestamp('updated_at', { mode: 'string' }).defaultNow().notNull(),
   },
-  table => {
-    return {
-      ai_models_model_id_unique: unique('ai_models_model_id_unique').on(table.model_id),
-    };
-  }
+  table => [unique('ai_models_model_id_unique').on(table.model_id)]
 );
 export const tool_parameter_type = pgEnum('tool_parameter_type', [
   'string',
@@ -166,14 +154,10 @@ export const tools = pgTable(
     created_at: timestamp('created_at', { mode: 'string' }).defaultNow().notNull(),
     updated_at: timestamp('updated_at', { mode: 'string' }).defaultNow().notNull(),
   },
-  table => {
-    return {
-      tools_name_unique: unique('tools_name_unique').on(table.name),
-      tools_implementation_key_unique: unique('tools_implementation_key_unique').on(
-        table.implementation_key
-      ),
-    };
-  }
+  table => [
+    unique('tools_name_unique').on(table.name),
+    unique('tools_implementation_key_unique').on(table.implementation_key),
+  ]
 );
 
 export const tool_parameters = pgTable(
@@ -193,14 +177,7 @@ export const tool_parameters = pgTable(
     created_at: timestamp('created_at', { mode: 'string' }).defaultNow().notNull(),
     updated_at: timestamp('updated_at', { mode: 'string' }).defaultNow().notNull(),
   },
-  table => {
-    return {
-      tool_parameters_tool_name_unique: unique('tool_parameters_tool_name_unique').on(
-        table.tool_id,
-        table.name
-      ),
-    };
-  }
+  table => [unique('tool_parameters_tool_name_unique').on(table.tool_id, table.name)]
 );
 
 export const client_tools = pgTable(
@@ -218,14 +195,7 @@ export const client_tools = pgTable(
     created_at: timestamp('created_at', { mode: 'string' }).defaultNow().notNull(),
     updated_at: timestamp('updated_at', { mode: 'string' }).defaultNow().notNull(),
   },
-  table => {
-    return {
-      client_tools_client_tool_unique: unique('client_tools_client_tool_unique').on(
-        table.client_id,
-        table.tool_id
-      ),
-    };
-  }
+  table => [unique('client_tools_client_tool_unique').on(table.client_id, table.tool_id)]
 );
 
 // 聊天机器人表
@@ -245,15 +215,10 @@ export const chat_bots = pgTable(
     created_at: timestamp('created_at', { mode: 'string' }).defaultNow().notNull(),
     updated_at: timestamp('updated_at', { mode: 'string' }).defaultNow().notNull(),
   },
-  table => {
-    return {
-      chat_bots_name_client_unique: unique('chat_bots_name_client_unique').on(
-        table.name,
-        table.client_id
-      ),
-      chat_bots_url_unique: unique('chat_bots_url_unique').on(table.url),
-    };
-  }
+  table => [
+    unique('chat_bots_name_client_unique').on(table.name, table.client_id),
+    unique('chat_bots_url_unique').on(table.url),
+  ]
 );
 
 // 聊天机器人工具关联表
@@ -271,14 +236,7 @@ export const chat_bot_tools = pgTable(
     created_at: timestamp('created_at', { mode: 'string' }).defaultNow().notNull(),
     updated_at: timestamp('updated_at', { mode: 'string' }).defaultNow().notNull(),
   },
-  table => {
-    return {
-      chat_bot_tools_bot_tool_unique: unique('chat_bot_tools_bot_tool_unique').on(
-        table.chat_bot_id,
-        table.client_tool_id
-      ),
-    };
-  }
+  table => [unique('chat_bot_tools_bot_tool_unique').on(table.chat_bot_id, table.client_tool_id)]
 );
 
 // 聊天机器人知识库关联表
