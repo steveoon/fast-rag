@@ -3,6 +3,7 @@ import { MessageContent as MessageContentComponent } from '@/hooks/message-conte
 import Image from 'next/image';
 import { MessageContent } from '@/app/chat-bot/[id]/types';
 import { CollapsibleDrawer } from '@/components/ui/collapsible-drawer';
+import { ToolCallsGroup } from '@/components/ui/tool-calls-group';
 import dynamic from 'next/dynamic';
 import { VisualizationData } from '@/components/visualizations';
 
@@ -433,6 +434,17 @@ const renderPart = (
   }
 };
 
+// 工具调用数据，用于分组显示
+interface ToolCallForGroup {
+  toolName: string;
+  toolCallId?: string;
+  input?: Record<string, unknown>;
+  output?: unknown;
+  state: string;
+  originalPart: any;
+  originalIndex: number;
+}
+
 function MessageContentAdapterComponent({
   content,
   showCopyButton = false,
@@ -446,20 +458,190 @@ function MessageContentAdapterComponent({
   }
 
   if (Array.isArray(content)) {
-    // 过滤掉 null 的结果
-    const renderedParts = content
-      .map((part, index) => renderPart(part, index, showCopyButton, showOnly, messageId))
+    // 分离工具调用和其他内容
+    const toolCalls: ToolCallForGroup[] = [];
+    const otherParts: { part: any; index: number }[] = [];
+
+    content.forEach((part, index) => {
+      const partType = part?.type as string;
+
+      // 检查是否应该显示这个部分
+      if (!shouldShowPart(partType, showOnly)) {
+        return;
+      }
+
+      // 收集工具调用
+      if (partType.startsWith('tool-') && partType !== 'tool-invocation') {
+        const toolPart = part as ToolUIPartRuntime;
+        // 只收集 output-available 状态的工具调用用于分组显示
+        if (toolPart.state === 'output-available') {
+          toolCalls.push({
+            toolName: toolPart.toolName || partType.replace('tool-', ''),
+            toolCallId: toolPart.toolCallId,
+            input: toolPart.input,
+            output: toolPart.output,
+            state: toolPart.state,
+            originalPart: part,
+            originalIndex: index,
+          });
+        }
+      } else if (partType === 'tool-invocation') {
+        const toolInvocation = part.toolInvocation;
+        if (toolInvocation?.state === 'result') {
+          toolCalls.push({
+            toolName: toolInvocation.toolName || '未命名工具',
+            input: toolInvocation.args,
+            output: toolInvocation.result,
+            state: 'result',
+            originalPart: part,
+            originalIndex: index,
+          });
+        }
+      } else {
+        otherParts.push({ part, index });
+      }
+    });
+
+    // 渲染非工具内容
+    const renderedOtherParts = otherParts
+      .map(({ part, index }) => renderPart(part, index, showCopyButton, showOnly, messageId))
       .filter(Boolean);
 
     // 如果没有任何可渲染的内容，返回空
-    if (renderedParts.length === 0) {
+    if (renderedOtherParts.length === 0 && toolCalls.length === 0) {
       return null;
     }
 
-    return <div className="flex flex-col gap-3">{renderedParts}</div>;
+    return (
+      <div className="flex flex-col gap-3">
+        {renderedOtherParts}
+        {toolCalls.length > 0 && (
+          <ToolCallsGroup
+            toolCalls={toolCalls}
+            renderToolDetail={call => renderToolDetailContent(call)}
+          />
+        )}
+      </div>
+    );
   }
 
   return <div className="text-red-500">无法显示消息内容</div>;
+}
+
+// 工具调用基础数据类型（与 ToolCallsGroup 组件兼容）
+interface ToolCallBaseData {
+  toolName: string;
+  toolCallId?: string;
+  input?: Record<string, unknown>;
+  output?: unknown;
+  state: string;
+}
+
+// 渲染单个工具调用的详细内容（用于分组显示中的展开详情）
+function renderToolDetailContent(call: ToolCallBaseData) {
+  const result = (call.output || {}) as ToolInvocationResult;
+
+  // 检查是否有图片结果
+  const hasImageResult =
+    result && typeof result === 'object' && 'imageUrl' in result && result.imageUrl;
+
+  // 检查是否有搜索结果
+  const hasSearchResults =
+    result &&
+    Array.isArray(result) &&
+    result.length > 0 &&
+    result[0] &&
+    typeof result[0] === 'object' &&
+    'title' in result[0] &&
+    'url' in result[0];
+
+  // 检查是否有可视化数据
+  const hasVisualization =
+    result &&
+    typeof result === 'object' &&
+    'visualize' in result &&
+    result.visualize &&
+    typeof result.visualize === 'object' &&
+    'type' in result.visualize;
+
+  const isVisualizationImage = hasVisualization && result.visualize!.type === 'image';
+
+  return (
+    <div className="text-xs space-y-2">
+      {/* 搜索结果特殊处理 */}
+      {hasSearchResults && (
+        <div className="space-y-1.5">
+          <div className="font-medium text-blue-600 dark:text-blue-400">
+            🌐 搜索结果 ({(result as any[]).length})
+          </div>
+          <div className="space-y-1 max-h-40 overflow-auto">
+            {(result as any[]).slice(0, 5).map((item, idx) => (
+              <div key={idx} className="bg-gray-100 dark:bg-gray-900 p-1.5 rounded">
+                <div className="font-medium truncate">{item.title}</div>
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 dark:text-blue-400 truncate block text-[10px]"
+                >
+                  {item.url}
+                </a>
+              </div>
+            ))}
+            {(result as any[]).length > 5 && (
+              <div className="text-gray-500 text-center">
+                还有 {(result as any[]).length - 5} 条结果...
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 可视化数据处理 */}
+      {hasVisualization && (
+        <div className="my-2">
+          <VisualizationRenderer visualization={result.visualize!} />
+        </div>
+      )}
+
+      {/* 图片结果特殊处理 */}
+      {hasImageResult && !isVisualizationImage && (
+        <div className="my-2 rounded-md overflow-hidden">
+          <Image
+            src={getProxyImageUrl(result.imageUrl as string)}
+            alt={(result.prompt as string) || '生成的图像'}
+            width={0}
+            height={0}
+            sizes="100vw"
+            style={{ objectFit: 'contain' }}
+            className="w-full h-auto max-h-[300px] rounded-md"
+          />
+        </div>
+      )}
+
+      {/* 参数 */}
+      {call.input && (
+        <div>
+          <div className="font-medium text-blue-600 dark:text-blue-400 mb-1">参数:</div>
+          <pre className="bg-gray-100 dark:bg-gray-900 p-2 rounded overflow-auto max-h-24 text-[10px]">
+            {JSON.stringify(call.input, null, 2)}
+          </pre>
+        </div>
+      )}
+
+      {/* 结果 */}
+      {call.output !== undefined && !hasImageResult && !hasSearchResults && !hasVisualization && (
+        <div>
+          <div className="font-medium text-green-600 dark:text-green-400 mb-1">结果:</div>
+          <pre className="bg-gray-100 dark:bg-gray-900 p-2 rounded overflow-auto max-h-24 text-[10px]">
+            {typeof call.output === 'string'
+              ? call.output
+              : JSON.stringify(call.output || {}, null, 2)}
+          </pre>
+        </div>
+      )}
+    </div>
+  );
 }
 
 // 不在这一层使用 memo，让流式内容能够正常更新

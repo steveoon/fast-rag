@@ -2,7 +2,7 @@ import { tool } from 'ai';
 import { z } from 'zod';
 import { ToolDefinition, ToolConfig } from '../types';
 import { exaClient } from './clients';
-import { createSearchFormatterAgent } from '../../agents';
+import type { exa } from '@agentic/exa';
 
 // 定义操作类型枚举 (更新为最新的 Exa MCP 工具名称)
 const OPERATIONS = [
@@ -70,71 +70,6 @@ type FormattedSearchData =
   | CrawlingVisualization
   | CompanyResearchVisualization
   | Record<string, unknown>;
-
-// ==================== 格式化 Output Schemas ====================
-
-// 网页搜索结果 Schema
-const webSearchSchema = z.object({
-  operation: z.string().describe('操作类型'),
-  query: z.string().describe('查询内容'),
-  results: z
-    .array(
-      z.object({
-        title: z.string().describe('标题'),
-        url: z.string().describe('URL'),
-        snippet: z.string().describe('内容摘要'),
-        publishedDate: z.string().optional().describe('发布日期'),
-      })
-    )
-    .describe('搜索结果列表'),
-});
-
-// 代码上下文搜索结果 Schema
-const codeContextSchema = z.object({
-  operation: z.string().describe('操作类型'),
-  query: z.string().describe('查询内容'),
-  results: z
-    .array(
-      z.object({
-        title: z.string().describe('标题'),
-        url: z.string().describe('URL'),
-        snippet: z.string().describe('代码或内容摘要'),
-        source: z.string().optional().describe('来源类型 (github/docs/stackoverflow)'),
-      })
-    )
-    .describe('代码上下文结果列表'),
-});
-
-// 公司研究结果 Schema
-const companyResearchSchema = z.object({
-  operation: z.string().describe('操作类型'),
-  query: z.string().describe('查询内容'),
-  company: z.object({
-    name: z.string().describe('公司名称'),
-    description: z.string().describe('公司描述'),
-    website: z.string().optional().describe('官网'),
-    industry: z.string().optional().describe('行业'),
-    employees: z.string().optional().describe('员工规模'),
-    founded: z.string().optional().describe('成立时间'),
-  }),
-});
-
-// 网页爬取结果 Schema
-const crawlingSchema = z.object({
-  operation: z.string().describe('操作类型'),
-  urls: z.array(z.string()).describe('爬取的URL列表'),
-  pages: z
-    .array(
-      z.object({
-        url: z.string().describe('网页URL'),
-        title: z.string().describe('网页标题'),
-        content: z.string().describe('提取的主要内容'),
-        links: z.array(z.string()).optional().describe('页面中的链接'),
-        images: z.array(z.string()).optional().describe('页面中的图片URL'),
-      })
-    )
-    .describe('爬取的页面列表'),
-});
 
 // 工具状态消息类型
 interface ToolStatusMessage {
@@ -247,21 +182,22 @@ const multiDimensionalSearchTool: ToolDefinition = {
             query,
           });
 
-          // 根据操作类型选择不同的格式化处理
+          // 根据操作类型选择不同的格式化处理 (直接映射，无需 LLM)
           let formattedData: FormattedSearchData;
+          const searchResult = result as exa.SearchResponse;
 
           switch (operation) {
             case 'web_search':
-              formattedData = await formatWebSearchResult(result, operation, query);
+              formattedData = formatWebSearchResult(searchResult, operation, query);
               break;
             case 'code_context':
-              formattedData = await formatCodeContextResult(result, operation, query);
+              formattedData = formatCodeContextResult(searchResult, operation, query);
               break;
             case 'company_research':
-              formattedData = await formatCompanyResearchResult(result, operation, query);
+              formattedData = formatCompanyResearchResult(searchResult, operation, query);
               break;
             case 'crawling':
-              formattedData = await formatCrawlingResult(result, operation, [query]);
+              formattedData = formatCrawlingResult(searchResult, operation, [query]);
               break;
             default:
               formattedData = { operation, query, result };
@@ -294,119 +230,85 @@ const multiDimensionalSearchTool: ToolDefinition = {
   },
 };
 
-// 辅助函数：格式化网页搜索结果
-async function formatWebSearchResult(
-  result: unknown,
+// 辅助函数：格式化网页搜索结果 (直接映射，无需 LLM)
+function formatWebSearchResult(
+  result: exa.SearchResponse,
   operation: string,
   query: string
-): Promise<WebSearchVisualization> {
-  try {
-    const { output } = await createSearchFormatterAgent(webSearchSchema).generate({
-      prompt: `以下是Exa API的响应:
-${JSON.stringify(result)}
-
-操作类型: ${operation}
-查询内容: ${query}
-
-请格式化`,
-    });
-
-    return output;
-  } catch (error) {
-    console.error('格式化网页搜索结果失败:', error);
-    return {
-      operation,
-      query,
-      results: [],
-    };
-  }
+): WebSearchVisualization {
+  return {
+    operation,
+    query,
+    results: (result.results || []).map(item => ({
+      title: item.title || '无标题',
+      url: item.url,
+      snippet: item.highlights?.[0] || item.text?.slice(0, 300) || '',
+      publishedDate: item.publishedDate,
+    })),
+  };
 }
 
-// 辅助函数：格式化代码上下文搜索结果
-async function formatCodeContextResult(
-  result: unknown,
+// 辅助函数：格式化代码上下文搜索结果 (直接映射，无需 LLM)
+function formatCodeContextResult(
+  result: exa.SearchResponse,
   operation: string,
   query: string
-): Promise<CodeContextVisualization> {
-  try {
-    const { output } = await createSearchFormatterAgent(codeContextSchema).generate({
-      prompt: `以下是Exa API的响应:
-${JSON.stringify(result)}
+): CodeContextVisualization {
+  return {
+    operation,
+    query,
+    results: (result.results || []).map(item => {
+      // 从 URL 推断来源类型
+      let source: string | undefined;
+      if (item.url.includes('github.com')) source = 'github';
+      else if (item.url.includes('stackoverflow.com')) source = 'stackoverflow';
+      else if (item.url.includes('docs.') || item.url.includes('documentation')) source = 'docs';
 
-操作类型: ${operation}
-查询内容: ${query}
-
-请格式化`,
-    });
-
-    return output;
-  } catch (error) {
-    console.error('格式化代码上下文结果失败:', error);
-    return {
-      operation,
-      query,
-      results: [],
-    };
-  }
+      return {
+        title: item.title || '无标题',
+        url: item.url,
+        snippet: item.highlights?.[0] || item.text?.slice(0, 300) || '',
+        source,
+      };
+    }),
+  };
 }
 
-// 辅助函数：格式化公司研究结果
-async function formatCompanyResearchResult(
-  result: unknown,
+// 辅助函数：格式化公司研究结果 (直接映射，无需 LLM)
+function formatCompanyResearchResult(
+  result: exa.SearchResponse,
   operation: string,
   query: string
-): Promise<CompanyResearchVisualization> {
-  try {
-    const { output } = await createSearchFormatterAgent(companyResearchSchema).generate({
-      prompt: `以下是Exa API的响应:
-${JSON.stringify(result)}
+): CompanyResearchVisualization {
+  // 从搜索结果中提取公司信息
+  const firstResult = result.results?.[0];
 
-操作类型: ${operation}
-查询内容: ${query}
-
-请格式化`,
-    });
-
-    return output;
-  } catch (error) {
-    console.error('格式化公司研究结果失败:', error);
-    return {
-      operation,
-      query,
-      company: {
-        name: '',
-        description: '',
-      },
-    };
-  }
+  return {
+    operation,
+    query,
+    company: {
+      name: query, // 使用查询作为公司名称
+      description: firstResult?.highlights?.[0] || firstResult?.text?.slice(0, 500) || '暂无描述',
+      website: firstResult?.url,
+    },
+  };
 }
 
-// 辅助函数：格式化网页爬取结果
-async function formatCrawlingResult(
-  result: unknown,
+// 辅助函数：格式化网页爬取结果 (直接映射，无需 LLM)
+function formatCrawlingResult(
+  result: exa.SearchResponse,
   operation: string,
   urls: string[]
-): Promise<CrawlingVisualization> {
-  try {
-    const { output } = await createSearchFormatterAgent(crawlingSchema).generate({
-      prompt: `以下是Exa API的响应:
-${JSON.stringify(result)}
-
-操作类型: ${operation}
-爬取URL: ${JSON.stringify(urls)}
-
-请格式化`,
-    });
-
-    return output;
-  } catch (error) {
-    console.error('格式化网页爬取结果失败:', error);
-    return {
-      operation,
-      urls,
-      pages: [],
-    };
-  }
+): CrawlingVisualization {
+  return {
+    operation,
+    urls,
+    pages: (result.results || []).map(item => ({
+      url: item.url,
+      title: item.title || '无标题',
+      content: item.text?.slice(0, 2000) || '',
+    })),
+  };
 }
 
 // 辅助函数：获取结果摘要信息
