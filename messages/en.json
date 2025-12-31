@@ -525,7 +525,9 @@
       "serviceUnavailable": "Chat service is temporarily unavailable, please try again later",
       "fileUploadDeveloping": "File upload feature is under development...",
       "voiceInputDeveloping": "Voice input feature is under development...",
-      "loadingKnowledgeBase": "Loading knowledge base..."
+      "loadingKnowledgeBase": "Loading knowledge base...",
+      "botDisabledTitle": "Chatbot Disabled",
+      "botDisabledDescription": "The administrator has temporarily disabled this chatbot. Please try again later or contact the administrator."
     },
     "toolStatus": {
       "processStarting": "Starting...",
@@ -534,6 +536,8 @@
       "toolCompleted": "Tool call completed",
       "processingComplete": "Processing completed",
       "preparing": "Preparing...",
+      "analyzing": "Analyzing query intent...",
+      "generating": "Generating response...",
       "usingTool": "Using tool:",
       "tools": {
         "queryKnowledgeBase": "Knowledge Base",

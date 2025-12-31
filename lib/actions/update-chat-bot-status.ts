@@ -4,6 +4,7 @@ import { db } from '../db';
 import { chat_bots, clients } from '../db/schema/schema';
 import { CustomError } from '@/types';
 import { eq } from 'drizzle-orm';
+import { invalidateBotStatusCache } from '@/lib/redis/bot-status-cache';
 
 /**
  * 更新聊天机器人状态
@@ -44,6 +45,9 @@ export async function updateChatBotStatus(
   if (!updatedChatbot) {
     throw new CustomError('更新聊天机器人状态失败', 'CHATBOT_STATUS_UPDATE_FAILED');
   }
+
+  // 清除 Bot 状态缓存，确保下次请求获取最新状态
+  await invalidateBotStatusCache(chatbotId);
 
   return { chatbot: updatedChatbot };
 }

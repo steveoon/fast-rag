@@ -11,6 +11,7 @@ export * from './auth';
 export * from './translations';
 export * from './extract-api-key';
 export * from './retry';
+export * from './ai-error-handler';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

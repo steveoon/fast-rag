@@ -525,7 +525,9 @@
       "serviceUnavailable": "聊天服务暂时不可用，请稍后再试",
       "fileUploadDeveloping": "文件上传功能正在开发中...",
       "voiceInputDeveloping": "语音输入功能正在开发中...",
-      "loadingKnowledgeBase": "正在加载知识库..."
+      "loadingKnowledgeBase": "正在加载知识库...",
+      "botDisabledTitle": "聊天机器人已停用",
+      "botDisabledDescription": "管理员暂时关闭了此聊天助手的访问权限，请稍后再试或联系管理员。"
     },
     "toolStatus": {
       "processStarting": "正在启动...",
@@ -534,6 +536,8 @@
       "toolCompleted": "工具调用完成",
       "processingComplete": "处理完成",
       "preparing": "准备中...",
+      "analyzing": "正在分析查询意图...",
+      "generating": "正在生成回答...",
       "usingTool": "正在使用工具:",
       "tools": {
         "queryKnowledgeBase": "知识库",

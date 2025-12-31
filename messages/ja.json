@@ -524,7 +524,9 @@
       "serviceUnavailable": "チャットサービスは一時的に利用できません、後でもう一度お試しください",
       "fileUploadDeveloping": "ファイルアップロード機能は開発中です...",
       "voiceInputDeveloping": "音声入力機能は開発中です...",
-      "loadingKnowledgeBase": "ナレッジベースを読み込んでいます..."
+      "loadingKnowledgeBase": "ナレッジベースを読み込んでいます...",
+      "botDisabledTitle": "チャットボットは無効です",
+      "botDisabledDescription": "管理者がこのチャットボットを一時的に無効にしました。後でもう一度お試しいただくか、管理者にお問い合わせください。"
     },
     "toolStatus": {
       "processStarting": "起動中...",
@@ -533,6 +535,8 @@
       "toolCompleted": "ツール呼び出し完了",
       "processingComplete": "処理完了",
       "preparing": "準備中...",
+      "analyzing": "クエリの意図を分析中...",
+      "generating": "回答を生成中...",
       "usingTool": "ツールを使用中:",
       "tools": {
         "queryKnowledgeBase": "知識ベース",

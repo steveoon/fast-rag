@@ -163,7 +163,7 @@ const toolDescriptionMap: Record<string, string> = {
   generateImageQuery:
     '根据提供的描述生成图片，支持卡通、写实和插画三种风格，可用于创建旅行地点的示意图、路线图等视觉内容',
   getPlaceInfoQuery:
-    '获取北欧特定城市、景点、地标的详细信息，包括介绍、历史背景、游玩小贴士、交通建议等旅行相关信息',
+    '获取全球城市、景点、地标的详细旅行信息，包括介绍、历史背景、游玩小贴士、交通建议、最佳访问时间等',
   getWeather: '查询指定地点和日期的天气预报信息，包括温度、降水概率等数据，适用于旅行规划',
   googleMapsQuery: `使用Google Maps API查询地点位置、路线规划、周边搜索等地理信息，支持多种操作:
     * geocode: 将地址转换为坐标
@@ -230,7 +230,7 @@ export function generateToolSystemPrompt(tools: ToolSet): string {
     - 引用GitHub内容时，应提供仓库链接、作者和许可证信息
     
     旅行信息工具使用指南:
-    - 对于北欧旅行目的地查询，优先使用getPlaceInfoQuery工具获取结构化的旅行信息
+    - 对于任何旅行目的地查询，优先使用getPlaceInfoQuery工具获取结构化的旅行信息
     - 结合googleMapsQuery工具获取地理位置、路线规划和周边设施信息
     - 使用getWeather工具获取目的地天气状况，帮助用户进行旅行规划
     - 当需要可视化展示时，可使用generateImageQuery工具生成相关图片
@@ -292,7 +292,7 @@ export function generateQueryAnalysisPrompt(content: string): string {
      - webSearch: 适用于需要最新信息、事实核查、流行话题
      - smartWikidataQuery: 适用于需要结构化事实数据的情况，如人物信息、地点数据等（首选）
      - wikidataGetEntity: 仅当已知具体Wikidata实体ID时使用（极少用到）
-     - getPlaceInfoQuery: 适用于北欧旅行目的地信息查询，可获取城市、景点的详细介绍和旅行建议
+     - getPlaceInfoQuery: 适用于全球旅行目的地信息查询，可获取城市、景点的详细介绍和旅行建议
      - generateImageQuery: 适用于需要生成图像的场景，如创建旅行地点的示意图、路线图等视觉内容
      - googleMapsQuery: 适用于地理位置查询、路线规划、周边设施搜索等地图相关操作
      - multiDimensionalSearch: 适用于学术内容查询、Twitter/X平台内容搜索或网页内容爬取
@@ -302,7 +302,7 @@ export function generateQueryAnalysisPrompt(content: string): string {
 
   重要提示：
   - 对于查询人物、地点、组织等实体信息时，应优先选择smartWikidataQuery而非wikidataGetEntity
-  - 对于北欧旅行相关的查询，优先考虑使用getPlaceInfoQuery工具和googleMapsQuery工具结合
+  - 对于旅行目的地相关的查询，优先考虑使用getPlaceInfoQuery工具和googleMapsQuery工具结合
   - 当查询涉及"如何到达"、"距离多远"、"附近有什么"等地理位置问题时，使用googleMapsQuery工具
   - 当用户需要图片或视觉内容时，应选择generateImageQuery工具
   - 当用户提问涉及学术论文、研究内容时，应优先选择multiDimensionalSearch工具

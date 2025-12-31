@@ -46,21 +46,8 @@ export default async function ChatBotPage() {
       );
     }
 
-    // 检查机器人状态是否为启用状态
-    if (chatBot.status !== 'active') {
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-slate-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-950">
-          <AuroraBackground variant="minimal" />
-          <div className="p-8 text-center max-w-md mx-auto bg-white/70 dark:bg-gray-900/70 rounded-xl shadow-lg backdrop-blur-sm z-10">
-            <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">
-              {t('notActive')}
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-2">{t('adminDisabled')}</p>
-            <p className="text-gray-600 dark:text-gray-400">{t('tryLater')}</p>
-          </div>
-        </div>
-      );
-    }
+    // 记录初始禁用状态，交给客户端处理（支持轮询恢复）
+    const initialBotDisabled = chatBot.status !== 'active';
 
     const apiKey = await getActiveKeyFromBotId(botId);
 
@@ -117,6 +104,7 @@ export default async function ChatBotPage() {
             modelDisplayName={modelDisplayName}
             exampleQuestions={chatBot.example_questions as string[] | undefined}
             initialKnowledgeBases={knowledgeBases}
+            initialBotDisabled={initialBotDisabled}
           />
         </div>
       </div>

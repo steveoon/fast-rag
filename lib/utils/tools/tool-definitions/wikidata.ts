@@ -1,9 +1,8 @@
-import { tool } from 'ai';
+import { tool, generateText, Output } from 'ai';
 import { z } from 'zod';
-import { generateObject } from 'ai';
 import { registry } from '@/lib/utils/models-registry';
 import { wikidataClient, exaClient } from '@/lib/utils/tools/tool-definitions/clients';
-import { retryRateLimited } from '@/lib/utils/retry';
+import { retryRateLimited, isObjectGenerationError } from '@/lib/utils';
 import { ToolDefinition, ToolConfig } from '../types';
 import { mapToolNameToEnabledTool } from '../tool-mapping';
 import { formatWikidataProperties, extractEntityId } from '../wikidata';
@@ -148,23 +147,25 @@ export const smartWikidataQueryTool: ToolDefinition = {
 
           if (hasChinese) {
             try {
-              // 使用generateObject获取英文翻译
-              const { object: translation } = await generateObject({
+              // 使用 generateText + Output.object 获取英文翻译
+              const translationSchema = z.object({
+                englishName: z.string().describe('实体的英文名称或翻译'),
+                confidence: z.number().min(0).max(10).describe('翻译准确度的信心值(0-10)'),
+              });
+
+              const { output: translation } = await generateText({
                 model: registry.languageModel('google/gemini-3-flash-preview'),
-                schema: z.object({
-                  englishName: z.string().describe('实体的英文名称或翻译'),
-                  confidence: z.number().min(0).max(10).describe('翻译准确度的信心值(0-10)'),
-                }),
+                output: Output.object({ schema: translationSchema }),
                 prompt: `请将以下中文实体名称翻译成英文，返回最准确的英文名称。
-                
+
                 "${query}"
-                
+
                 如果这是一个知名人物、地点、组织或概念，请提供其最常用的英文名称。
                 例如:
                 - "乔布斯" → "Steve Jobs"
                 - "苏东坡" → "Su Dongpo"
                 - "北京" → "Beijing"
-                
+
                 如果无法确定确切翻译，请尽可能接近。为翻译准确度提供0-10的信心值。`,
               });
 
@@ -182,7 +183,10 @@ export const smartWikidataQueryTool: ToolDefinition = {
                 ]);
               }
             } catch (error) {
-              console.error('实体名称翻译错误:', error);
+              // 使用统一的错误处理（会自动记录日志）
+              if (!isObjectGenerationError(error, 'WikidataTranslation')) {
+                console.error('实体名称翻译错误:', error);
+              }
               // 翻译失败时继续使用原始查询
             }
           }

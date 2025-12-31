@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { tool } from 'ai';
+import { tool, generateText, Output } from 'ai';
 import { z } from 'zod';
-import { generateObject } from 'ai';
 import { registry } from '@/lib/utils/models-registry';
+import { isObjectGenerationError } from '@/lib/utils';
 import { ToolDefinition, ToolConfig } from '../types';
 import { mapToolNameToEnabledTool } from '../tool-mapping';
 import { smartWikidataQueryTool } from './wikidata';
@@ -17,12 +17,12 @@ export const PlaceInfoSchema = z.object({
   transportInfo: z.string().optional().describe('交通方式建议'),
   bestTimeToVisit: z.string().optional().describe('最佳访问季节或月份建议'),
   estimatedVisitDuration: z.string().optional().describe('建议的参观或停留时长'),
-  officialWebsite: z.string().url().optional().describe('官方网站链接'),
+  officialWebsite: z.string().optional().describe('官方网站链接（URL格式）'),
   keyLinks: z
     .array(
       z.object({
         name: z.string().describe('链接名称，例如"预订游船"'),
-        url: z.string().url().describe('相关链接URL'),
+        url: z.string().describe('相关链接URL（URL格式）'),
       })
     )
     .optional()
@@ -50,9 +50,9 @@ const placeInfoTool: ToolDefinition = {
   createTool: (config: ToolConfig) => {
     return tool({
       description:
-        '获取北欧特定城市、景点、地标的详细信息，包括介绍、历史背景、游玩小贴士、交通建议等',
+        '获取全球城市、景点、地标的详细旅行信息，包括介绍、历史背景、游玩小贴士、交通建议、最佳访问时间等',
       inputSchema: z.object({
-        placeName: z.string().describe('需要查询信息的地点名称（如 "松恩峡湾", "特罗姆瑟"）'),
+        placeName: z.string().describe('需要查询信息的地点名称（如 "故宫", "富士山", "巴黎铁塔"）'),
         language: z.string().optional().default('zh').describe('期望返回信息的语言，默认中文'),
       }),
       execute: async ({ placeName }, { toolCallId, abortSignal }) => {
@@ -323,9 +323,9 @@ const placeInfoTool: ToolDefinition = {
             对于官方网站字段(officialWebsite)，只有在源数据中找到有效URL时才提供，否则请完全省略此字段。`;
 
           // 调用LLM进行信息综合和结构化
-          const { object } = await generateObject({
-            model: registry.languageModel('openai/gpt-4o'),
-            schema: PlaceInfoSchema,
+          const { output: placeInfo } = await generateText({
+            model: registry.languageModel('google/gemini-3-flash-preview'),
+            output: Output.object({ schema: PlaceInfoSchema }),
             system: `你是一位旅游编辑专家，精通整理和结构化旅游目的地信息。
             你的任务是根据提供的各种来源数据，为旅行者生成一个全面、实用且结构良好的目的地信息对象。
             信息应该对计划旅行的人有实际帮助，并包含实用的细节。
@@ -336,10 +336,10 @@ const placeInfoTool: ToolDefinition = {
           });
 
           // 确保sourceAttribution包含正确的数据源
-          if (object && Array.isArray(object.sourceAttribution)) {
+          if (placeInfo && Array.isArray(placeInfo.sourceAttribution)) {
             for (const source of dataSources) {
-              if (!object.sourceAttribution.includes(source)) {
-                object.sourceAttribution.push(source);
+              if (!placeInfo.sourceAttribution.includes(source)) {
+                placeInfo.sourceAttribution.push(source);
               }
             }
           }
@@ -361,9 +361,13 @@ const placeInfoTool: ToolDefinition = {
           }
 
           // 返回结构化的地点信息
-          return object;
+          return placeInfo;
         } catch (error) {
-          console.error('获取地点信息失败:', error);
+          // 使用统一的错误处理（会自动记录日志）
+          if (!isObjectGenerationError(error, 'PlaceInfo')) {
+            console.error('获取地点信息失败:', error);
+          }
+
           if (config.dataStream) {
             config.dataStream.write?.({
               type: 'data',

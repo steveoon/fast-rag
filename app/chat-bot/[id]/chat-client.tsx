@@ -1,5 +1,5 @@
 'use client';
-import { FormEvent, useState, useEffect, useMemo } from 'react';
+import { FormEvent, useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Paperclip,
   Mic,
@@ -26,6 +26,7 @@ import {
 } from '@/app/platform/bots-management/store/knowledge-base-store';
 import { cn } from '@/lib/utils';
 import type { UIMessage } from '@ai-sdk/react';
+import type { ChatUIMessage, ProcessingStatusDataPart } from '@/lib/types/ui-message';
 
 // 从消息 parts 中提取纯文本内容用于复制
 function extractTextFromMessage(message: UIMessage): string {
@@ -48,6 +49,7 @@ interface ChatClientProps {
   modelDisplayName?: string;
   exampleQuestions?: string[];
   initialKnowledgeBases?: AssignedKnowledgeBase[];
+  initialBotDisabled?: boolean;
 }
 
 // 内部聊天组件，接收已加载的知识库数据
@@ -55,24 +57,64 @@ interface ChatCoreProps {
   apiKey: string;
   tools: string[];
   botName: string;
+  botId: string;
   modelId?: string;
   modelDisplayName?: string;
   exampleQuestions?: string[];
   assignedKnowledgeBases: AssignedKnowledgeBase[];
+  initialBotDisabled?: boolean;
 }
 
 function ChatCore({
   apiKey,
   tools,
   botName,
+  botId,
   modelId,
   modelDisplayName,
   exampleQuestions,
   assignedKnowledgeBases,
+  initialBotDisabled = false,
 }: ChatCoreProps) {
   const [chatError, setChatError] = useState<string | null>(null);
   const [input, setInput] = useState('');
+  const [isBotDisabled, setIsBotDisabled] = useState(initialBotDisabled);
+  // 处理状态 - 用于显示实时处理进度
+  const [processingStatus, setProcessingStatus] = useState<ProcessingStatusDataPart | null>(null);
   const t = useTranslations('ChatBot.chat');
+
+  // Bot 状态轮询检查（每 30 秒）
+  const checkBotStatus = useCallback(async () => {
+    if (!botId || !apiKey) return;
+
+    try {
+      const response = await fetch(`/api/v1/bot-status/${botId}`, {
+        headers: { Authorization: `Bearer ${apiKey}` },
+      });
+      const data = await response.json();
+
+      if (!response.ok || !data.data?.isActive) {
+        setIsBotDisabled(true);
+      } else {
+        // Bot 重新启用时恢复状态
+        setIsBotDisabled(false);
+      }
+    } catch (error) {
+      console.error('Bot status check failed:', error);
+    }
+  }, [botId, apiKey]);
+
+  useEffect(() => {
+    if (!botId) return;
+
+    // 初始检查
+    checkBotStatus();
+
+    // 设置轮询（30 秒间隔）
+    const intervalId = setInterval(checkBotStatus, 30000);
+
+    return () => clearInterval(intervalId);
+  }, [botId, checkBotStatus]);
 
   // 创建 transport，此时知识库已经加载完成
   const transport = useMemo(() => {
@@ -85,6 +127,7 @@ function ChatCore({
         Authorization: `Bearer ${apiKey}`,
       },
       body: {
+        botId: botId || undefined, // 传递 botId 用于状态验证
         enabledTools: tools,
         maxSteps: 15,
         docs,
@@ -92,9 +135,9 @@ function ChatCore({
         model: modelId,
       },
     });
-  }, [apiKey, tools, assignedKnowledgeBases, modelId]);
+  }, [apiKey, tools, assignedKnowledgeBases, modelId, botId]);
 
-  const { messages, sendMessage, status } = useChat({
+  const { messages, sendMessage, status } = useChat<ChatUIMessage>({
     onError: error => {
       console.error('Chat error:', error);
       if (error instanceof Error) {
@@ -104,6 +147,22 @@ function ChatCore({
         console.error('Error details:', error);
       }
       setChatError(t('serviceUnavailable'));
+    },
+    // 处理流式数据部分 (包括临时数据)
+    onData: dataPart => {
+      // 处理临时的处理状态通知
+      if (dataPart.type === 'data-processingStatus') {
+        const statusData = dataPart.data as ProcessingStatusDataPart;
+        setProcessingStatus(statusData);
+        // 处理完成时清除状态
+        if (statusData.status === 'completed') {
+          setTimeout(() => setProcessingStatus(null), 500);
+        }
+      }
+      // 处理临时通知 (可扩展为 toast 等)
+      if (dataPart.type === 'data-notification') {
+        console.log('Notification:', dataPart.data);
+      }
     },
     transport,
   });
@@ -143,6 +202,41 @@ function ChatCore({
   const handleSuggestionClick = (suggestion: string) => {
     setInput(suggestion);
   };
+
+  // Bot 被禁用时显示提示
+  if (isBotDisabled) {
+    return (
+      <div className="flex flex-col h-full bg-background/80 backdrop-blur-sm rounded-xl overflow-hidden shadow-xl">
+        {/* 标题栏 */}
+        <div className="py-4 px-5 border-b bg-white/95 dark:bg-gray-900/95 backdrop-blur-md flex items-center gap-3">
+          <div className="relative">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center shadow-lg">
+              <Bot className="h-5 w-5 text-white" />
+            </div>
+            {/* 离线状态指示器 */}
+            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-gray-400 rounded-full border-2 border-white dark:border-gray-900" />
+          </div>
+          <h2 className="text-base font-semibold text-gray-800 dark:text-gray-100">{botName}</h2>
+        </div>
+
+        {/* 禁用提示 */}
+        <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-50/50 to-white dark:from-gray-900 dark:to-gray-800">
+          <div className="text-center p-8 max-w-md">
+            <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="h-8 w-8 text-amber-500" />
+            </div>
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">
+              {t('botDisabledTitle') || '聊天机器人已停用'}
+            </h2>
+            <p className="text-gray-500 dark:text-gray-400">
+              {t('botDisabledDescription') ||
+                '管理员暂时关闭了此聊天助手的访问权限，请稍后再试或联系管理员。'}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full bg-background/80 backdrop-blur-sm rounded-xl overflow-hidden shadow-xl">
@@ -224,7 +318,10 @@ function ChatCore({
                   message === messages[messages.length - 1] &&
                   isProcessing && (
                     <div className="mt-2 pt-2 border-t border-gray-200/50 dark:border-gray-600/30">
-                      <ChatBotToolStatus data={[]} isProcessing={isProcessing} />
+                      <ChatBotToolStatus
+                        processingStatus={processingStatus}
+                        isProcessing={isProcessing}
+                      />
                     </div>
                   )}
               </ChatBubbleMessage>
@@ -243,7 +340,7 @@ function ChatCore({
           )}
 
           {messages.length === 0 && status === 'submitted' && (
-            <ChatBotToolStatus data={[]} isProcessing={isProcessing} />
+            <ChatBotToolStatus processingStatus={processingStatus} isProcessing={isProcessing} />
           )}
         </ChatMessageList>
       </div>
@@ -362,6 +459,7 @@ export function ChatClient({
   modelDisplayName,
   exampleQuestions,
   initialKnowledgeBases,
+  initialBotDisabled = false,
 }: ChatClientProps) {
   const [knowledgeBaseReady, setKnowledgeBaseReady] = useState(!!initialKnowledgeBases);
   const { assignedKnowledgeBases, fetchBotKnowledgeBases } = useKnowledgeBaseStore();
@@ -429,10 +527,12 @@ export function ChatClient({
       apiKey={apiKey}
       tools={tools}
       botName={botName}
+      botId={botId || ''}
       modelId={modelId}
       modelDisplayName={modelDisplayName}
       exampleQuestions={exampleQuestions}
       assignedKnowledgeBases={effectiveKnowledgeBases}
+      initialBotDisabled={initialBotDisabled}
     />
   );
 }

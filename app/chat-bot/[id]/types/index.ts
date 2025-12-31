@@ -134,9 +134,16 @@ interface ToolStatusData extends BaseStatusData {
 // 联合类型，表示可能的状态数据类型
 export type StatusData = TextStatusData | StepCompleteStatusData | ToolStatusData;
 
+// 处理状态类型 - 从 onData 回调获取
+export interface ProcessingStatus {
+  status: 'started' | 'analyzing' | 'toolCalling' | 'generating' | 'completed';
+  message: string;
+  progress?: number;
+}
+
 // 组件 Props 类型
 export interface ChatBotToolStatusProps {
-  // 接受任何类型的数据，因为AI SDK返回的是JSONValue[]
-  data: unknown[] | undefined;
+  // 处理状态数据，从 onData 回调获取
+  processingStatus: ProcessingStatus | null;
   isProcessing: boolean;
 }
