@@ -64,11 +64,6 @@ export function ToolCallsGroup({ toolCalls, renderToolDetail }: ToolCallsGroupPr
     setExpandedCalls(newExpanded);
   };
 
-  // 如果只有一个工具调用，直接显示详情
-  if (toolCalls.length === 1 && renderToolDetail) {
-    return <div className="text-sm">{renderToolDetail(toolCalls[0], 0)}</div>;
-  }
-
   // 如果没有工具调用，不显示任何内容
   if (toolCalls.length === 0) {
     return null;
