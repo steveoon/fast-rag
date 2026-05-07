@@ -50,6 +50,10 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
 
       - name: Build and push Docker image
         id: build-and-push
@@ -64,8 +68,6 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             NODE_ENV=production
-            DATABASE_URL=postgres://postgres:postgres@localhost:5432/fast_rag
-            SERVER_SECRET_KEY=build-time-server-secret
             NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
             NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
             NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET=${{ secrets.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET }}
@@ -75,9 +77,13 @@ jobs:
       - name: Display structure of built image
         if: failure()
         run: |
-          docker load --input /tmp/myimage.tar
-          docker image ls
-          docker history $(docker images -q | head -n 1)
+          if [ -f /tmp/myimage.tar ]; then
+            docker load --input /tmp/myimage.tar
+            docker image ls
+            docker history $(docker images -q | head -n 1)
+          else
+            echo "No image tar was produced before the failure."
+          fi
 
       - name: Sign the published Docker image
         if: ${{ github.event_name != 'pull_request' }}
