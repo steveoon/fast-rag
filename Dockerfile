@@ -38,6 +38,7 @@ RUN \
   export UPSTASH_REDIS_REST_URL="https://example.upstash.io"; \
   export UPSTASH_REDIS_REST_TOKEN="build-time-upstash-token"; \
   export WEATHER_API_KEY="build-time-weather-api-key"; \
+  export EXA_API_KEY="build-time-exa-api-key"; \
   export NEXT_PUBLIC_SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL"; \
   export NEXT_PUBLIC_SUPABASE_ANON_KEY="$NEXT_PUBLIC_SUPABASE_ANON_KEY"; \
   export NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET="$NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET"; \
