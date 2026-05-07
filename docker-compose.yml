@@ -1,0 +1,14 @@
+services:
+  fast-rag:
+    image: ${FAST_RAG_IMAGE:-ghcr.io/steveoon/fast-rag:latest}
+    container_name: fast-rag
+    pull_policy: always
+    restart: unless-stopped
+    env_file:
+      - ${APP_ENV_FILE:-.env}
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+    ports:
+      - '3000:3000'

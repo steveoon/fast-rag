@@ -64,10 +64,12 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             NODE_ENV=production
-            DATABASE_URL=${{ secrets.DATABASE_URL }}
-            SERVER_SECRET_KEY=${{ secrets.SERVER_SECRET_KEY }}
+            DATABASE_URL=postgres://postgres:postgres@localhost:5432/fast_rag
+            SERVER_SECRET_KEY=build-time-server-secret
             NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
             NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+            NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET=${{ secrets.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET }}
+            NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }}
           outputs: type=docker,dest=/tmp/myimage.tar
 
       - name: Display structure of built image
