@@ -22,19 +22,10 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-ARG DATABASE_URL
-ARG SERVER_SECRET_KEY
 ARG NEXT_PUBLIC_SUPABASE_URL
 ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
 ARG NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET
 ARG NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-
-ENV DATABASE_URL=$DATABASE_URL
-ENV SERVER_SECRET_KEY=$SERVER_SECRET_KEY
-ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
-ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
-ENV NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET=$NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET
-ENV NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=$NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
@@ -42,6 +33,16 @@ ENV NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=$NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 # ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN \
+  export DATABASE_URL="postgres://postgres:postgres@localhost:5432/fast_rag"; \
+  export SERVER_SECRET_KEY="build-time-server-secret"; \
+  export UPSTASH_REDIS_REST_URL="https://example.upstash.io"; \
+  export UPSTASH_REDIS_REST_TOKEN="build-time-upstash-token"; \
+  export WEATHER_API_KEY="build-time-weather-api-key"; \
+  export EXA_API_KEY="build-time-exa-api-key"; \
+  export NEXT_PUBLIC_SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL"; \
+  export NEXT_PUBLIC_SUPABASE_ANON_KEY="$NEXT_PUBLIC_SUPABASE_ANON_KEY"; \
+  export NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET="$NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET"; \
+  export NEXT_PUBLIC_GOOGLE_MAPS_API_KEY="$NEXT_PUBLIC_GOOGLE_MAPS_API_KEY"; \
   if [ -f yarn.lock ]; then yarn run build; \
   elif [ -f package-lock.json ]; then npm run build; \
   elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build; \
